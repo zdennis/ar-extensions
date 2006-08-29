@@ -1,0 +1,7 @@
+development:
+  adapter: mysql
+  database: aroptests
+  username: rails
+  password:
+  port: 3306
+  host: localhost

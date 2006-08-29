@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>benchmark (BenchmarkBase)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File benchmarks/lib/base.rb, line 11</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">benchmark</span>( <span class="ruby-identifier">table_types</span>, <span class="ruby-identifier">num</span> )
+    <span class="ruby-identifier">array_of_cols_and_vals</span> = <span class="ruby-identifier">build_array_of_cols_and_vals</span>( <span class="ruby-identifier">num</span> )
+    <span class="ruby-identifier">table_types</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">table_type</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">send</span>( <span class="ruby-node">&quot;benchmark_#{table_type}&quot;</span>, <span class="ruby-identifier">array_of_cols_and_vals</span> )
+    <span class="ruby-keyword kw">end</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

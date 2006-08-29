@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>import_without_validations_or_callbacks (ActiveRecord::Base)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/active_record_base/import.rb, line 156</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">import_without_validations_or_callbacks</span>( <span class="ruby-identifier">column_names</span>, <span class="ruby-identifier">array_of_attributes</span>, <span class="ruby-identifier">options</span>={} )
+    <span class="ruby-identifier">escaped_column_names</span> = <span class="ruby-identifier">quote_column_names</span>( <span class="ruby-identifier">column_names</span> )
+
+    <span class="ruby-comment cmt"># generate the sql</span>
+    <span class="ruby-identifier">base_sql</span> = <span class="ruby-node">&quot;INSERT INTO #{table_name} (#{escaped_column_names.join(', ')}) VALUES &quot;</span>
+    <span class="ruby-identifier">values_sql</span> = <span class="ruby-identifier">values_sql_for_column_names_and_attributes</span>( <span class="ruby-identifier">column_names</span>, <span class="ruby-identifier">array_of_attributes</span> )
+    <span class="ruby-identifier">post_sql_statements</span> = []
+    
+    <span class="ruby-comment cmt"># find post sql statements</span>
+    <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:on_duplicate_key_update</span>]
+      <span class="ruby-identifier">post_sql_statements</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">sql_for_on_duplicate_key_update</span>( <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:on_duplicate_key_update</span>] )
+    <span class="ruby-keyword kw">end</span>
+
+    <span class="ruby-comment cmt"># perform the inserts</span>
+    <span class="ruby-identifier">number_of_inserts</span> = <span class="ruby-identifier">connection</span>.<span class="ruby-identifier">insert_many</span>( 
+      [ <span class="ruby-identifier">base_sql</span>, <span class="ruby-identifier">post_sql_statements</span> ].<span class="ruby-identifier">flatten</span>, 
+      <span class="ruby-identifier">values_sql</span>,
+      <span class="ruby-node">&quot;#{self.class.name} Create Many Without Validations Or Callbacks&quot;</span> )
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

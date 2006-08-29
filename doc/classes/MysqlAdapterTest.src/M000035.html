@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>test_get_insert_value_sets (MysqlAdapterTest)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File tests/test_mysql_adapter.rb, line 10</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">test_get_insert_value_sets</span>
+    <span class="ruby-identifier">values</span> = [
+      <span class="ruby-value str">&quot;('1','2','3')&quot;</span>,
+      <span class="ruby-value str">&quot;('4','5','6')&quot;</span>,
+      <span class="ruby-value str">&quot;('7','8','9')&quot;</span> ]
+      
+    <span class="ruby-identifier">values_size_in_bytes</span> = <span class="ruby-constant">MysqlAdapter</span>.<span class="ruby-identifier">sum_sizes</span>( <span class="ruby-operator">*</span><span class="ruby-identifier">values</span> )
+    <span class="ruby-identifier">base_sql_size_in_bytes</span> = <span class="ruby-value">15</span>
+    <span class="ruby-identifier">max_bytes</span> = <span class="ruby-value">30</span>
+    
+    <span class="ruby-identifier">value_sets</span> = <span class="ruby-constant">MysqlAdapter</span>.<span class="ruby-identifier">get_insert_value_sets</span>( <span class="ruby-identifier">values</span>, <span class="ruby-identifier">base_sql_size_in_bytes</span>, <span class="ruby-identifier">max_bytes</span> )
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-value">3</span>, <span class="ruby-identifier">value_sets</span>.<span class="ruby-identifier">size</span>, <span class="ruby-value str">'Three value sets were expected!'</span>
+     
+    <span class="ruby-comment cmt"># Each element in the value_sets array must be an array</span>
+    <span class="ruby-identifier">value_sets</span>.<span class="ruby-identifier">each_with_index</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">e</span>,<span class="ruby-identifier">i</span><span class="ruby-operator">|</span> 
+      <span class="ruby-identifier">assert_kind_of</span> <span class="ruby-constant">Array</span>, <span class="ruby-identifier">e</span>, <span class="ruby-node">&quot;Element #{i} was expected to be an Array!&quot;</span> }
+
+    <span class="ruby-comment cmt"># Each element in the values array should have a 1:1 correlation to the elements</span>
+    <span class="ruby-comment cmt"># in the returned value_sets arrays</span>
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-identifier">values</span>[<span class="ruby-value">0</span>], <span class="ruby-identifier">value_sets</span>[<span class="ruby-value">0</span>].<span class="ruby-identifier">first</span>
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-identifier">values</span>[<span class="ruby-value">1</span>], <span class="ruby-identifier">value_sets</span>[<span class="ruby-value">1</span>].<span class="ruby-identifier">first</span>
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-identifier">values</span>[<span class="ruby-value">2</span>], <span class="ruby-identifier">value_sets</span>[<span class="ruby-value">2</span>].<span class="ruby-identifier">first</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>sql_for_on_duplicate_key_update_as_hash (ActiveRecord::Base)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/active_record_base/import.rb, line 202</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">sql_for_on_duplicate_key_update_as_hash</span>( <span class="ruby-identifier">hsh</span> )
+    <span class="ruby-identifier">sql</span> = <span class="ruby-value str">' ON DUPLICATE KEY UPDATE '</span>
+    <span class="ruby-identifier">qt</span> = <span class="ruby-identifier">connection</span>.<span class="ruby-identifier">quote_column_name</span>( <span class="ruby-identifier">table_name</span> )
+    <span class="ruby-identifier">results</span> = <span class="ruby-identifier">hsh</span>.<span class="ruby-identifier">map</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">column1</span>, <span class="ruby-identifier">column2</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">qc1</span> = <span class="ruby-identifier">connection</span>.<span class="ruby-identifier">quote_column_name</span>( <span class="ruby-identifier">column1</span> )
+      <span class="ruby-identifier">qc2</span> = <span class="ruby-identifier">connection</span>.<span class="ruby-identifier">quote_column_name</span>( <span class="ruby-identifier">column2</span> )
+      <span class="ruby-node">&quot;#{qt}.#{qc1}=VALUES( #{qc2} )&quot;</span>
+    <span class="ruby-keyword kw">end</span>
+    <span class="ruby-identifier">results</span>.<span class="ruby-identifier">join</span>( <span class="ruby-value str">','</span>)
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

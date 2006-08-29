@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>test_import_without_validations_but_with_on_duplicate_key_update_using_symbol_array1 (ActiveRecordBaseTest)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File tests/test_active_record_base.rb, line 142</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">test_import_without_validations_but_with_on_duplicate_key_update_using_symbol_array1</span>
+    <span class="ruby-constant">Topic</span>.<span class="ruby-identifier">destroy_all</span>    
+    <span class="ruby-identifier">orig_topic</span> = <span class="ruby-identifier">setup_import_without_validations_but_with_on_duplicate_key_update</span>
+    <span class="ruby-identifier">columns</span> = <span class="ruby-ivar">@columns_for_on_duplicate_key_update</span>
+ 
+    <span class="ruby-comment cmt"># test updates with array with symbol(s) *note that author_name isn't supposed to change</span>
+    <span class="ruby-identifier">columns2update</span> = [ <span class="ruby-identifier">:title</span> ]
+    <span class="ruby-identifier">updated_values</span> = [ [ <span class="ruby-value">1</span>, <span class="ruby-value str">'Book - 3rd Edition'</span>, <span class="ruby-value str">'New Author'</span> ] ]
+    <span class="ruby-constant">Topic</span>.<span class="ruby-identifier">import</span>( <span class="ruby-identifier">columns</span>, <span class="ruby-identifier">updated_values</span>, 
+      <span class="ruby-identifier">:validation=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword kw">false</span>,
+      <span class="ruby-identifier">:on_duplicate_key_update=</span><span class="ruby-operator">&gt;</span><span class="ruby-identifier">columns2update</span> )
+    <span class="ruby-identifier">topic</span> = <span class="ruby-constant">Topic</span>.<span class="ruby-identifier">find_by_id</span>( <span class="ruby-value">1</span> )
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-identifier">updated_values</span>[<span class="ruby-value">0</span>][<span class="ruby-value">1</span>], <span class="ruby-identifier">topic</span>.<span class="ruby-identifier">title</span>, <span class="ruby-value str">&quot;The book title is wrong! It was supposed to change!&quot;</span>
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-identifier">orig_topic</span>.<span class="ruby-identifier">author_name</span>, <span class="ruby-identifier">topic</span>.<span class="ruby-identifier">author_name</span>, <span class="ruby-value str">&quot;The author's name is incorrect! It wasn't supposed to change!&quot;</span>
+    
+    <span class="ruby-constant">Topic</span>.<span class="ruby-identifier">destroy_all</span> 
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

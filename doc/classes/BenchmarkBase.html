@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Class: BenchmarkBase</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Class</strong></td>
+          <td class="class-name-in-header">BenchmarkBase</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../files/benchmarks/lib/base_rb.html">
+                benchmarks/lib/base.rb
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        <tr class="top-aligned-row">
+            <td><strong>Parent:</strong></td>
+            <td>
+                Object
+            </td>
+        </tr>
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000001">benchmark</a>&nbsp;&nbsp;
+      <a href="#M000002">bm</a>&nbsp;&nbsp;
+      <a href="#M000003">bm_model</a>&nbsp;&nbsp;
+      <a href="#M000004">build_array_of_cols_and_vals</a>&nbsp;&nbsp;
+      <a href="#M000005">create_hash_for_cols_and_vals</a>&nbsp;&nbsp;
+      <a href="#M000006">delete_all</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+
+    <div id="attribute-list">
+      <h3 class="section-bar">Attributes</h3>
+
+      <div class="name-list">
+        <table>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">results</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc"></td>
+        </tr>
+        </table>
+      </div>
+    </div>
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Instance methods</h3>
+
+      <div id="method-M000001" class="method-detail">
+        <a name="M000001"></a>
+
+        <div class="method-heading">
+          <a href="BenchmarkBase.src/M000001.html" target="Code" class="method-signature"
+            onclick="popupCode('BenchmarkBase.src/M000001.html');return false;">
+          <span class="method-name">benchmark</span><span class="method-args">( table_types, num )</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+The main benchmark method dispatcher. This dispatches the benchmarks to
+actual benchmark_xxxx methods.
+</p>
+<h2>PARAMETERS</h2>
+<pre>
+ * table_types - an array of table types to benchmark
+ * num - the number of record insertions to test
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000002" class="method-detail">
+        <a name="M000002"></a>
+
+        <div class="method-heading">
+          <a href="BenchmarkBase.src/M000002.html" target="Code" class="method-signature"
+            onclick="popupCode('BenchmarkBase.src/M000002.html');return false;">
+          <span class="method-name">bm</span><span class="method-args">( description, &amp;blk )</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Returns an OpenStruct which contains two attritues, <tt>description</tt>
+and <tt>tms</tt> after performing an actual benchmark.
+</p>
+<h2>PARAMETERS</h2>
+<pre>
+ * description - the description of the block that is getting benchmarked
+ * blk - the block of code to benchmark
+</pre>
+<h2>RETURNS</h2>
+<p>
+An OpenStruct object with the following attributes:
+</p>
+<pre>
+  * description - the description of the benchmark ran
+  * tms - a Benchmark::Tms containing the results of the benchmark
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000003" class="method-detail">
+        <a name="M000003"></a>
+
+        <div class="method-heading">
+          <a href="BenchmarkBase.src/M000003.html" target="Code" class="method-signature"
+            onclick="popupCode('BenchmarkBase.src/M000003.html');return false;">
+          <span class="method-name">bm_model</span><span class="method-args">( model_clazz, array_of_cols_and_vals )</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Given a model class (ie: <a href="Topic.html">Topic</a>), and an array of
+columns and value sets this will perform all of the benchmarks necessary
+for this library.
+</p>
+<h2>PARAMETERS</h2>
+<pre>
+ * model_clazz - the model class to benchmark (ie: Topic)
+ * array_of_cols_and_vals - an array of column identifiers and value sets
+</pre>
+<h2>RETURNS</h2>
+<pre>
+ returns true
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000004" class="method-detail">
+        <a name="M000004"></a>
+
+        <div class="method-heading">
+          <a href="BenchmarkBase.src/M000004.html" target="Code" class="method-signature"
+            onclick="popupCode('BenchmarkBase.src/M000004.html');return false;">
+          <span class="method-name">build_array_of_cols_and_vals</span><span class="method-args">( num )</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Returns a two element array composing of an array of columns and an array
+of value sets given the passed <tt>num</tt>.
+</p>
+<h3>What is a value set?</h3>
+<p>
+A value set is an array of arrays. Each child array represents an array of
+value sets for a given row of data.
+</p>
+<p>
+For example, say we wanted to represent an insertion of two records:
+</p>
+<pre>
+  column_names = [ 'id', 'name', 'description' ]
+  record1 = [ 1, 'John Doe', 'A plumber' ]
+  record2 = [ 2, 'John Smith', 'A painter' ]
+  value_set [ record1, record2 ]
+</pre>
+<h2>PARAMETER</h2>
+<pre>
+ * num - the number of records to create
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000005" class="method-detail">
+        <a name="M000005"></a>
+
+        <div class="method-heading">
+          <a href="BenchmarkBase.src/M000005.html" target="Code" class="method-signature"
+            onclick="popupCode('BenchmarkBase.src/M000005.html');return false;">
+          <span class="method-name">create_hash_for_cols_and_vals</span><span class="method-args">( cols, vals )</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Returns a hash of column identifier to value mappings giving the passed in
+value array.
+</p>
+<p>
+Example:
+</p>
+<pre>
+  cols = [ 'id', 'name', 'description' ]
+  values = [ 1, 'John Doe', 'A plumber' ]
+  hsh = create_hash_for_cols_and_vals( cols, values )
+  # hsh =&gt; { 'id'=&gt;1, 'name'=&gt;'John Doe', 'description'=&gt;'A plumber' }
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000006" class="method-detail">
+        <a name="M000006"></a>
+
+        <div class="method-heading">
+          <a href="BenchmarkBase.src/M000006.html" target="Code" class="method-signature"
+            onclick="popupCode('BenchmarkBase.src/M000006.html');return false;">
+          <span class="method-name">delete_all</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Deletes all records from all <a href="ActiveRecord.html">ActiveRecord</a>
+subclasses
+</p>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>
