@@ -4,7 +4,7 @@ print "Using native MySQL\n"
 
 ActiveRecord::Base.logger = Logger.new("debug.log")
 
-db1 = 'ar_benchmarks'
+db1 = 'aroptests'
 
 ActiveRecord::Base.establish_connection(
   :adapter  => "mysql",

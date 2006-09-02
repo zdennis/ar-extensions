@@ -55,7 +55,7 @@ class ActiveRecord::Base
           if key.to_s =~ /(.+)_(#{k.to_s})$/
             arr.first << "#{$1} #{v} #{connection.quote(val,column)} "
             break true
-          elsif key.to_s =~ /(.+)_(ne)$/
+          elsif key.to_s =~ /(.+)_(ne|not)$/
             arr.first << "#{$1} #{attribute_condition( val, true )} "
             break true
           elsif key.to_s =~ /(.+)_like$/
