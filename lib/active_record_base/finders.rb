@@ -39,7 +39,7 @@ class ActiveRecord::Base
         attribute_condition_orig( argument )
       end
     end
-    
+
     alias :sanitize_sql_orig :sanitize_sql
     def sanitize_sql( arg )
       arg = sanitize_sql_from_hash( arg ) if arg.is_a?( Hash )
@@ -53,28 +53,28 @@ class ActiveRecord::Base
         found = SANITIZE_MAP.inject( false ){ |found,(k,v)|
           column = columns_hash[ $1 ]
           if key.to_s =~ /(.+)_(#{k.to_s})$/
-            arr.first << "#{$1} #{v} #{connection.quote(val,column)} "
+            arr.first << "#{table_name}.#{connection.quote_column_name($1)} #{v} #{connection.quote(val,column)} "
             break true
           elsif key.to_s =~ /(.+)_(ne|not)$/
-            arr.first << "#{$1} #{attribute_condition( val, true )} "
+            arr.first << "#{table_name}.#{connection.quote_column_name($1)} #{attribute_condition( val, true )} "
             break true
           elsif key.to_s =~ /(.+)_like$/
-            arr.first << "#{$1} LIKE ?"
+            arr.first << "#{table_name}.#{connection.quote_column_name($1)} LIKE ?"
             val = "%#{val}%"
             break true
           elsif key.to_s =~ /(.+)_starts_with$/
-            arr.first << "#{$1} LIKE ?"
+            arr.first << "#{table_name}.#{connection.quote_column_name($1)} LIKE ?"
             val = "#{val}%"
             break true
           elsif key.to_s =~ /(.+)_ends_with$/
-            arr.first << "#{$1} LIKE ?"
+            arr.first << "#{table_name}.#{connection.quote_column_name($1)} LIKE ?"
             val = "%#{val}"
             break true
           end
         }       
 
         if not found
-          arr.first << key.to_s + " #{attribute_condition( val )} "
+          arr.first << "#{table_name}.#{connection.quote_column_name(key)} #{attribute_condition( val )} "
         end
 
         if val.is_a?( Range )
