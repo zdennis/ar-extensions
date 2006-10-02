@@ -111,4 +111,17 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     developers = Developer.find( :all, :conditions=>{ :name_not=>/9999/ } )
     assert_equal( Developer.count, developers.size )
   end
+
+  def test_find_with_string_and_hash
+    developers = Developer.find( :all, 
+      :conditions=>[ "name = 'Zach Dennis'", { :id=>1 } ] )
+    assert_equal( 1, developers.size )
+  end
+
+  def test_find_with_string_and_hash_where_none_match
+    developers = Developer.find( :all, 
+      :conditions=>[ "id = 1", { :id=>2 } ] )
+    assert_equal( 0, developers.size )
+  end
+
 end
