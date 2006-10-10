@@ -124,4 +124,10 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     assert_equal( 0, developers.size )
   end
 
+  def test_find_with_string_and_hash_where_string_uses_hash_values
+    developers = Developer.find( :all, 
+      :conditions=>[ "id = :id", { :id=>1 } ] )
+    assert_equal( 1, developers.size )
+  end
+  
 end

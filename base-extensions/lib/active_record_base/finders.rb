@@ -43,14 +43,20 @@ class ActiveRecord::Base
     alias :sanitize_sql_orig :sanitize_sql
     def sanitize_sql( arg )
       arg = sanitize_sql_from_hash( arg ) if arg.is_a?( Hash )
-      arg = sanitize_sql_from_array_and_hash( arg ) if arg.size == 2 and arg.first.is_a?( String ) and arg.last.is_a?( Hash )
+      arg = sanitize_sql_from_string_and_hash( arg ) if arg.size == 2 and arg.first.is_a?( String ) and arg.last.is_a?( Hash )
       sanitize_sql_orig( arg )
     end
 
-    def sanitize_sql_from_array_and_hash( arr )
+    def sanitize_sql_from_string_and_hash( arr )
+      # the return arr if... is to allow for AR support for named bind variables within the conditions string
+      return arr if arr.first =~ /\:[\w]+/        
       arr2 = sanitize_sql_from_hash( arr.last )
-      conditions = [  arr.first <<  " AND (#{arr2.first})" ]
-      conditions.push( *arr2[1..-1] )
+      if arr2.empty?
+        conditions = arr.first
+      else
+        conditions = [  arr.first <<  " AND (#{arr2.first})" ]
+        conditions.push( *arr2[1..-1] )
+      end
       conditions
     end
     
@@ -93,6 +99,7 @@ class ActiveRecord::Base
         arr
       end
       arr[0] = arr.first.join( ' AND ' )
+      return [] if arr.size == 1 and arr.first == ''
       arr
     end
     
