@@ -42,6 +42,7 @@ class ActiveRecord::Base
 
     alias :sanitize_sql_orig :sanitize_sql
     def sanitize_sql( arg )
+      return sanitize_sql_orig( arg ) if arg.nil?
       arg = sanitize_sql_from_hash( arg ) if arg.is_a?( Hash )
       arg = sanitize_sql_from_string_and_hash( arg ) if arg.size == 2 and arg.first.is_a?( String ) and arg.last.is_a?( Hash )
       sanitize_sql_orig( arg )

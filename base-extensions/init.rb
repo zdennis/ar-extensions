@@ -11,7 +11,3 @@ require File.join( db_adapters_path, 'mysql_adapter' )
 
 
 
-
-
-
-
