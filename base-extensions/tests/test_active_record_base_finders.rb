@@ -3,7 +3,7 @@ require File.join( File.dirname( __FILE__ ), 'boot' )
 class ActiveRecordBaseFinderTest < Test::Unit::TestCase
   include ActiveRecord::ConnectionAdapters
 
-  fixtures 'developers'
+  fixtures 'developers', 'books'
 
   def setup
     @connection = ActiveRecord::Base.connection
@@ -11,6 +11,7 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
 
   def teardown
     Developer.delete( :all )
+    Book.delete( :all )
   end
 
   def test_find_by_array
@@ -128,6 +129,12 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     developers = Developer.find( :all, 
       :conditions=>[ "id = :id", { :id=>1 } ] )
     assert_equal( 1, developers.size )
+  end
+
+  def test_find_three_results_using_match
+    books = Book.find( :all,
+                       :conditions=>{ :match=>[ 'title,publisher,author_name', 'Terry' ] } )
+    assert_equal( 4, books.size )
   end
   
 end

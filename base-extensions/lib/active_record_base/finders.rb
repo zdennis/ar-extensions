@@ -85,6 +85,10 @@ class ActiveRecord::Base
             arr.first << "#{table_name}.#{connection.quote_column_name($1)} LIKE ?"
             val = "%#{val}"
             break true
+          elsif key.to_s == "match"
+            arr.first << "MATCH(#{val[0]}) AGAINST(?)"
+            val = val[1]
+            break true
           end
         }       
 

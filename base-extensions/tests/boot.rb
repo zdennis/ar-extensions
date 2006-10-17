@@ -7,7 +7,7 @@ require 'active_record/fixtures'
 Test::Unit::TestCase.fixture_path = File.dirname(__FILE__) + "/fixtures/"
 $LOAD_PATH.unshift(Test::Unit::TestCase.fixture_path)
 class Test::Unit::TestCase #:nodoc:
-  def create_fixtures(*table_names)
+  def self.fixtures(*table_names)
     if block_given?
       Fixtures.create_fixtures(Test::Unit::TestCase.fixture_path, table_names) { yield }
     else

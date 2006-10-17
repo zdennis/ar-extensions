@@ -61,3 +61,12 @@ CREATE TABLE `developers` (
   `updated_at` datetime default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `books` (
+  `id` int(11) NOT NULL auto_increment,
+  `title` varchar(255) NOT NULL,
+  `publisher` varchar(255) NOT NULL,
+  `author_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  FULLTEXT( `title`, `publisher`, `author_name` )
+) ENGINE=MyISAM;
