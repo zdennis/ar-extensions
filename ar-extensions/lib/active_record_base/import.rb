@@ -159,7 +159,7 @@ class ActiveRecord::Base
     escaped_column_names = quote_column_names( column_names )
 
     # generate the sql
-    base_sql = "INSERT INTO #{table_name} (#{escaped_column_names.join(', ')}) VALUES "
+    base_sql = "INSERT #{options[:ignore]?'IGNORE':''} INTO #{table_name} (#{escaped_column_names.join(', ')}) VALUES "
     values_sql = values_sql_for_column_names_and_attributes( column_names, array_of_attributes )
     post_sql_statements = []
     
