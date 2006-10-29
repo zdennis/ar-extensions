@@ -1,0 +1,31 @@
+RUNNING THE TESTS
+-----------------
+To run the tests you can run rake tasks from the top level directory.
+For more information on what tasks can be run, run "rake -T" from
+the command line.
+
+Currently the two available tasks are:
+ - test:mysql
+ - test:activerecord:mysql
+
+Task - test:mysql
+-----------------
+The test:mysql tasks runs the ActiveRecord::Extensions tests for
+MySQL. Before you can run these you must create a database and load
+it's schema using the ../config/mysql.schema file. 
+
+Task - test:activerecord:mysql
+------------------------------
+The test:activerecord:mysql takes one argument, the path to activerecord.
+For activerecord testing purposes this must be the activerecord 
+directory inside of a full rails download. 
+  Example: "rake test:activerecord:mysql /home/zdennis/rails-1.1.6/activerecord"
+This runs the ActiveRecord tasks with the ActiveRecord::Extensions loaded.
+
+Database Configuration Updates 
+------------------------------
+ActiveRecord::Extension testing is moving in the direction of mimicking
+ActiveRecord testing. The default testing configuration is housed in the
+connection.rb file which is in the connections/native_xxxxx directory.
+
+

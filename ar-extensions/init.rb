@@ -1,6 +1,8 @@
 begin ; require 'active_record' ; rescue; require 'rubygems'; require 'active_record'; end
 
 dir = File.dirname( __FILE__ )
+require File.join( dir, 'lib', 'extensions' )
+
 ar_base_path = File.join( dir, 'lib', 'active_record_base' )
 db_adapters_path = File.join( dir, 'lib', 'adapters' )
 

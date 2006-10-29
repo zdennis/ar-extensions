@@ -34,6 +34,14 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     developers = Developer.find( :all, :conditions=>{ :name_like=>'Zach' } )
     assert_equal( 1, developers.size )
   end
+  
+  def test_find_with_contains
+    developers = Developer.find( :all, :conditions=>{ :name_contains=>'ach' } )
+    assert_equal( 1, developers.size )
+
+    developers = Developer.find( :all, :conditions=>{ :name_contains=>'Zach' } )
+    assert_equal( 1, developers.size )
+  end
 
   def test_find_with_starts_with
     developers = Developer.find( :all, :conditions=>{ :name_starts_with=>'Zach' } )
@@ -95,6 +103,9 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
 
     developers = Developer.find( :all, :conditions=>{ :id_not=>[ 9999 ] } )
     assert_equal( Developer.count, developers.size )
+    
+    developers = Developer.find( :all, :conditions=>{ :id_not_in=>[ 9999 ] } )
+    assert_equal( Developer.count, developers.size )
   end
 
   def test_find_not_in_range
@@ -102,6 +113,9 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     assert_equal( Developer.count, developers.size )
 
     developers = Developer.find( :all, :conditions=>{ :id_not=>( 9998..9999 ) } )
+    assert_equal( Developer.count, developers.size )
+    
+    developers = Developer.find( :all, :conditions=>{ :id_not_in=>( 9998..9999 ) } )
     assert_equal( Developer.count, developers.size )
   end
 
