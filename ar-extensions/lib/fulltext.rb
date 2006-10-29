@@ -36,7 +36,7 @@ module ActiveRecord::Extensions::FullTextSupport
     
     def_delegator 'ActiveRecord::Extensions::FullTextSupport::MySQLFullTextExtension', :register    
   end
-  ActiveRecord::Extensions.register MySQLFullTextExtension.new, :adapter=>:mysql
+  ActiveRecord::Extensions.register MySQLFullTextExtension.new, :adapters=>[:mysql]
   
   
   module ClassMethods

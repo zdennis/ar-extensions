@@ -24,12 +24,16 @@ module ActiveRecord::Extensions
     end
 
     def process( field, value, caller )
+      current_adapter = caller.connection.adapter_name.downcase
       @registry.each_pair do |extension,options|
+        adapters = options[:adapters]
+        adapters.map!{ |e| e.to_s } unless adapters == :all
+        next if options[:adapters] != :all and adapters.grep( /#{current_adapter}/ ).empty?
         if result=extension.process( field, value, caller )
           return result
         end
       end
-      Result.new( nil, nil )
+      nil
     end
       
   end
@@ -110,7 +114,7 @@ module ActiveRecord::Extensions
     end
     
   end
-  register Comparison, :adapter=>:all
+  register Comparison, :adapters=>:all
 
   
   # ActiveRecord::Extension to translate Hash keys which end in
@@ -144,7 +148,7 @@ module ActiveRecord::Extensions
     end
     
   end
-  register Like, :adapter=>:all 
+  register Like, :adapters=>:all 
 
   
   class RangeExt < AbstractExtension
@@ -164,7 +168,7 @@ module ActiveRecord::Extensions
     end
     
   end
-  register RangeExt, :adapter=>[ :mysql, :postgres ]  
+  register RangeExt, :adapters=>[ :mysql, :postgres ]  
   
 
   class RegexpMySQL < AbstractExtension
@@ -182,7 +186,7 @@ module ActiveRecord::Extensions
     end
     
   end
-  register RegexpMySQL, :adapter=>:mysql
+  register RegexpMySQL, :adapters=>[ :mysql ]
   
 end
 
