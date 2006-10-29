@@ -147,7 +147,7 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
 
   def test_find_three_results_using_match
     books = Book.find( :all,
-                       :conditions=>{ :match=>[ 'title,publisher,author_name', 'Terry' ] } )
+                       :conditions=>{ :match_title=> 'Terry' } )
     assert_equal( 4, books.size )
   end
   

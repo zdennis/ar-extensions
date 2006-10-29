@@ -9,6 +9,10 @@ module ActiveRecord::Extensions
     def []( arg )
       @registry[ arg ]
     end
+    
+    def registers?( arg )
+      self[ arg ] ? true : false
+    end
 
     def []=(a,b)
       @registry[a] = b
