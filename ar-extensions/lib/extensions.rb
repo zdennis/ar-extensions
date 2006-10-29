@@ -53,14 +53,6 @@ module ActiveRecord::Extensions
   class AbstractExtension
     include Abstract
     Abstract.method( :process, :key, :val, :caller )
-    
-    def initialize( options )
-      @options = options
-    end
-    
-    def extension_name
-      "#{@options[ :name ]}_#{@options[ :adapter ]}"
-    end    
   end
 
   
@@ -161,7 +153,7 @@ module ActiveRecord::Extensions
         fieldname = caller.connection.quote_column_name( key )
         min = caller.connection.quote( val.first, caller.columns_hash[ key ] )
         max = caller.connection.quote( val.last, caller.columns_hash[ key ] )
-        str = "#{caller.table_name}.#{fieldname} BETWEEN #{min} AND #{max}"
+        str = "#{caller.table_name}.#{fieldname} #{match_data ? 'NOT ' : '' } BETWEEN #{min} AND #{max}"
         return Result.new( str, nil )
       end
       nil      
