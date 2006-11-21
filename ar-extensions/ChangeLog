@@ -1,0 +1,9 @@
+2006-11-20  Zach Dennis  <zach.dennis@gmail.com>
+
+	* Refactored core finder components out into ActiveRecord extensions
+
+	* Duck typing support for any object that is passed in to a conditions hash. ie: MyModel.find( :all, :conditions=>{ :name=>NameSearchObject.new } )
+
+	* Duck typing support for any object that is passed in as a condition. ie: MyModel.find( :all, :conditions=>SearchObject.new )
+	
+
