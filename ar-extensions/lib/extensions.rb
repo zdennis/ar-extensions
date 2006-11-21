@@ -97,9 +97,20 @@ module ActiveRecord::Extensions
   #  Model.find :all, :conditions=>{ 'number_lte'=>100 }
   class Comparison < AbstractExtension
  
-    SUFFIX_MAP = { 'lt'=>'<', 'lte'=>'<=', 'gt'=>'>', 'gte'=>'>=', 'ne'=>'!=', 'not'=>'!=' }
+    SUFFIX_MAP = { 'eq'=>'=', 'lt'=>'<', 'lte'=>'<=', 'gt'=>'>', 'gte'=>'>=', 'ne'=>'!=', 'not'=>'!=' }
     
     def self.process( key, val, caller )
+      process_without_suffix( key, val, caller ) || process_with_suffix( key, val, caller )
+    end
+    
+    def self.process_without_suffix( key, val, caller )
+      return nil unless caller.columns_hash.has_key?( key )
+      str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )}=" +
+        "#{caller.connection.quote( val, caller.columns_hash[ key ] )} "
+      Result.new( str, nil )
+    end
+
+    def self.process_with_suffix( key, val, caller )
       return nil unless val.is_a?( String ) or val.is_a?( Numeric )
       SUFFIX_MAP.each_pair do |k,v|
         match_data = key.to_s.match( /(.+)_#{k}$/ )

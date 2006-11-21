@@ -14,5 +14,3 @@ require File.join( ar_base_path, 'finders' )
 require File.join( db_adapters_path, 'abstract_adapter' )
 require File.join( db_adapters_path, 'mysql_adapter' )
 
-
-
