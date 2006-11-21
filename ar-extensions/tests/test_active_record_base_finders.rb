@@ -150,5 +150,64 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
                        :conditions=>{ :match_title=> 'Terry' } )
     assert_equal( 4, books.size )
   end
+
+  def test_find_with_duck_typing_to_sql_for_an_id
+    search_object = Object.new
+    class << search_object
+      def to_sql( caller )
+        'id=1'
+      end
+    end
+    
+    developers = Developer.find( :all, 
+      :conditions=>search_object )
+    assert_equal( 1, developers.size )
+  end
+
+  def test_find_with_duck_typing_to_sql_for_multiple_conditions
+    name = Object.new
+    class << name
+      def to_sql( caller )
+        "name='Zach Dennis'"
+      end
+    end
+    
+    salary = Object.new
+    class << salary
+      def to_sql( caller )
+        "salary='1'"
+      end
+    end
+    
+    developers = Developer.find( :all, 
+                                 :conditions=>{ 
+                                   :name=>name,
+                                   :salary=>salary }
+                                 )
+    assert_equal( 1, developers.size )
+  end
+  
+  def test_find_with_duck_typing_to_sql_for_multiple_conditions_find_nothing
+    name = Object.new
+    class << name
+      def to_sql( caller )
+        "name='Zach Dennis'"
+      end
+    end
+    
+    salary = Object.new
+    class << salary
+      def to_sql( caller )
+        "salary='0'"
+      end
+    end
+    
+    developers = Developer.find( :all, 
+                                 :conditions=>{ 
+                                   :name=>name,
+                                   :salary=>salary }
+                                 )
+    assert_equal( 0, developers.size )
+  end
   
 end
