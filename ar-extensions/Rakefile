@@ -10,32 +10,42 @@ task :boot do
     require File.join( DIR, 'tests', 'boot' )  
 end
 
+ADAPTERS = %w( mysql postgresql )
+
 namespace :test do
   
-  desc "test base extensions"
-  task :mysql do |t|
-    Dir[ File.join( DIR, 'tests', 'test_*.rb' ) ].each{ |f| require f }
+  ADAPTERS.each do |adapter|
+    desc "test base extensions for #{adapter}"
+    task adapter.to_sym do |t|
+      ENV['ARE_DB'] = adapter
+      Dir[ File.join( DIR, 'tests', 'test_*.rb' ) ].each{ |f| require f }
+    end
   end
   
   namespace :activerecord do
 
-    desc "runs ActiveRecord unit tests for MySQL with loading "
-    task :mysql => [ :boot ] do |t|
-      activerecord_dir = ARGV[1]
-      if activerecord_dir.nil? or ! File.directory?( activerecord_dir )
-        STDERR.puts "ERROR: Pass in the path to ActiveRecord. Eg: /home/joe/rails_trunk/activerecord"
-        exit
-      end
-      
-      old_dir, old_env = Dir.pwd, ENV['RUBYOPT']
-      Dir.chdir( activerecord_dir )
-      ENV['RUBYOPT'] = "-r#{File.join(old_dir,'init.rb')}"
-      load "Rakefile"
-      Rake::Task[ 'test_mysql' ].invoke
-      Dir.chdir( old_dir )
-      ENV['RUBYOPT'] = old_env
-    end
-    
-  end
-    
+    ADAPTERS.each do |adapter|
+      desc "runs ActiveRecord unit tests for #{adapter} with ActiveRecord::Extensions"
+      task adapter.to_sym do |t|
+        activerecord_dir = ARGV[1]
+        if activerecord_dir.nil? or ! File.directory?( activerecord_dir )
+          STDERR.puts "ERROR: Pass in the path to ActiveRecord. Eg: /home/joe/rails_trunk/activerecord"
+          exit
+        end
+        
+        old_dir, old_env = Dir.pwd, ENV['RUBYOPT']
+        Dir.chdir( activerecord_dir )
+        ENV['RUBYOPT'] = "-r#{File.join(old_dir,'init.rb')}"
+
+        load "Rakefile"
+        Rake::Task[ "test_#{adapter}" ].invoke
+        Dir.chdir( old_dir )
+        ENV['RUBYOPT'] = old_env
+        
+      end      
+  
+    end  
+          
+  end    
+  
 end

@@ -3,6 +3,7 @@ dir = File.dirname( __FILE__ )
 require File.join( dir, '..', 'boot' )
 require 'test/unit'
 require 'active_record/fixtures'
+require 'breakpoint'
 
 Test::Unit::TestCase.fixture_path = File.dirname(__FILE__) + "/fixtures/"
 $LOAD_PATH.unshift(Test::Unit::TestCase.fixture_path)
@@ -18,10 +19,7 @@ class Test::Unit::TestCase #:nodoc:
   self.use_instantiated_fixtures = false
 end
 
-
-# TODO fix this to autoload connection
-require File.join( dir, 'connections', 'native_mysql', 'connection.rb' )
-#require File.join( dir, 'connections', 'native_postgresql', 'connection.rb' )
+require File.join( dir, 'connections', "native_#{ENV["ARE_DB"]}", 'connection.rb' )
 
 # Load Models
 models_dir = File.join( dir, 'models' )

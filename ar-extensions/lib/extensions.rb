@@ -105,8 +105,12 @@ module ActiveRecord::Extensions
     
     def self.process_without_suffix( key, val, caller )
       return nil unless caller.columns_hash.has_key?( key )
-      str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )}=" +
-        "#{caller.connection.quote( val, caller.columns_hash[ key ] )} "
+      if val.nil?
+        str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )} IS NULL"
+      else
+        str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )}=" +
+          "#{caller.connection.quote( val, caller.columns_hash[ key ] )} "
+      end
       Result.new( str, nil )
     end
 
@@ -179,7 +183,7 @@ module ActiveRecord::Extensions
     end
     
   end
-  register RangeExt, :adapters=>[ :mysql, :postgres ]  
+  register RangeExt, :adapters=>:all  
   
 
   class RegexpMySQL < AbstractExtension
@@ -198,6 +202,26 @@ module ActiveRecord::Extensions
     
   end
   register RegexpMySQL, :adapters=>[ :mysql ]
+
+
+  # This doesn't support case insensitive matches. 
+  class RegexpPostgreSQL < AbstractExtension
+   
+    NOT_EQUAL_RGX = /(.+)_(ne|not)/
+    
+    def self.process( key, val, caller )
+      if val.is_a?( Regexp )
+        match_data = key.to_s.match( NOT_EQUAL_RGX )
+        key = match_data.captures[0] if match_data
+        fieldname = caller.connection.quote_column_name( key )
+        return Result.new( "#{caller.table_name}.#{fieldname} #{match_data ? '!~ ':'~'} ?", val )
+      end
+      nil
+    end
+    
+  end
+  register RegexpPostgreSQL, :adapters=>[ :postgresql ]
+
   
 end
 

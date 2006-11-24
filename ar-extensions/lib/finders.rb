@@ -2,6 +2,7 @@ module ActiveRecord::ConnectionAdapters::Quoting
 
   alias :quote_orig :quote
   def quote( value, column=nil )
+#    puts "#{__FILE__}:#{__LINE__} | VALUE: #{value.inspect}  COLUMN:#{column}"
     if value.is_a?( Regexp )
       "'#{value.inspect[1...-1]}'"
     else
@@ -19,6 +20,7 @@ class ActiveRecord::Base
 
     alias :sanitize_sql_orig :sanitize_sql
     def sanitize_sql( arg )
+#      puts "#{__FILE__}:#{__LINE__}  ARG:#{arg.inspect}"
       return sanitize_sql_orig( arg ) if arg.nil?
       arg = sanitize_sql_by_way_of_duck_typing( arg ) if arg.respond_to?( :to_sql )
       arg = sanitize_sql_from_hash( arg ) if arg.is_a?( Hash )

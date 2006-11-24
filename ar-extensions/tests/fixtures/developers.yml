@@ -7,3 +7,8 @@ second_developer:
   id: 2
   name: John Doe
   salary: 2
+
+null_developer:
+  id: 3
+  name: NULL
+  salary: 3

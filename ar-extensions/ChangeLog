@@ -1,3 +1,9 @@
+2006-11-23  Zach Dennis  <zdennis@silver.dennis.network>
+
+	* Added finder support for PostgreSQL including Regexp Searching. (No full text searching though)
+
+	* Fixed bug in finders.rb where NULL searches were not correctly being translated into IS NULL when doing { :column => nil }
+
 2006-11-20  Zach Dennis  <zach.dennis@gmail.com>
 
 	* Refactored core finder components out into ActiveRecord extensions

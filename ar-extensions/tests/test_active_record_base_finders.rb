@@ -9,11 +9,6 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     @connection = ActiveRecord::Base.connection
   end
 
-  def teardown
-    Developer.delete( :all )
-    Book.delete( :all )
-  end
-
   def test_find_by_array
     developers = Developer.find( :all, :conditions=>{ :id=>[1,2] } )
     assert_equal( 2, developers.size )
@@ -76,7 +71,7 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
 
   def test_find_with_greater_than
     developers = Developer.find( :all, :conditions=>{ :id_gt=>1 } )
-    assert_equal( 1, developers.size )
+    assert_equal( 2, developers.size )
   end
 
   def test_find_with_less_than_or_equal_to
@@ -86,7 +81,7 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
 
   def test_find_with_greater_than_or_equal_to
     developers = Developer.find( :all, :conditions=>{ :id_gte=>1 } )
-    assert_equal( 2, developers.size )
+    assert_equal( 3, developers.size )
   end
 
   def test_find_not_equal_to
@@ -120,10 +115,10 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
   end
 
   def test_find_not_matching_regex
-    developers = Developer.find( :all, :conditions=>{ :name_ne=>/9999/ } )
+    developers = Developer.find( :all, :conditions=>{ :id_ne=>/9999/ } )
     assert_equal( Developer.count, developers.size )
 
-    developers = Developer.find( :all, :conditions=>{ :name_not=>/9999/ } )
+    developers = Developer.find( :all, :conditions=>{ :id_not=>/9999/ } )
     assert_equal( Developer.count, developers.size )
   end
 
@@ -145,10 +140,24 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     assert_equal( 1, developers.size )
   end
 
+  def test_find_where_value_is_null
+    developers = Developer.find( :all,
+                                 :conditions=>{ :name=>nil } )
+    assert_equal( 1, developers.size )
+  end
+  
+  # FIXME this won't work until full text index/searching is added for 
+  #   any db adapter outside of MySQL.
+  # For PostgreSQL support look into TSearch2 support which is
+  # builtin to PostgreSQL 8.x (but not in 7.x)
   def test_find_three_results_using_match
-    books = Book.find( :all,
-                       :conditions=>{ :match_title=> 'Terry' } )
-    assert_equal( 4, books.size )
+    if Book.connection.adapter_name !~ /mysql/i
+      assert_equal( 4, 0, "Full Text Searching is not implemented for #{Book.connection.adapter_name}" )
+    else
+      books = Book.find( :all,
+                         :conditions=>{ :match_title=> 'Terry' } )
+      assert_equal( 4, books.size )
+    end
   end
 
   def test_find_with_duck_typing_to_sql_for_an_id
