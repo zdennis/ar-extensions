@@ -1,4 +1,7 @@
-class ActiveRecord::Base
+module ActiveRecord::Extensions::ConnectionAdapters ; end
+module ActiveRecord::Extensions::Import ; end
+
+module ActiveRecord::Extensions::Import::Base
 
   # Imports a collection of values to the database. This is more efficient than
   # using ActiveRecord::Base#create or ActiveRecord::Base#save multiple times. This
@@ -76,7 +79,7 @@ class ActiveRecord::Base
   #     attributes, 
   #     :on_duplicate_key_update=>{ 'first_name'=>'last_name' } )
   #  
-  def self.import( *args )
+  def import( *args )
     options = { :validate=>true }
     
     # supports 2-element array and array
@@ -102,34 +105,9 @@ class ActiveRecord::Base
     end
   end
 
-  # Returns SQL for an INSERT statement given the passed in +column_names+ and +array_of_attributes+.
-  def self.values_sql_for_column_names_and_attributes( column_names, array_of_attributes )   # :nodoc:
-    values = []
-    array_of_attributes.each do |arr|
-      my_values = []
-      arr.each_with_index do |val,i|
-        my_values << connection.quote( val, columns_hash[ column_names[i] ] )
-      end
-      values << my_values
-    end   
-    values_sql = values.map{ |arr| '(' + arr.join( ',' ) + ')' }
-    values_sql
-  end
-  
-  # Returns an Array of Hashes for the passed in +column_names+ and +array_of_attributes+.
-  def self.validations_array_for_column_names_and_attributes( column_names, array_of_attributes ) # :nodoc:
-    arr = []
-    array_of_attributes.each do |attributes|
-      c = 0
-      hsh = attributes.inject( {} ){|hsh,attr| hsh[ column_names[c] ] = attr ; c+=1 ; hsh }
-      arr << hsh
-    end
-    arr
-  end
-  
-  # Imports the passed in +column_names+ and +array_of_attributes+ given the passed in +options+ Hash with
-  # validations. Returns an array of instances that failed validations.
-  def self.import_with_validations( column_names, array_of_attributes, options={} ) # :nodoc:
+  # Imports the passed in +column_names+ and +array_of_attributes+ given the passed in +options+ Hash
+  # with validations. Returns an array of instances that failed validations.
+  def import_with_validations( column_names, array_of_attributes, options={} ) # :nodoc:
     failed_instances = []
 
     # create instances for each of our column/value sets
@@ -153,69 +131,116 @@ class ActiveRecord::Base
   end
   
   # Imports the passed in +column_names+ and +array_of_attributes+ given the passed in 
-  # +options+ Hash. This will return the number of insert operations it took to create these records without
-  # validations or callbacks. 
-  def self.import_without_validations_or_callbacks( column_names, array_of_attributes, options={} )
+  # +options+ Hash. This will return the number of insert operations it took to create these 
+  # records without validations or callbacks. 
+  def import_without_validations_or_callbacks( column_names, array_of_attributes, options={} )
     escaped_column_names = quote_column_names( column_names )
 
     # generate the sql
-    base_sql = "INSERT #{options[:ignore]?'IGNORE':''} INTO #{table_name} (#{escaped_column_names.join(', ')}) VALUES "
-    values_sql = values_sql_for_column_names_and_attributes( column_names, array_of_attributes )
-    post_sql_statements = []
-    
-    # find post sql statements
-    if options[:on_duplicate_key_update]
-      post_sql_statements << sql_for_on_duplicate_key_update( options[:on_duplicate_key_update] )
-    end
+    insert_sql = connection.multiple_value_sets_insert_sql( table_name, escaped_column_names, options )
 
+    columns = []
+    array_of_attributes.first.each_with_index { |arr,i| columns << columns_hash[ column_names[i] ] }
+    values_sql = connection.values_sql_for_column_names_and_attributes( columns, array_of_attributes )
+    post_sql_statements = connection.post_sql_statements( table_name, options )
+    
     # perform the inserts
     number_of_inserts = connection.insert_many( 
-      [ base_sql, post_sql_statements ].flatten, 
+      [ insert_sql, post_sql_statements ].flatten, 
       values_sql,
       "#{self.class.name} Create Many Without Validations Or Callbacks" )
   end
       
   # Returns an array of quoted column names
-  def self.quote_column_names( names ) 
+  def quote_column_names( names ) 
     names.map{ |name| connection.quote_column_name( name ) }
+  end
+ 
+  # Returns an Array of Hashes for the passed in +column_names+ and +array_of_attributes+.
+  def validations_array_for_column_names_and_attributes( column_names, array_of_attributes ) # :nodoc:
+    arr = []
+    array_of_attributes.each do |attributes|
+      c = 0
+      hsh = attributes.inject( {} ){|hsh,attr| hsh[ column_names[c] ] = attr ; c+=1 ; hsh }
+      arr << hsh
+    end
+    arr
+  end
+  
+end
+
+ActiveRecord::Base.extend( ActiveRecord::Extensions::Import::Base )
+
+
+
+module ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter
+
+  # Returns an array of post SQL statements given the passed in options.
+  def post_sql_statements( table_name, options )
+    post_sql_statements = []
+    if options[:on_duplicate_key_update]
+      post_sql_statements << sql_for_on_duplicate_key_update( table_name, options[:on_duplicate_key_update] )
+    end
+    post_sql_statements
+  end
+  
+  def multiple_value_sets_insert_sql( table_name, column_names, options )
+    "INSERT #{options[:ignore]?'IGNORE':''} INTO #{table_name} (#{column_names.join(', ')}) "
   end
   
   # Returns a generated ON DUPLICATE KEY UPDATE statement given the passed
-  # in +args+. This will only work with MySQL.
-  def self.sql_for_on_duplicate_key_update( *args ) # :nodoc:
+  # in +args+. 
+  def sql_for_on_duplicate_key_update( table_name, *args ) # :nodoc:
     sql = ' ON DUPLICATE KEY UPDATE '
     arg = args.first
     if arg.is_a?( Array )
-      sql << sql_for_on_duplicate_key_update_as_array( arg )
+      sql << sql_for_on_duplicate_key_update_as_array( table_name, arg )
     elsif arg.is_a?( Hash )
-      sql << sql_for_on_duplicate_key_update_as_hash( arg )
+      sql << sql_for_on_duplicate_key_update_as_hash( table_name, arg )
     else
       raise ArgumentError.new( "Expected Array or Hash" )
     end
     sql
   end
-  
-  # This will only work for MySQL.
-  def self.sql_for_on_duplicate_key_update_as_array( arr )  # :nodoc:
-    qt =  connection.quote_column_name( table_name )
+
+  def sql_for_on_duplicate_key_update_as_array( table_name, arr )  # :nodoc:
+    qt = quote_column_name( table_name )
     results = arr.map do |column|
-      qc =  connection.quote_column_name( column )
+      qc = quote_column_name( column )
       "#{qt}.#{qc}=VALUES( #{qc} )"        
     end
     results.join( ',' )
   end
   
-
-  # This will only work for MySQL.
-  def self.sql_for_on_duplicate_key_update_as_hash( hsh ) # :nodoc:
+  def sql_for_on_duplicate_key_update_as_hash( table_name, hsh ) # :nodoc:
     sql = ' ON DUPLICATE KEY UPDATE '
-    qt = connection.quote_column_name( table_name )
+    qt = quote_column_name( table_name )
     results = hsh.map do |column1, column2|
-      qc1 = connection.quote_column_name( column1 )
-      qc2 = connection.quote_column_name( column2 )
+      qc1 = quote_column_name( column1 )
+      qc2 = quote_column_name( column2 )
       "#{qt}.#{qc1}=VALUES( #{qc2} )"
     end
     results.join( ',')
   end  
+
+  # Returns SQL the VALUES for an INSERT statement given the passed in +columns+ 
+  # and +array_of_attributes+.
+  def values_sql_for_column_names_and_attributes( columns, array_of_attributes )   # :nodoc:
+    values = []
+    array_of_attributes.each do |arr|
+      my_values = []
+      arr.each_with_index do |val,j|
+        my_values << quote( val, columns[j] )
+      end
+      values << my_values
+    end   
+    values_arr = values.map{ |arr| '(' + arr.join( ',' ) + ')' }
+    values_arr[0] = "VALUES" + values_arr[0]
+    values_arr
+  end
   
 end
+
+#ActiveRecord::Base.extend( ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter )
+ActiveRecord::ConnectionAdapters::MysqlAdapter.send( 'include', ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter )
+

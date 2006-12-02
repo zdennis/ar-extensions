@@ -17,7 +17,6 @@ module ActiveRecord
         
         sql_size = base_sql.size + post_sql.size 
 
-
         # the number of bytes the requested insert statement values will take up
         values_in_bytes = self.class.sum_sizes( *values )
         
