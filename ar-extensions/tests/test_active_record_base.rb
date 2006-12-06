@@ -1,6 +1,5 @@
 require File.join( File.dirname( __FILE__ ), 'boot')
 
-
 class ActiveRecordBaseTest < Test::Unit::TestCase
 
   def setup
@@ -8,10 +7,6 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     @columns_for_on_duplicate_key_update = [ 'id', 'title', 'author_name']
   end
   
-  def teardown
-  end
-
- 
   def test_quoted_column_names  
     column_names = %W{ col1 col2 }
     actual = ActiveRecord::Base.quote_column_names( column_names )
@@ -104,6 +99,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end
   
   def test_import_without_validations_but_with_on_duplicate_key_update_using_string_array1
+    return unless Topic.supports_on_duplicate_key_update?
     Topic.destroy_all
     orig_topic = setup_import_without_validations_but_with_on_duplicate_key_update
     columns = @columns_for_on_duplicate_key_update
@@ -122,6 +118,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end
  
   def test_import_without_validations_but_with_on_duplicate_key_update_using_string_array2
+    return unless Topic.supports_on_duplicate_key_update?
     Topic.destroy_all    
     setup_import_without_validations_but_with_on_duplicate_key_update
     columns = @columns_for_on_duplicate_key_update
@@ -140,6 +137,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end    
   
   def test_import_without_validations_but_with_on_duplicate_key_update_using_symbol_array1
+    return unless Topic.supports_on_duplicate_key_update?
     Topic.destroy_all    
     orig_topic = setup_import_without_validations_but_with_on_duplicate_key_update
     columns = @columns_for_on_duplicate_key_update
@@ -158,6 +156,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end    
    
   def test_import_without_validations_but_with_on_duplicate_key_update_using_symbol_array2
+    return unless Topic.supports_on_duplicate_key_update?
     Topic.destroy_all    
     orig_topic = setup_import_without_validations_but_with_on_duplicate_key_update
     columns = @columns_for_on_duplicate_key_update
@@ -176,6 +175,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end
   
   def test_import_without_validations_but_with_on_duplicate_key_update_using_string_hash1
+    return unless Topic.supports_on_duplicate_key_update?
     Topic.destroy_all    
     orig_topic = setup_import_without_validations_but_with_on_duplicate_key_update
     columns = @columns_for_on_duplicate_key_update
@@ -194,6 +194,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end
 
   def test_import_without_validations_but_with_on_duplicate_key_update_using_string_hash2
+    return unless Topic.supports_on_duplicate_key_update?
     Topic.destroy_all    
     orig_topic = setup_import_without_validations_but_with_on_duplicate_key_update
     columns = @columns_for_on_duplicate_key_update
@@ -213,6 +214,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end
   
   def test_import_without_validations_but_with_on_duplicate_key_update_using_string_hash3
+    return unless Topic.supports_on_duplicate_key_update?
     Topic.destroy_all    
     orig_topic = setup_import_without_validations_but_with_on_duplicate_key_update
     columns = @columns_for_on_duplicate_key_update
@@ -231,6 +233,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end
   
   def test_import_without_validations_but_with_on_duplicate_key_update_using_symbol_hash1
+    return unless Topic.supports_on_duplicate_key_update?
     Topic.destroy_all    
     orig_topic = setup_import_without_validations_but_with_on_duplicate_key_update
     columns = @columns_for_on_duplicate_key_update
@@ -249,6 +252,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end
 
   def test_import_without_validations_but_with_on_duplicate_key_update_using_symbol_hash2
+    return unless Topic.supports_on_duplicate_key_update?
     Topic.destroy_all    
     orig_topic = setup_import_without_validations_but_with_on_duplicate_key_update
     columns = @columns_for_on_duplicate_key_update
@@ -268,6 +272,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end
   
   def test_import_without_validations_but_with_on_duplicate_key_update_using_symbol_hash3
+    return unless Topic.supports_on_duplicate_key_update?
     Topic.destroy_all    
     orig_topic = setup_import_without_validations_but_with_on_duplicate_key_update
     columns = @columns_for_on_duplicate_key_update

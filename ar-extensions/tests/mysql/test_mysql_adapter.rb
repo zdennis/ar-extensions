@@ -1,5 +1,3 @@
-require File.join( File.dirname( __FILE__ ), 'boot')
-
 class MysqlAdapterTest < Test::Unit::TestCase
   include ActiveRecord::ConnectionAdapters
   

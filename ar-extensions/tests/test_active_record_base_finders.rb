@@ -151,8 +151,8 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
   # For PostgreSQL support look into TSearch2 support which is
   # builtin to PostgreSQL 8.x (but not in 7.x)
   def test_find_three_results_using_match
-    if Book.connection.adapter_name !~ /mysql/i
-      assert_equal( 4, 0, "Full Text Searching is not implemented for #{Book.connection.adapter_name}" )
+    unless Book.supports_full_text_searching?
+      STDERR.puts "test_find_three_results_using_match is not testing, since your database adapter doesn't support fulltext searching"
     else
       books = Book.find( :all,
                          :conditions=>{ :match_title=> 'Terry' } )

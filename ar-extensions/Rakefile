@@ -19,6 +19,7 @@ namespace :test do
     task adapter.to_sym do |t|
       ENV['ARE_DB'] = adapter
       Dir[ File.join( DIR, 'tests', 'test_*.rb' ) ].each{ |f| require f }
+      Dir[ File.join( DIR, 'tests', adapter.to_s, 'test_*.rb' ) ].each{ |f| require f }
     end
   end
   

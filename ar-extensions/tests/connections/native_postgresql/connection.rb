@@ -15,3 +15,4 @@ ActiveRecord::Base.establish_connection(
   :min_messages => "warning" 
 )
 
+
