@@ -5,6 +5,16 @@ module ActiveRecord::Extensions
   Result = Struct.new( :sql, :value )
   
   class Registry
+
+    def options( extension )
+      extension_arr = @registry.detect{ |arr| arr.first == extension }
+      return unless extension_arr
+      extension_arr.last
+    end
+
+    def registers?( extension )
+      @registry.detect{ |arr| arr.first == extension }
+    end
     
     def register( extension, options )
       @registry << [ extension, options ]

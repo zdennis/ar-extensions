@@ -23,7 +23,7 @@ class ActiveRecord::Extensions::FullTextSearching::MySQLFullTextExtension < Acti
     return nil unless match_data
     fulltext_identifier = match_data.captures[0].to_sym
     if self.class.registers?( fulltext_identifier )
-      fields = self.class.registry[fulltext_identifier][:fields]
+      fields = self.class.registry.options( fulltext_identifier )[:fields]
       str = "MATCH ( #{fields.join( ',' )} ) AGAINST (#{caller.connection.quote(val)})"
       return ActiveRecord::Extensions::Result.new( str, nil )
     end
