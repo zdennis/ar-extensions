@@ -6,26 +6,17 @@ module ActiveRecord::Extensions
   
   class Registry
     
-    def []( arg )
-      @registry[ arg ]
+    def register( extension, options )
+      @registry << [ extension, options ]
     end
-    
-    def registers?( arg )
-      self[ arg ] ? true : false
-    end
-
-    def []=(a,b)
-      @registry[a] = b
-    end
-    alias :register :[]=
       
     def initialize
-      @registry = {}
+      @registry = []
     end
 
     def process( field, value, caller )
       current_adapter = caller.connection.adapter_name.downcase
-      @registry.each_pair do |extension,options|
+      @registry.reverse.each do |(extension,options)|
         adapters = options[:adapters]
         adapters.map!{ |e| e.to_s } unless adapters == :all
         next if options[:adapters] != :all and adapters.grep( /#{current_adapter}/ ).empty?
@@ -80,7 +71,7 @@ module ActiveRecord::Extensions
     end
     
   end
-  register ArrayExt, :adapters=>:all
+
   
   # ActiveRecord::Extension to translate Hash keys which end in
   # +_lt+, +_lte+, +_gt+, or +_gte+ with the approriate <, <=, >,
@@ -129,7 +120,6 @@ module ActiveRecord::Extensions
     end
     
   end
-  register Comparison, :adapters=>:all
 
   
   # ActiveRecord::Extension to translate Hash keys which end in
@@ -163,7 +153,7 @@ module ActiveRecord::Extensions
     end
     
   end
-  register Like, :adapters=>:all 
+
 
   
   class RangeExt < AbstractExtension
@@ -183,8 +173,7 @@ module ActiveRecord::Extensions
     end
     
   end
-  register RangeExt, :adapters=>:all  
-  
+ 
 
   class RegexpMySQL < AbstractExtension
     
@@ -201,7 +190,7 @@ module ActiveRecord::Extensions
     end
     
   end
-  register RegexpMySQL, :adapters=>[ :mysql ]
+
 
 
   # This doesn't support case insensitive matches. 
@@ -220,9 +209,13 @@ module ActiveRecord::Extensions
     end
     
   end
-  register RegexpPostgreSQL, :adapters=>[ :postgresql ]
 
-  
+  register Comparison, :adapters=>:all
+  register Like, :adapters=>:all 
+  register ArrayExt, :adapters=>:all  
+  register RangeExt, :adapters=>:all  
+  register RegexpMySQL, :adapters=>[ :mysql ]
+  register RegexpPostgreSQL, :adapters=>[ :postgresql ]
 end
 
 

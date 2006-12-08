@@ -2,7 +2,6 @@ module ActiveRecord::ConnectionAdapters::Quoting
 
   alias :quote_orig :quote
   def quote( value, column=nil )
-#    puts "#{__FILE__}:#{__LINE__} | VALUE: #{value.inspect}  COLUMN:#{column}"
     if value.is_a?( Regexp )
       "'#{value.inspect[1...-1]}'"
     else
@@ -20,12 +19,15 @@ class ActiveRecord::Base
 
     alias :sanitize_sql_orig :sanitize_sql
     def sanitize_sql( arg )
-#      puts "#{__FILE__}:#{__LINE__}  ARG:#{arg.inspect}"
       return sanitize_sql_orig( arg ) if arg.nil?
-      arg = sanitize_sql_by_way_of_duck_typing( arg ) if arg.respond_to?( :to_sql )
-      arg = sanitize_sql_from_hash( arg ) if arg.is_a?( Hash )
-      arg = sanitize_sql_from_string_and_hash( arg ) if arg.size == 2 and arg.first.is_a?( String ) and arg.last.is_a?( Hash )
-      result = sanitize_sql_orig( arg )
+      if arg.respond_to?( :to_sql )
+        arg = sanitize_sql_by_way_of_duck_typing( arg ) #if arg.respond_to?( :to_sql )
+      elsif arg.is_a?( Hash )
+        arg = sanitize_sql_from_hash( arg ) #if arg.is_a?( Hash )
+      elsif arg.size == 2 and arg.first.is_a?( String ) and arg.last.is_a?( Hash )
+         arg = sanitize_sql_from_string_and_hash( arg ) # if arg.size == 2 and arg.first.is_a?( String ) and arg.last.is_a?( Hash )
+      end
+      sanitize_sql_orig( arg )
     end
     
     def sanitize_sql_by_way_of_duck_typing( arg )
@@ -54,7 +56,6 @@ class ActiveRecord::Base
         else
           sql = nil
           result = ActiveRecord::Extensions.process( key, val, self )
-          
           if result
             conditions << result.sql if result.sql
             values.push( result.value ) if result.value

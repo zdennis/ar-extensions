@@ -9,7 +9,7 @@ db1 = 'aroptests'
 ActiveRecord::Base.establish_connection(
   :adapter  => "postgresql",
   :username => "postgres",
-  :password => "postgres",
+  :password => "password",
   :host => 'localhost',
   :database => db1,
   :min_messages => "warning" 
