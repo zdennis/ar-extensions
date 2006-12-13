@@ -3,6 +3,8 @@ begin ; require 'active_record' ; rescue LoadError; require 'rubygems'; require 
 dir = File.dirname( __FILE__ )
 require File.join( dir, 'lib', 'extensions' )
 
+require File.join( dir, 'lib', 'csv' )
+
 require File.join( dir, 'lib', 'fulltext' )
 require File.join( dir, 'lib', 'fulltext', 'mysql' )
 
