@@ -1,19 +1,13 @@
 require 'faster_csv'
 
-=begin
-TODO - support to_csv( filename, options )
-OPTIONS TO SUPPORT:
- :headers 
- :exclude_columns
- :include_columns
-=end
-
 module ActiveRecord::Extensions::FindToCSV
   ALIAS_FOR_FIND = :_original_find_before_arext
 
   def self.included( cl )
-    cl.instance_eval "alias #{ALIAS_FOR_FIND} :find"
-    cl.extend( ClassMethods )
+    if not cl.ancestors.include?( self::ClassMethods )
+      cl.instance_eval "alias #{ALIAS_FOR_FIND} :find"
+      cl.extend( ClassMethods )
+    end
   end
 
   module ClassMethods
@@ -25,14 +19,41 @@ module ActiveRecord::Extensions::FindToCSV
   end
 
   module InstanceMethods
-    def to_csv( filename )
-      csv = FasterCSV.generate do |csv|
-        csv << self.first.attributes.sort.map{ |arr| arr.first }
-         self.each do |row|
-          csv << self.first.attributes.sort.map{ |arr| arr.last }
-         end
+    class NoRecordsError < StandardError ; end
+ 
+    def to_csv_file( filepath, *args )
+      mode, options = nil, {}
+
+      if args.empty?
+        mode = 'w'
+      elsif args.first.is_a?( String )
+        mode = args.first
+      elsif args.first.is_a?( Hash )
+        mode, options = 'w', args.first
+      elsif args.size == 2
+        mode, options = args
       end
-      File.open( filename, "w" ){ |io| io.puts csv }
+
+      raise ArgumentError.new( "Unknown arguments: #{args}" ) if mode.nil?
+
+      csv = to_csv( options )
+      File.open( filepath, mode ){ |io| io.write( csv ) }
+      csv
+    end                 
+
+    def to_csv( options={} )
+      raise NoRecordsError.new if self.size == 0
+      headers = options[:headers] || self.first.attributes.keys.inject( [] ){ |arr,k| arr<<k }
+      headers = headers.map{ |e| e.to_s }
+
+      csv = FasterCSV.generate do |csv|
+        csv << headers
+        each do |e|
+          csv << headers.inject( [] ){ |arr,hdr| arr << e.attributes[ hdr ].to_s }
+        end
+      end
+      csv
     end
   end
+
 end
