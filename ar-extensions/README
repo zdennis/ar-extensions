@@ -3,14 +3,32 @@ LICENSE
 This is licensed under the ruby license. 
 
 Author: Zach Dennis
-Web Site: http://blogs.mktec.com/zdennis
-Email: zdennis@mktec.com
+Web Site: http://www.continuousthinking.com
+Email: zach.dennis@gmail.com
 
- - For How-To information see http://blogs.mktec.com/pages/ARE
+ - For How-To information see http://www.continuousthinking.com/are
  - For project information and feedback please consult http://rubyforge.org/projects/arext/
  - For release information please see below
 
-ActiveRecord::Extension 0.0.5
+ActiveRecord::Extensions 0.1.0
+-------------------------------
+December 16th, 2006
+ - Adds to_csv method to arrays returned by ActiveRecord::Base.find. 
+ - Fixes bug in ActiveRecord::Extensions::Registry when processing key/value pairs where
+   the order of certain Extensions was not handled correctly due to Hash usage.
+ - Refactoring of ActiveRecord::Extensions::Registry
+ - Added more tests for better finder support 
+
+ActiveRecord::Extensions 0.0.6
+------------------------------
+December 5th, 2006
+ - Added generic support for import functionality for all adapters
+ - Includes rake testing tasks for postgresql
+ - Includes postgresql support for all extensions except for full text searching (which is only mysql)
+ - Refactored directory structure of tests, import functionality and fulltext functionality
+
+
+ActiveRecord::Extensions 0.0.5
 ------------------------------
 October 20th, 2006.
  - Fixes two bugs which broke normal ActiveRecord behavior

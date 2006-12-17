@@ -8,8 +8,23 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
   def setup
     @connection = ActiveRecord::Base.connection
   end
-
-  def test_find_by_array
+  
+  def test_find_by_array1
+    developers = Developer.find( :all, :conditions=>[ 'ID IN(?)', [1,2] ] )
+    assert_equal( 2, developers.size )
+  end
+  
+  def test_find_by_array2
+    developers = Developer.find_all_by_id( [ 1, 2 ] )
+    assert_equal( 2, developers.size )
+  end  
+  
+  def test_find_by_array3
+    developers = Developer.find_all_by_name( [ 'Zach Dennis', 'John Doe', "The Second Topic's of the day" ] )
+    assert_equal( 2, developers.size )
+  end
+    
+  def test_find_by_array4
     developers = Developer.find( :all, :conditions=>{ :id=>[1,2] } )
     assert_equal( 2, developers.size )
   end

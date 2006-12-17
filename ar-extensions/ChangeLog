@@ -1,3 +1,19 @@
+2006-12-16  Zach Dennis  <zdennis@silver.dennis.network>
+
+	* Added more tests for better finder support
+
+	* Added to_csv support for Arrays returned by ActiveRecord::Base.find
+
+	* Refactored ActiveRecord::Extensions::Registry to use an Array instead of hash
+
+2006-12-06  Zach Dennis  <zdennis@silver.dennis.network>
+
+	* PostgreSQL has tested support for everything MySQL has except for Full Text Searching. This is not implemented.
+
+	* Refactored how import and full text searching implementation is handled, this is largely handled by duck typing certain method calls. 
+
+	* Added generic import support for any adapter that doesn't support multi-value insert statements. This provides generic support which is guaranteed to be no slower then ActiveRecord#create. 
+
 2006-11-23  Zach Dennis  <zdennis@silver.dennis.network>
 
 	* Added finder support for PostgreSQL including Regexp Searching. (No full text searching though)
