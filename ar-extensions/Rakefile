@@ -12,11 +12,24 @@ end
 
 ADAPTERS = %w( mysql postgresql )
 
+namespace :db do
+
+  ADAPTERS.each do |adapter|
+    desc "builds test database for #{adapter}"
+    task "prepare_#{adapter}" do |t|
+      ENV['ARE_DB'] = adapter
+      require File.join( DIR, 'tests', 'boot' )
+      require File.join( DIR, 'db', 'migrate', "#{adapter}_schema.rb" )
+    end
+  end
+
+end
+
 namespace :test do
   
   ADAPTERS.each do |adapter|
     desc "test base extensions for #{adapter}"
-    task adapter.to_sym do |t|
+    task adapter do |t|
       ENV['ARE_DB'] = adapter
       Dir[ File.join( DIR, 'tests', 'test_*.rb' ) ].each{ |f| require f }
       Dir[ File.join( DIR, 'tests', adapter.to_s, 'test_*.rb' ) ].each{ |f| require f }
