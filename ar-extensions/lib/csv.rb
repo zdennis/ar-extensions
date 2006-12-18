@@ -20,7 +20,22 @@ module ActiveRecord::Extensions::FindToCSV
 
   module InstanceMethods
     class NoRecordsError < StandardError ; end
- 
+
+    private
+    
+    def to_csv_fields_for_options( options )
+      fields = self.first.attributes.keys.inject( [] ){ |arr,k| arr << k }
+      if options.has_key?( :only )
+        fields = options[:only].map{ |fieldname| fieldname.to_s }
+      elsif options.has_key?( :except )
+        fields = fields - options[:except].map{ |fieldname| fieldname.to_s }
+      end     
+      fields
+    end
+    
+    
+    public
+    
     def to_csv_file( filepath, *args )
       mode, options = nil, {}
 
@@ -39,17 +54,17 @@ module ActiveRecord::Extensions::FindToCSV
       csv = to_csv( options )
       File.open( filepath, mode ){ |io| io.write( csv ) }
       csv
-    end                 
-
+    end
+    
     def to_csv( options={} )
       raise NoRecordsError.new if self.size == 0
-      headers = options[:headers] || self.first.attributes.keys.inject( [] ){ |arr,k| arr<<k }
-      headers = headers.map{ |e| e.to_s }
+    
+      fields = to_csv_fields_for_options( options )
 
       csv = FasterCSV.generate do |csv|
-        csv << headers
+        csv << fields unless options[:headers] == false
         each do |e|
-          csv << headers.inject( [] ){ |arr,hdr| arr << e.attributes[ hdr ].to_s }
+          csv << fields.inject( [] ){ |arr,field| arr << e.attributes[ field ].to_s }
         end
       end
       csv

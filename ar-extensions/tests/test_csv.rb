@@ -32,23 +32,93 @@ class CSVTest < Test::Unit::TestCase
     assert csv =~ /#{Regexp.escape(developer_csv)}/
   end
 
-  def test_find_to_csv_with_headers_option_as_symbols
-    options = { :headers=>[ :name, :salary ] }
+  def test_find_to_csv_with_only_option_as_symbols
+    options = { :only => [ :name, :salary ] }
+
     developers = Developer.find( :all )
     csv = developers.to_csv( options )
-
-    expected_number_of_rows = Developer.count + 1     # plus 1 for header row
-    expected_number_of_cols = 2
 
     csv_arr = FasterCSV.parse( csv )
     csv_headers = csv_arr.first
     csv_data_rows = csv_arr[1..-1]
 
     assert_equal Developer.count, csv_data_rows.size
-    assert_equal options[:headers].size, csv_headers.size
+    assert_equal options[:only].size, csv_headers.size
 
     developer_csv = Developer.find( :all, :limit=>1 ).to_csv( options )
     assert csv =~ /#{Regexp.escape(developer_csv)}/
+  end
+  
+  def test_find_to_csv_with_only_option_as_strings
+    options = { :only => [ 'name', 'salary' ] }
+    
+    developers = Developer.find( :all )
+    csv = developers.to_csv( options )
+
+    csv_arr = FasterCSV.parse( csv )
+    csv_headers = csv_arr.first
+    csv_data_rows = csv_arr[1..-1]
+
+    assert_equal Developer.count, csv_data_rows.size
+    assert_equal options[:only].size, csv_headers.size
+
+    developer_csv = Developer.find( :all, :limit=>1 ).to_csv( options )
+    assert csv =~ /#{Regexp.escape(developer_csv)}/
+  end
+  
+  def test_find_to_csv_with_except_option_as_symbols
+    options = { :except => [ :id, :salary ] }
+    developers = Developer.find( :all )
+    csv = developers.to_csv( options )
+    
+    csv_arr = FasterCSV.parse( csv )
+    csv_headers = csv_arr.first
+    csv_data_rows = csv_arr[1..-1]
+    
+    assert_equal Developer.count, csv_data_rows.size
+    assert_equal Developer.columns.size - options[:except].size, csv_headers.size
+    
+    expected_headers = (Developer.columns.map{ |c| c.name } - options[:except].map{|e| e.to_s } )
+    assert_block do
+      expected_headers.inject( true ) { |bool,header| 
+        bool = false unless csv_headers.include?( header  )
+        bool }
+    end
+  end
+
+  def test_find_to_csv_with_except_option_as_strings
+    options = { :except => [ 'id', 'salary' ] }
+    developers = Developer.find( :all )
+    csv = developers.to_csv( options )
+    
+    csv_arr = FasterCSV.parse( csv )
+    csv_headers = csv_arr.first
+    csv_data_rows = csv_arr[1..-1]
+    
+    assert_equal Developer.count, csv_data_rows.size
+    assert_equal Developer.columns.size - options[:except].size, csv_headers.size
+
+    expected_headers = (Developer.columns.map{ |c| c.name } - options[:except] )
+    assert_block do
+      expected_headers.inject( true ) { |bool,header| 
+        bool = false unless csv_headers.include?( header  )
+        bool }
+    end
+
+  end
+    
+  def test_find_to_csv_should_have_no_header_row
+    developers = Developer.find( :all )
+    csv = developers.to_csv( :headers => false )
+    
+    assert_equal Developer.count, FasterCSV.parse( csv ).size    
+  end
+  
+  def test_find_to_csv_should_have_header_row 
+    developers = Developer.find( :all )
+    csv = developers.to_csv( :headers => true )
+
+    assert_equal Developer.count + 1, FasterCSV.parse( csv ).size
   end
 
   def test_find_to_csv_file

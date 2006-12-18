@@ -1,5 +1,11 @@
 2006-12-17  zdennis  <zdennis@aries>
 
+	* Added :only and :except options to to_csv method. Forcing
+	compatibility with http://blog.integralimpressions.com/articles/2006/09/01/tocsv-plugin
+
+	* Changed to_csv option :headers take a boolean rather then an
+	array of column names.
+
 	* Added rake task db:prepare_<adapter_name> to build test
 	database. 
 
