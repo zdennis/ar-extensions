@@ -1,3 +1,8 @@
+2006-12-17  zdennis  <zdennis@aries>
+
+	* Added rake task db:prepare_<adapter_name> to build test
+	database. 
+
 2006-12-16  Zach Dennis  <zdennis@silver.dennis.network>
 
 	* Added more tests for better finder support
