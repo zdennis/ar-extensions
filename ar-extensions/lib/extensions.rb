@@ -217,6 +217,32 @@ module ActiveRecord::Extensions
       end
       nil
     end
+
+  end
+  
+  class RegexpSqlite 
+    
+    NOT_EQUAL_RGX = /(.+)_(ne|not)/
+    
+    def self.process( key, val, caller )
+      if val.is_a?( Regexp )
+        match_data = key.to_s.match( NOT_EQUAL_RGX )
+        key = match_data.captures[0] if match_data
+        negate = match_data ? 'y' : 'n'
+        fieldname = caller.connection.quote_column_name( key )
+
+        caller.connection.instance_eval( '@connection' ).create_function( 'rlike', 3 ) do |func, a, b, negate|
+          if negate =~ /y/
+            func.set_result 1 if a.to_s !~ /#{b}/
+          else
+            func.set_result 1 if a.to_s =~ /#{b}/
+          end
+        end
+        
+        return Result.new( "rlike( #{fieldname}, ?, '#{negate}' )", val )
+      end
+      nil
+    end
     
   end
 
@@ -226,6 +252,7 @@ module ActiveRecord::Extensions
   register RangeExt, :adapters=>:all  
   register RegexpMySQL, :adapters=>[ :mysql ]
   register RegexpPostgreSQL, :adapters=>[ :postgresql ]
+  register RegexpSqlite, :adapters =>[ :sqlite ]
 end
 
 
