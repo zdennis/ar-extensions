@@ -3,12 +3,22 @@ LICENSE
 This is licensed under the ruby license. 
 
 Author: Zach Dennis
-Web Site: http://www.continuousthinking.com
+Web Site: http://www.continuousthinking.com/are
 Email: zach.dennis@gmail.com
 
  - For How-To information see http://www.continuousthinking.com/are
  - For project information and feedback please consult http://rubyforge.org/projects/arext/
  - For release information please see below
+
+ActiveRecord::Extensions 0.2.0
+------------------------------
+December 22nd, 2006
+ - Updates to_csv method for arrays returned by ActiveRecord::Base.find
+ - Adds does_not_match suffix for regular expression based conditions, ie: :field_does_not_match => /regex/
+ - Adds not_between suffix for ange based conditions, ie: :id_not_between => ( 0 .. 1 )
+ - Adds SQLite and SQLite3 support for better finders.
+ - Updates rake tasks for sqlite and sqlite3.
+ - Added rake tasks to use database migrations rather then raw SQL schema files.
 
 ActiveRecord::Extensions 0.1.0
 -------------------------------

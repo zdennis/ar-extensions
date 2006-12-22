@@ -7,8 +7,12 @@ the command line.
 Currently the four available tasks are:
  - test:mysql
  - test:postgresql
+ - test:sqlite
+ - test:sqlite3
  - test:activerecord:mysql
  - test:activerecord:postgresql
+ - test:activerecord:sqlite
+ - test:activerecord:sqlite3
 
 Task - test:<db_adapter>
 -----------------
@@ -26,12 +30,14 @@ Example:   "rake test:activerecord:mysql /home/zdennis/rails-1.1.6/activerecord"
 
 This runs the ActiveRecord tasks with the ActiveRecord::Extensions loaded.
 
-Database Configuration Updates 
+Preparing Your Test Database
 ------------------------------
-ActiveRecord::Extension testing is moving in the direction of mimicking
-ActiveRecord testing. The default testing configuration is housed in the
-connection.rb file which is in the connections/native_xxxxx directory.
+As of 0.2.0 ActiveRecord::Extensions allows you to use database migrations to prepare
+your test database. The format of the task is:
+  rake db:test:prepare_<db_adapter>
 
-TODOs For Testing
------------------
- - Convert schema files to migrations
+IE: rake db:test:prepare_mysql
+
+This will force creation of all of the tables. This tasks relies on your connection to
+be specified correctly in the tests/connections/native_<db_adapter>connection.rb 
+file. 
