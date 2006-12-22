@@ -1,4 +1,4 @@
-class ActiveRecord::Extensions::FullTextSearching::MySQLFullTextExtension < ActiveRecord::Extensions::AbstractExtension
+class ActiveRecord::Extensions::FullTextSearching::MySQLFullTextExtension
   extend Forwardable
   
   class << self

@@ -10,7 +10,7 @@ task :boot do
     require File.join( DIR, 'tests', 'boot' )  
 end
 
-ADAPTERS = %w( mysql postgresql sqlite )
+ADAPTERS = %w( mysql postgresql sqlite sqlite3 )
 
 namespace :db do
 
@@ -21,7 +21,7 @@ namespace :db do
         ENV['ARE_DB'] = adapter
         require File.join( DIR, 'tests', 'boot' )
         require File.join( DIR, 'db', 'migrate', 'generic_schema' )        
-        db_schema = File.join( DIR, 'db', 'migrate', "#{adapter}_schema" )
+        db_schema = File.join( DIR, 'db', 'migrate', "#{adapter}_schema.rb" )
         require db_schema if File.exists?( db_schema )
       end
     end

@@ -78,7 +78,7 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     developers = Developer.find( :all, :conditions=>{ :name=>/Dennis$/ } )
     assert_equal( 1, developers.size )
   end
-
+  
   def test_find_with_less_than
     developers = Developer.find( :all, :conditions=>{ :id_lt=>2 } )
     assert_equal( 1, developers.size )
@@ -127,6 +127,9 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     
     developers = Developer.find( :all, :conditions=>{ :id_not_in=>( 9998..9999 ) } )
     assert_equal( Developer.count, developers.size )
+    
+    developers = Developer.find( :all, :conditions=>{ :id_not_between=>( 9998..9999 ) } )
+    assert_equal( Developer.count, developers.size )
   end
 
   def test_find_not_matching_regex
@@ -134,6 +137,9 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     assert_equal( Developer.count, developers.size )
 
     developers = Developer.find( :all, :conditions=>{ :id_not=>/9999/ } )
+    assert_equal( Developer.count, developers.size )
+    
+    developers = Developer.find( :all, :conditions=>{ :id_does_not_match=>/9999/ } )
     assert_equal( Developer.count, developers.size )
   end
 

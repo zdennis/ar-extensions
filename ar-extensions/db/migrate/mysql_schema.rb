@@ -21,5 +21,5 @@ ActiveRecord::Schema.define do
     t.column :author_name, :string, :null=>false
   end
   execute "ALTER TABLE books ADD FULLTEXT( `title`, `publisher`, `author_name` )"
-  
+
 end
