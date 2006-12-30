@@ -34,9 +34,7 @@ namespace :test do
   ADAPTERS.each do |adapter|
     desc "test base extensions for #{adapter}"
     task adapter do |t|
-      ENV['ARE_DB'] = adapter
-      Dir[ File.join( DIR, 'tests', 'test_*.rb' ) ].each{ |f| require f }
-      Dir[ File.join( DIR, 'tests', adapter.to_s, 'test_*.rb' ) ].each{ |f| require f }
+      system "ruby tests/run.rb #{adapter}" 
     end
   end
   
