@@ -10,6 +10,13 @@ Email: zach.dennis@gmail.com
  - For project information and feedback please consult http://rubyforge.org/projects/arext/
  - For release information please see below
 
+ActiveRecord::Extensions 0.3.0
+------------------------------
+December 29th, 2006
+ - Updates to the lib/ directory structure to avoid namespace issues.
+ - Updates to the Rakefile to run an external ruby process for tests rather then the same 
+   ruby process that runs the rake tasks
+
 ActiveRecord::Extensions 0.2.0
 ------------------------------
 December 22nd, 2006
