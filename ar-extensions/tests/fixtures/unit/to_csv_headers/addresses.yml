@@ -1,0 +1,8 @@
+first_developers_address:
+  id: 1
+  developer_id: 1
+  address: 1111 SomeWhere Rd.
+  city: Someville
+  state: MI
+  zip: 49548
+

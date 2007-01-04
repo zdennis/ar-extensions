@@ -10,7 +10,8 @@ class Address < ActiveRecord::Base
   include ActiveRecord::Extensions::FindToCSV
 end
 
-class CSVTest < Test::Unit::TestCase
+class TestToCSVHeaders < Test::Unit::TestCase
+  self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/to_csv_headers' )
   fixtures 'developers', 'addresses'
 
   def teardown
@@ -18,23 +19,18 @@ class CSVTest < Test::Unit::TestCase
     Address.delete_all
   end
 
-  def test_to_csv_with_default_options
-    csv = nil
-    assert csv
-  end
-
   def test_to_csv_headers_verify_order_and_names_with_default_options
     headers = Developer.to_csv_headers
     assert headers
     assert_equal  Developer.columns.size, headers.size
-    assert_equal Developer.columns.map{ |c| c.name }, headers
+    assert_equal Developer.columns.map{ |c| c.name }.sort, headers
   end
 
   def test_to_csv_headers_verify_order_and_names_with_headers_option_as_true
     headers = Developer.to_csv_headers( :headers=> true )
     assert headers
     assert_equal  Developer.columns.size, headers.size
-    assert_equal Developer.columns.map{ |c| c.name }, headers
+    assert_equal Developer.columns.map{ |c| c.name }.sort, headers
   end
 
   def test_to_csv_headers_verify_order_and_names_with_headers_option_as_false
@@ -52,13 +48,22 @@ class CSVTest < Test::Unit::TestCase
     assert_equal expected_headers, headers
   end
 
-  def test_to_csv_headers_verify_order_and_names_with_headers_option_as_array_of_strings
-    wanted_headers = [ 'id', 'name' ]
+    def test_to_csv_headers_verify_order_and_names_with_headers_option_as_array_of_symbols
+    wanted_headers = [ :id, :name ]
     headers = Developer.to_csv_headers( :headers=>wanted_headers )
     assert headers
     assert_equal wanted_headers.size, headers.size
     
-    expected_headers = Developer.columns.select{ |c| wanted_headers.include?( c.name.to_s ) }.map{ |c| c.name }
+    expected_headers = Developer.columns.select{ |c| wanted_headers.include?( c.name.to_sym ) }.map{ |c| c.name }
+    assert_equal expected_headers, headers
+  end
+  
+  def test_to_csv_headers_with_nonalphabetical_list_array_of_strings
+    headers = Developer.to_csv_headers( :headers=>%W( name id ) )
+    assert headers
+    assert_equal 2, headers.size
+    
+    expected_headers = %W( name id )
     assert_equal expected_headers, headers
   end
 
@@ -67,7 +72,7 @@ class CSVTest < Test::Unit::TestCase
     assert headers
     assert_equal Address.columns.size + Developer.columns.size, headers.size
 
-    expected_headers = Address.columns.map{ |c| c.name } + Developer.columns.map{ |c| "developer[#{c.name}]" }
+    expected_headers = Address.columns.map{ |c| c.name }.sort + Developer.columns.map{ |c| "developer[#{c.name}]" }.sort
     assert_equal expected_headers, headers
   end
 
@@ -76,7 +81,7 @@ class CSVTest < Test::Unit::TestCase
     assert headers
     assert_equal Address.columns.size + Developer.columns.size, headers.size
 
-    expected_headers = Address.columns.map{ |c| c.name } + Developer.columns.map{ |c| "developer[#{c.name}]" }
+    expected_headers = Address.columns.map{ |c| c.name }.sort + Developer.columns.map{ |c| "developer[#{c.name}]" }.sort
     assert_equal expected_headers, headers
   end
 
@@ -86,7 +91,7 @@ class CSVTest < Test::Unit::TestCase
     assert headers
     assert_equal Address.columns.size + developer_headers.size, headers.size
 
-    expected_headers = Address.columns.map{ |c| c.name } + developer_headers.map{ |hdr| "developer[#{hdr}]" }
+    expected_headers = Address.columns.map{ |c| c.name }.sort + developer_headers.map{ |hdr| "developer[#{hdr}]" }.sort
     assert_equal expected_headers, headers
   end
 
@@ -96,7 +101,7 @@ class CSVTest < Test::Unit::TestCase
     assert headers
     assert_equal Address.columns.size + developer_headers.size, headers.size
 
-    expected_headers = Address.columns.map{ |c| c.name } + developer_headers.map{ |hdr| "developer[#{hdr}]" }
+    expected_headers = Address.columns.map{ |c| c.name }.sort + developer_headers.map{ |hdr| "developer[#{hdr}]" }.sort
     assert_equal expected_headers, headers
   end
 
@@ -112,6 +117,19 @@ class CSVTest < Test::Unit::TestCase
     end
   end
 
+  def test_to_csv_headers_for_a_belongs_to_association_with_specified_columns_as_symbols2
+    headers = Address.to_csv_headers( :only=>[ :city, :state ],
+                                      :include => { :developer=>{ :only=>[ :id, :name ] } } )
+
+    assert_equal 4, headers.size
+
+    expected_headers = %W( city state developer[id] developer[name] )
+    expected_headers.each do |header|
+      assert headers.include?( header ), "The expected header '#{header}' is missing!"
+    end
+  end
+  
+  
   def test_to_csv_headers_for_a_belongs_to_association_with_specified_columns_as_strings
     developer_columns = [ 'id', 'name' ]
     headers = Address.to_csv_headers( :include => { :developer=>{ :only=>developer_columns } } )
@@ -170,5 +188,30 @@ class CSVTest < Test::Unit::TestCase
   end
 
 
+  def test_to_csv_fields_with_default_options
+    fieldmap = Developer.to_csv_fields
+    assert_equal %W( created_at id name salary updated_at ), fieldmap.fields
+  end
+  
+  def test_to_csv_fields_with_headers_option_as_true
+    fieldmap = Developer.to_csv_fields( :headers=>true )
+    assert_equal %W( created_at id name salary updated_at ), fieldmap.fields
+  end
+
+  def test_to_csv_fields_with_headers_option_as_false
+    fieldmap = Developer.to_csv_fields( :headers=>true )
+    assert_equal %W( created_at id name salary updated_at ), fieldmap.fields
+  end
+  
+  def test_to_csv_fields_with_headers_option_as_array_of_strings
+    fieldmap = Developer.to_csv_fields( :headers=>[ 'name', 'id' ] )
+    assert_equal %W( name id ), fieldmap.fields
+  end
+
+  def test_to_csv_fields_with_headers_option_as_array_of_symbols
+    fieldmap = Developer.to_csv_fields( :headers=>[ :name, :id ] )
+    assert_equal %W( name id ), fieldmap.fields
+  end
+  
 end
 

@@ -5,37 +5,36 @@ module ActiveRecord::Extensions::FindToCSV
   ALIAS_FOR_FIND = :_original_find_before_arext
 
   def self.included( cl )
-    if not cl.ancestors.include?( self::ClassMethods )
+    virtual_class = class << cl ; self ; end
+    if not virtual_class.ancestors.include?( self::ClassMethods )
       cl.instance_eval "alias #{ALIAS_FOR_FIND} :find"
       cl.extend( ClassMethods )
       cl.send( :include, InstanceMethods )
     end
   end
 
-  module ClassMethods
-
-    private
+  
+  class FieldMap
+    attr_reader :fields, :fields_to_headers
+ 
+    def initialize( fields, fields_to_headers )
+      @fields, @fields_to_headers = fields, fields_to_headers
+    end
     
-    def to_csv_headers_for_array( headers )
-      wanted_headers = headers.map{ |e| e.to_s }
-      columns = self.columns.select{ |c| wanted_headers.include?( c.name ) }
-      columns.map{ |c| c.name }
+    def headers
+      @headers ||= fields.inject( [] ){ |arr,field| arr << fields_to_headers[ field ] }
     end
+    
+  end
 
-    def to_csv_headers_for_hash( headers )
-      headers.values
-    end
+  
+  module ClassMethods
+      
+    private
 
-    def to_csv_headers_for_unknown_headers_type( headers )
-      case headers
-      when true
-        self.columns.map{ |column| column.name }
-      when Array
-        to_csv_headers_for_array( headers )
-      when Hash
-        to_csv_headers_for_hash( headers )
-      end
-    end
+    def to_csv_fields_for_nil
+      self.columns.map{ |column| column.name }.sort
+    end                         
 
     def to_csv_headers_for_included_associations( includes )
       get_class = proc { |str| Object.const_get( self.reflections[ str.to_sym ].class_name ) }
@@ -60,7 +59,7 @@ module ActiveRecord::Extensions::FindToCSV
         []
       end
     end
-
+    
     public
 
     def find( *args )
@@ -69,21 +68,42 @@ module ActiveRecord::Extensions::FindToCSV
       results
     end
 
-# supports -->  options = { :headers=>true, :naming=>":model[:header]" }.merge( options )
-    def to_csv_headers( options={} )
-      options = { :headers=>true, :naming=>":header" }.merge( options )
-      return nil if options[:headers] == false
+    def to_csv_fields( options={} )
+      fields_to_headers, fields = {}, []
       
-      headers = to_csv_headers_for_unknown_headers_type( options[ :headers ] )
-      headers.push( *to_csv_headers_for_included_associations( options[ :include ] ).flatten )
-
+      headers = options[:headers]
+      case headers
+      when Array
+        fields = headers.map{ |e| e.to_s }
+      when Hash
+        headers = headers.inject( {} ){ |hsh,(k,v)| hsh[k.to_s] = v ; hsh }
+        fields = headers.keys.sort
+        fields.each { |field| fields_to_headers[field] = headers[field] }
+      else
+        fields = to_csv_fields_for_nil
+      end
+      
       if options[:only]
         specified_fields = options[:only].map{ |e| e.to_s }
-        headers.delete_if{ |header| not specified_fields.include?( header ) }
+        fields.delete_if{ |field| not specified_fields.include?( field ) }
       elsif options[:except]
         excluded_fields = options[:except].map{ |e| e.to_s }
-        headers.delete_if{ |header| excluded_fields.include?( header ) }
+        fields.delete_if{ |field| excluded_fields.include?( field ) }
       end
+
+      fields.each{ |field| fields_to_headers[field] = field } if fields_to_headers.empty?
+
+      FieldMap.new( fields, fields_to_headers )
+    end
+    
+    def to_csv_headers( options={} )
+      options = { :headers=>true, :naming=>":header" }.merge( options )
+      return nil if not options[:headers]
+
+      fieldmap = to_csv_fields( options )
+      headers = fieldmap.headers
+      
+      headers.push( *to_csv_headers_for_included_associations( options[ :include ] ).flatten )
 
       headers.map!{ |header| options[:naming].gsub( /:header/, header ).gsub( /:model/, self.name.downcase ) }
 
@@ -96,70 +116,58 @@ module ActiveRecord::Extensions::FindToCSV
           when Hash
           end
       end
-
       headers
     end
 
   end
 
+  
   module InstanceMethods
-    private    
-    def to_csv_fields_included_from_associations( includes )
-      if includes.is_a?( Array )
-        to_csv_fields_included_from_associations_as_array( includes.map{ |e| e.to_sym } )
-      elsif includes.is_a?( Hash )
-        to_csv_fields_included_from_associations_as_hash( includes )
+
+    private
+    
+    def to_csv_data_for_included_associations( includes )
+      case includes
+      when Array
+        includes.map { |association| self.send( association ).to_csv_data }
+      when Hash
+        includes.inject( [] ) do |arr,(association,options)|
+          begin
+            arr << self.send( association ).to_csv_data( options )
+          rescue NoMethodError
+            arr << Object.const_get( Inflector.classify( association ) ).columns.map{ |e| nil.to_s }
+          end
+        end
       else
-        raise ArgumentError.new( "Expected Array or Hash!" )
+        []
       end
     end
-
-    def to_csv_fields_included_from_associations_as_array( includes )
-      includes.inject( [] ) do |arr,association|
-        association_class = Object.const_get( reflections[ association ].class_name )
-        fields = association_class.columns_hash.keys
-        headers = fields.map{ |f| "#{association}[#{f}]" }
-        arr << OpenStruct.new( :fields => fields, :headers=> headers )
-      end
-    end
-
-    def to_csv_fields_included_from_associations_as_hash( includes )
-      includes.inject( [] ) do |arr,(association,options)|
-        association_class = Object.const_get( reflections[ association ].class_name )
-        fields = to_csv_fields_for_options( options )
-        headers = fields.map{ |f| "#{association}[#{f}]" }
-        arr << OpenStruct.new( :fields => fields, :headers => headers )
-      end
-    end
-
+    
     public
-
-    def to_csv_fields_for_options( options )
-      fields = attributes.keys.inject( [] ){ |arr,k| arr << k }
-      if options.has_key?( :only )
-        fields = options[:only].map{ |fieldname| fieldname.to_s }
-      elsif options.has_key?( :except )
-        fields = fields - options[:except].map{ |fieldname| fieldname.to_s }
-      end     
-      fields
+    
+    def to_csv_data( options={} )
+      fields = self.class.to_csv_fields( options ).fields
+      fields.inject( [] ) { |arr,field| arr << attributes[field].to_s }
     end
-
-    def to_csv_headers( options )
-      self.class.to_csv_headers( options )
+    
+    def to_csv( options={} )
+      FasterCSV.generate do |csv|
+        headers = self.class.to_csv_headers( options )
+        csv << headers if headers
+        
+        data = to_csv_data( options )
+        data.push( *to_csv_data_for_included_associations( options[:include ] ).flatten )
+        csv << data
+      end
     end
-
+    
   end
-
 
   module ArrayInstanceMethods
     class NoRecordsError < StandardError ; end
 
     private
     
-#    def to_csv_fields_for_options( options )
-#      first.to_csv_fields_for_options( options )
-#    end
-
     def to_csv_headers( options )
       first.to_csv_headers( options )
     end
@@ -182,11 +190,11 @@ module ActiveRecord::Extensions::FindToCSV
         unless options[:headers] == false
           headers = []
           headers.push( *fields )
-#puts "", included_fields.inspect, ""
+
           included_fields.each do |obj|
             headers.push( *obj.headers )
           end unless included_fields.nil?
-#puts headers.inspect
+
 
           csv << headers
         end
