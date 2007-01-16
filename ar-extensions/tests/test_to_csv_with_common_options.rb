@@ -1,18 +1,9 @@
-require File.join( File.dirname( __FILE__ ), 'boot')
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot') )
 require 'fileutils'
-require 'fastercsv'
-
-class Developer < ActiveRecord::Base
-  include ActiveRecord::Extensions::FindToCSV
-end
-
-class Address < ActiveRecord::Base
-  include ActiveRecord::Extensions::FindToCSV
-end
 
 class TestToCSVWithCommonOptions < Test::Unit::TestCase
   self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/to_csv_with_common_options' )
-  fixtures 'developers', 'addresses'
+  self.fixtures 'developers', 'addresses', 'teams'
 
   def setup
     @developer = Developer.find( 1 )
@@ -36,7 +27,7 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
     actual_data = parsed_csv.first
     assert_equal 1, parsed_csv.size
 
-    expected_data = '', '1', 'Zach Dennis', '1', ''
+    expected_data = '', '1', 'Zach Dennis', '1', '1', ''
     assert_equal expected_data, actual_data
   end
 
@@ -45,10 +36,10 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
     parsed_csv = parse_csv( csv )
     assert 2, parsed_csv.size
     
-    expected_headers = %w( created_at id name salary updated_at )
+    expected_headers = %w( created_at id name salary team_id updated_at )
     assert_equal expected_headers, parsed_csv.headers
     
-    expected_data = '', '1', 'Zach Dennis', '1', ''
+    expected_data = '', '1', 'Zach Dennis', '1', '1', ''
     assert_equal expected_data, parsed_csv.data.first
   end
 
@@ -95,10 +86,10 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
     parsed_csv = parse_csv( csv )
     assert_equal 2, parsed_csv.size
     
-    expected_headers = %w( created_at salary updated_at )
+    expected_headers = %w( created_at salary team_id updated_at )
     assert_equal expected_headers, parsed_csv.headers
     
-    expected_data = '', '1', ''
+    expected_data = '', '1', '1', ''
     assert_equal expected_data, parsed_csv.data.first
   end
   
@@ -109,14 +100,14 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
 
     expected_headers = %W( address city developer_id id state zip 
                            developer[created_at] developer[id] 
-                           developer[name] developer[salary] developer[updated_at] )
+                           developer[name] developer[salary] developer[team_id] developer[updated_at] )
     assert_equal expected_headers, parsed_csv.headers
     
     expected_data = [ @address.address, @address.city, @address.developer_id, 
                       @address.id, @address.state, @address.zip, 
                       @address.developer.created_at, @address.developer.id, 
                       @address.developer.name, @address.developer.salary, 
-                      @address.developer.updated_at ]
+                      @address.developer.team_id, @address.developer.updated_at ]
     assert_equal expected_data.map{ |e| e.to_s }, parsed_csv.data.first
   end
 
@@ -127,14 +118,14 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
 
     expected_headers = %W( address city developer_id id state zip 
                            developer[created_at] developer[id] 
-                           developer[name] developer[salary] developer[updated_at] )
+                           developer[name] developer[salary] developer[team_id] developer[updated_at] )
     assert_equal expected_headers, parsed_csv.headers
     
     expected_data = [ @address.address, @address.city, @address.developer_id, 
                       @address.id, @address.state, @address.zip, 
                       @address.developer.created_at, @address.developer.id, 
                       @address.developer.name, @address.developer.salary, 
-                      @address.developer.updated_at ]
+                      @address.developer.team_id, @address.developer.updated_at ]
     assert_equal expected_data.map{ |e| e.to_s }, parsed_csv.data.first
   end
 
@@ -145,14 +136,14 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
 
     expected_headers = %W( address city developer_id id state zip 
                            developer[created_at] developer[id] 
-                           developer[name] developer[salary] developer[updated_at] )
+                           developer[name] developer[salary] developer[team_id] developer[updated_at] )
     assert_equal expected_headers, parsed_csv.headers
     
     expected_data = [ @address.address, @address.city, @address.developer_id, 
                       @address.id, @address.state, @address.zip, 
                       @address.developer.created_at, @address.developer.id, 
                       @address.developer.name, @address.developer.salary, 
-                      @address.developer.updated_at ]
+                      @address.developer.team_id, @address.developer.updated_at ]
     assert_equal expected_data.map{ |e| e.to_s }, parsed_csv.data.first
   end
 
@@ -163,14 +154,14 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
 
     expected_headers = %W( address city developer_id id state zip 
                            developer[created_at] developer[id] 
-                           developer[name] developer[salary] developer[updated_at] )
+                           developer[name] developer[salary] developer[team_id] developer[updated_at] )
     assert_equal expected_headers, parsed_csv.headers
     
     expected_data = [ @address.address, @address.city, @address.developer_id, 
                       @address.id, @address.state, @address.zip, 
                       @address.developer.created_at, @address.developer.id, 
                       @address.developer.name, @address.developer.salary, 
-                      @address.developer.updated_at ]
+                      @address.developer.team_id, @address.developer.updated_at ]
     assert_equal expected_data.map{ |e| e.to_s }, parsed_csv.data.first
   end
 
@@ -258,7 +249,7 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
   
   def test_find_to_csv_for_a_belongs_to_association_with_an_options_hash_of_excluded_fields_as_array_of_strings2
     csv = @address.to_csv( :except=>%W( id developer_id address zip ), 
-                           :include=>{ :developer=>{ :except=>%W( id created_at updated_at ) } } )
+                           :include=>{ :developer=>{ :except=>%W( id created_at team_id updated_at ) } } )
     parsed_csv = parse_csv( csv )
     assert_equal 2, parsed_csv.size
 
@@ -272,7 +263,7 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
 
   def test_find_to_csv_for_a_belongs_to_association_with_an_options_hash_of_excluded_fields_as_array_of_symbols2
     csv = @address.to_csv( :except=>[ :id, :developer_id, :address, :zip ], 
-                           :include=>{ :developer=>{ :except=>[ :id, :created_at, :updated_at ] } } )
+                           :include=>{ :developer=>{ :except=>[ :id, :created_at, :team_id, :updated_at ] } } )
     parsed_csv = parse_csv( csv )
     assert_equal 2, parsed_csv.size
 
@@ -284,7 +275,7 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
     assert_equal expected_data.map{ |e| e.to_s }, parsed_csv.data.first
   end
 
-  def test_find_to_csv_for_with_custom_header_names
+  def test_find_to_csv_with_custom_header_names
     csv = @address.to_csv( :headers=>{ :city=>"DeveloperCity", :state=>"DeveloperState" } )
     parsed_csv = parse_csv( csv )
     assert_equal 2, parsed_csv.size
@@ -296,7 +287,7 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
     assert_equal expected_data.map{ |e| e.to_s }, parsed_csv.data.first
   end
   
-  def test_find_to_csv_for_with_custom_header_names_with_a_belongs_to_association
+  def test_find_to_csv_with_custom_header_names_with_a_belongs_to_association
     csv = @address.to_csv( :headers=>{ :city=>"DeveloperCity", :state=>"DeveloperState" },
                            :include=>{ :developer=>{ :only=>[:id] } } )
     parsed_csv = parse_csv( csv )
@@ -309,7 +300,7 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
     assert_equal expected_data.map{ |e| e.to_s }, parsed_csv.data.first
   end
 
-  def test_find_to_csv_for_with_custom_header_names_for_a_belongs_to_association
+  def test_find_to_csv_with_custom_header_names_for_a_belongs_to_association
     csv = @address.to_csv( :headers=>{ :city=>"DeveloperCity", :state=>"DeveloperState" },
                            :include=>{ :developer=>{ :headers=>{ :id=>"MYID" } } } )
     parsed_csv = parse_csv( csv )
@@ -321,6 +312,22 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
     expected_data = [ @address.city, @address.state, @address.developer.id ]
     assert_equal expected_data.map{ |e| e.to_s }, parsed_csv.data.first
   end
-  
+
+  def test_find_to_csv_for_embedded_included_associations
+    csv = @address.to_csv( :only=>%W( city state zip ),
+                           :include=>{ :developer=>{
+                               :only=>%W( name ),
+                               :include=>{ :team=>{ 
+                                   :only=>%W( name ) } } } } )
+    parsed_csv = parse_csv( csv )
+    assert_equal 2, parsed_csv.size
+    
+    expected_headers = %W( city state zip developer[name] developer[team[name]] )
+    assert_equal expected_headers, parsed_csv.headers
+    
+    expected_data = [ @address.city, @address.state, @address.zip, 
+                      @address.developer.name, @address.developer.team.name ]
+    assert_equal expected_data, parsed_csv.data.first
+  end
   
 end

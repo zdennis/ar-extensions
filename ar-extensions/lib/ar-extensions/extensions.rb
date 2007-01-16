@@ -396,12 +396,17 @@ module ActiveRecord::Extensions
     self.connections = []
     
     def self.add_rlike_function( connection )
-      self.connections << connection        
-      connection.instance_eval( '@connection' ).create_function( 'rlike', 3 ) do |func, a, b, negate|
-        if negate =~ /true/
-          func.set_result 1 if a.to_s !~ /#{b}/
-        else
-          func.set_result 1 if a.to_s =~ /#{b}/
+      self.connections << connection 
+      unless connection.respond_to?( 'sqlite_regexp_support?' )
+        class << connection
+          def sqlite_regexp_support? ; true ; end
+        end
+        connection.instance_eval( '@connection' ).create_function( 'rlike', 3 ) do |func, a, b, negate|
+          if negate =~ /true/
+            func.set_result 1 if a.to_s !~ /#{b}/
+          else
+            func.set_result 1 if a.to_s =~ /#{b}/
+          end
         end
       end
     end 

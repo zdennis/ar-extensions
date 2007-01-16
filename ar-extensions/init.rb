@@ -1,9 +1,16 @@
+require 'ostruct'
 begin ; require 'active_record' ; rescue LoadError; require 'rubygems'; require 'active_record'; end
 
 dir = File.dirname( __FILE__ )
+require File.join( dir, 'lib/ar-extensions', 'version' )
 require File.join( dir, 'lib/ar-extensions', 'extensions' )
 
-require File.join( dir, 'lib/ar-extensions', 'csv' )
+begin 
+  require 'faster_csv' 
+  require File.join( dir, 'lib/ar-extensions', 'csv' )
+rescue LoadError
+  STDERR.puts "FasterCSV is not installed. CSV functionality will not be included."
+end
 
 require File.join( dir, 'lib/ar-extensions', 'fulltext' )
 require File.join( dir, 'lib/ar-extensions', 'fulltext', 'mysql' )

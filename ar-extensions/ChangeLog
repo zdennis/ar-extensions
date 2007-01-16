@@ -1,3 +1,24 @@
+2007-01-09  zdennis  <zdennis@aries>
+
+	* Added support for embedded to_csv includes
+
+2007-01-07  zdennis  <zdennis@aries>
+
+	* Added fix to init.rb to only load CSV functionality if FasterCSV
+	is available, otherwise print a message to STDERR and continue.
+
+	* Added fix to tests/boot.rb which solves fixture_path issues in
+	ActiveRecord 1.14.4 and earlier. The fix is included Rails trunk
+	and will be available in Rails 1.2.
+
+2007-01-05  zdennis  <zdennis@aries>
+
+	* Added ActiveRecord::Extensions::VERSION module which has the following constants: MAJOR, MINOR, REVISION
+
+	* Running rake tests are now smart enough to rebuild the database if they are required based on schema_info table.
+
+	* Added schema_info table for test database schemas. 
+
 2006-12-29  zdennis  <zdennis@aries>
 
 	* Updated the Rakefile to run an external ruby process when running test files rather then in the same ruby process that runs the Rakefile

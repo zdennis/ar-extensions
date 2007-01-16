@@ -1,23 +1,8 @@
-require File.join( File.dirname( __FILE__ ), 'boot')
-require 'fileutils'
-require 'fastercsv'
-
-class Developer < ActiveRecord::Base
-  include ActiveRecord::Extensions::FindToCSV
-end
-
-class Address < ActiveRecord::Base
-  include ActiveRecord::Extensions::FindToCSV
-end
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot' ) )
 
 class TestToCSVHeaders < Test::Unit::TestCase
   self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/to_csv_headers' )
-  fixtures 'developers', 'addresses'
-
-  def teardown
-    Developer.delete_all
-    Address.delete_all
-  end
+  self.fixtures 'developers', 'addresses'
 
   def test_to_csv_headers_verify_order_and_names_with_default_options
     headers = Developer.to_csv_headers
@@ -189,18 +174,17 @@ class TestToCSVHeaders < Test::Unit::TestCase
 
 
   def test_to_csv_fields_with_default_options
-    fieldmap = Developer.to_csv_fields
-    assert_equal %W( created_at id name salary updated_at ), fieldmap.fields
+    assert_equal %W( created_at id name salary team_id updated_at ), Developer.to_csv_fields.fields
   end
   
   def test_to_csv_fields_with_headers_option_as_true
     fieldmap = Developer.to_csv_fields( :headers=>true )
-    assert_equal %W( created_at id name salary updated_at ), fieldmap.fields
+    assert_equal %W( created_at id name salary team_id updated_at ), fieldmap.fields
   end
 
   def test_to_csv_fields_with_headers_option_as_false
     fieldmap = Developer.to_csv_fields( :headers=>true )
-    assert_equal %W( created_at id name salary updated_at ), fieldmap.fields
+    assert_equal %W( created_at id name salary team_id updated_at ), fieldmap.fields
   end
   
   def test_to_csv_fields_with_headers_option_as_array_of_strings

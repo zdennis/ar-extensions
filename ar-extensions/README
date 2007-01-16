@@ -3,12 +3,18 @@ LICENSE
 This is licensed under the ruby license. 
 
 Author: Zach Dennis
-Web Site: http://www.continuousthinking.com/are
+Web Site: http://www.continuousthinking.com/tags/arext
 Email: zach.dennis@gmail.com
 
  - For How-To information see http://www.continuousthinking.com/are
  - For project information and feedback please consult http://rubyforge.org/projects/arext/
  - For release information please see below
+
+ActiveRecord::Extensions 0.4.0
+------------------------------
+January 14th, 2006
+ - Updated to_csv functionality to include support for the :include option
+ - Updated tests to keep schema information. Test database will automatically rebuild themselves if they are out of sync
 
 ActiveRecord::Extensions 0.3.0
 ------------------------------

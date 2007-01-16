@@ -7,7 +7,9 @@ DIR = File.dirname( __FILE__ )
 task :default => [ "test:mysql" ]
 
 task :boot do 
-    require File.join( DIR, 'tests', 'boot' )  
+  require File.join( DIR, 'boot' )
+  require File.join( DIR, 'tests', 'connections', "native_#{ENV['ARE_DB']}", 'connection' )  
+  require File.join( DIR, 'db/migrate/version' )
 end
 
 ADAPTERS = %w( mysql postgresql sqlite sqlite3 )
@@ -18,11 +20,8 @@ namespace :db do
     ADAPTERS.each do |adapter|
       desc "builds test database for #{adapter}"
       task "prepare_#{adapter}" do |t|
-        ENV['ARE_DB'] = adapter
-        require File.join( DIR, 'tests', 'boot' )
-        require File.join( DIR, 'db', 'migrate', 'generic_schema' )        
-        db_schema = File.join( DIR, 'db', 'migrate', "#{adapter}_schema.rb" )
-        require db_schema if File.exists?( db_schema )
+        file2run = File.join( DIR, 'tests/prepare.rb' )
+        system( "ruby #{file2run} #{adapter}" )
       end
     end
   end
@@ -34,7 +33,12 @@ namespace :test do
   ADAPTERS.each do |adapter|
     desc "test base extensions for #{adapter}"
     task adapter do |t|
-      system "ruby tests/run.rb #{adapter}" 
+      ENV['ARE_DB'] = adapter
+      Rake::Task[ 'boot' ].invoke
+      if SchemaInfo::VERSION != SchemaInfo.find( :first ).version
+        Rake::Task[ "db:test:prepare_#{adapter}" ].invoke
+      end              
+      system "ruby #{File.join( DIR, 'tests/run.rb ' )} #{adapter}" 
     end
   end
   
@@ -45,7 +49,7 @@ namespace :test do
       task adapter.to_sym do |t|
         activerecord_dir = ARGV[1]
         if activerecord_dir.nil? or ! File.directory?( activerecord_dir )
-          STDERR.puts "ERROR: Pass in the path to ActiveRecord. Eg: /home/joe/rails_trunk/activerecord"
+          STDERR.puts "ERROR: Pass in the path to ActiveRecord. Eg: /home/zdennis/rails_trunk/activerecord"
           exit
         end
         
@@ -57,7 +61,6 @@ namespace :test do
         Rake::Task[ "test_#{adapter}" ].invoke
         Dir.chdir( old_dir )
         ENV['RUBYOPT'] = old_env
-        
       end      
   
     end  

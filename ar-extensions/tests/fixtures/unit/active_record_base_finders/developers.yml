@@ -1,0 +1,14 @@
+first_developer:
+  id: 1
+  name: Zach Dennis
+  salary: 1
+
+second_developer:
+  id: 2
+  name: John Doe
+  salary: 2
+
+null_developer:
+  id: 3
+  name: NULL
+  salary: 3

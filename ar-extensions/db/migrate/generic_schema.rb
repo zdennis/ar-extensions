@@ -1,5 +1,10 @@
 ActiveRecord::Schema.define do
-  
+
+  create_table :schema_info, :force=>true do |t|
+    t.column :version, :integer, :unique=>true
+  end
+  SchemaInfo.create :version=>SchemaInfo::VERSION
+
   create_table :topics, :force=>true do |t|
     t.column :title, :string, :null=>false
     t.column :author_name, :string
@@ -23,6 +28,7 @@ ActiveRecord::Schema.define do
     t.column :name, :string
     t.column :salary, :integer, :default=>'70000'
     t.column :created_at, :datetime
+    t.column :team_id, :integer
     t.column :updated_at, :datetime
   end
 
@@ -32,6 +38,10 @@ ActiveRecord::Schema.define do
     t.column :state, :string
     t.column :zip, :string
     t.column :developer_id, :integer
+  end
+
+  create_table :teams, :force=>true do |t|
+    t.column :name, :string
   end
   
   create_table :books, :force=>true do |t|

@@ -147,17 +147,16 @@ module ActiveRecord::Extensions::FindToCSV
     
     def to_csv_data( options={} )
       fields = self.class.to_csv_fields( options ).fields
-      fields.inject( [] ) { |arr,field| arr << attributes[field].to_s }
+      data = fields.inject( [] ) { |arr,field| arr << attributes[field].to_s }
+      data.push( *to_csv_data_for_included_associations( options[:include ] ).flatten )
+      data
     end
     
     def to_csv( options={} )
       FasterCSV.generate do |csv|
         headers = self.class.to_csv_headers( options )
         csv << headers if headers
-        
-        data = to_csv_data( options )
-        data.push( *to_csv_data_for_included_associations( options[:include ] ).flatten )
-        csv << data
+        csv << to_csv_data( options )
       end
     end
     
