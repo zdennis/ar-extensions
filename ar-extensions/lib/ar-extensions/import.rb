@@ -105,20 +105,25 @@ module ActiveRecord::Extensions::Import::Base
   #  
   def import( *args )
     options = { :validate=>true }
-    
+    options.merge!( args.pop ) if args.last.is_a? Hash
+
+    # assume array of model objects
+    if args.size == 1 and args.first.is_a?( Array )
+      models = args.first
+      column_names = models.first.class.columns.map{ |c| c.name }
+      array_of_attributes = models.inject( [] ) do |arr,model|
+        attributes = []
+        column_names.each{ |name| attributes << model.send( "#{name}_before_type_cast" ) }
+        arr << attributes
+      end
     # supports 2-element array and array
-    if args.size == 2 and args.first.is_a?( Array ) and args.last.is_a?( Array )
+    elsif args.size == 2 and args.first.is_a?( Array ) and args.last.is_a?( Array )
       column_names, array_of_attributes = args
-    # supports 3 element array, array and hash
-    elsif args.size == 3 
-      column_names, array_of_attributes, options = args
     else
       raise ArgumentError.new( "Invalid arguments!" )
     end
     
-    is_validating = options[:validate]
-    # clean up the options hash so we don't pass options for this method to other methods
-    options.delete_if{ |key,val| key.to_s =~ /validate/ }
+    is_validating = options.delete( :validate )
 
     # dup the passed in array so we don't modify it unintentionally
     array_of_attributes = array_of_attributes.dup
@@ -149,7 +154,7 @@ module ActiveRecord::Extensions::Import::Base
     array_of_attributes.compact!
 
     if not array_of_attributes.empty?
-      import_without_validations_or_callbacks( column_names, array_of_attributes )
+      import_without_validations_or_callbacks( column_names, array_of_attributes, options )
     end
     failed_instances   
   end
@@ -169,8 +174,6 @@ module ActiveRecord::Extensions::Import::Base
         my_values = []
         arr.each_with_index do |val,j|
           my_values << connection.quote( val, columns[j] )
-#          puts columns[j].inspect
- #         exit
         end
         insert_statements << "INSERT INTO #{self.table_name} #{columns_sql} VALUES(" + my_values.join( ',' ) + ")"
         connection.execute( insert_statements.last )

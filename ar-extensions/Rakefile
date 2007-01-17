@@ -35,9 +35,14 @@ namespace :test do
     task adapter do |t|
       ENV['ARE_DB'] = adapter
       Rake::Task[ 'boot' ].invoke
-      if SchemaInfo::VERSION != SchemaInfo.find( :first ).version
-        Rake::Task[ "db:test:prepare_#{adapter}" ].invoke
-      end              
+      
+      task = Rake::Task[ "db:test:prepare_#{adapter}" ]
+			begin
+        task = false  if SchemaInfo::VERSION == SchemaInfo.find( :first ).version
+		  rescue Exception => ex        
+      end
+      task.invoke if task
+        
       system "ruby #{File.join( DIR, 'tests/run.rb ' )} #{adapter}" 
     end
   end

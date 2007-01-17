@@ -12,6 +12,7 @@ rescue LoadError
   STDERR.puts "FasterCSV is not installed. CSV functionality will not be included."
 end
 
+require File.join( dir, 'lib/ar-extensions', 'foreign_keys' )
 require File.join( dir, 'lib/ar-extensions', 'fulltext' )
 require File.join( dir, 'lib/ar-extensions', 'fulltext', 'mysql' )
 

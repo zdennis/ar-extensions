@@ -8,7 +8,7 @@ db1 = 'aroptests'
 
 ActiveRecord::Base.establish_connection(
   :adapter  => "mysql",
-  :username => "rails",
+  :username => "zdennis",
   :encoding => "utf8",
   :database => db1
 )
