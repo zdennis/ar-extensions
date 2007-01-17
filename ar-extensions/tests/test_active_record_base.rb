@@ -325,6 +325,16 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     assert_equal "SomeNewguy", topic.author_name
     assert_equal "SomeOtherNewguy", topic2.author_name
   end  
+
+  def test_import_with_array_of_column_names_and_array_of_model_objects
+    
+    topic = Topic.new :title=>"Book", :author_name=>"Someguy", :author_email_address=>"me@me.com"
+    topic2 = Topic.new :title=>"Book2", :author_name=>"Someguy2", :author_email_address=>"me2@me.com"
+    
+    assert_equal 0, Topic.count
+    Topic.import( [ :title ], [ topic, topic2 ], :validate => false )
+    assert_equal 2, Topic.count
+  end
   
   
 end

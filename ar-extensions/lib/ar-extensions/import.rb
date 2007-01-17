@@ -108,9 +108,15 @@ module ActiveRecord::Extensions::Import::Base
     options.merge!( args.pop ) if args.last.is_a? Hash
 
     # assume array of model objects
-    if args.size == 1 and args.first.is_a?( Array )
-      models = args.first
-      column_names = models.first.class.columns.map{ |c| c.name }
+    if args.last.is_a?( Array ) and args.last.first.is_a? ActiveRecord::Base
+      if args.length == 2
+        models = args.last
+        column_names = args.first
+      else
+        models = args.first
+        column_names = models.first.class.column_names        
+      end
+
       array_of_attributes = models.inject( [] ) do |arr,model|
         attributes = []
         column_names.each{ |name| attributes << model.send( "#{name}_before_type_cast" ) }
