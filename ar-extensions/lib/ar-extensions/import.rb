@@ -114,7 +114,7 @@ module ActiveRecord::Extensions::Import::Base
         column_names = args.first
       else
         models = args.first
-        column_names = models.first.class.column_names        
+        column_names = self.column_names
       end
 
       array_of_attributes = models.inject( [] ) do |arr,model|
