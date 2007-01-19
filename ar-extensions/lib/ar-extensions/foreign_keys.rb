@@ -1,4 +1,4 @@
-module ActiveRecord::ForeignKeys
+module ActiveRecord::Base::ForeignKeys
 
   # ActiveRecord::Base.foreign_keys.disable
 
@@ -9,7 +9,7 @@ module ActiveRecord::ForeignKeys
       yield
       enable
     else
-      ActiveRecord::Base.connection.execute "set foreign_key_checks = 0"
+      connection.execute "set foreign_key_checks = 0"
     end
   end
 
@@ -19,7 +19,7 @@ module ActiveRecord::ForeignKeys
       yield
       disable
     else
-      ActiveRecord::Base.connection.execute "set foreign_key_checks = 1"
+      connection.execute "set foreign_key_checks = 1"
     end
   end
 end
