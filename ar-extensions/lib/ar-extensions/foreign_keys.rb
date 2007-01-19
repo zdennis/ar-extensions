@@ -1,25 +1,40 @@
-module ActiveRecord::Base::ForeignKeys
+module ActiveRecord::Extensions::ForeignKeys
 
-  # ActiveRecord::Base.foreign_keys.disable
+  class ForeignKeyController
+    attr_reader :clazz
 
-  #TODO: Dont modify external state
-  def self.disable
-    if block_given?
-      disable
-      yield
-      enable
-    else
-      connection.execute "set foreign_key_checks = 0"
+    def initialize( clazz )
+      @clazz = clazz
     end
+
+
+    #TODO: Dont modify external state
+    def disable
+      if block_given?
+        disable
+        yield
+        enable
+      else
+        clazz.connection.execute "set foreign_key_checks = 0"
+      end
+    end
+    
+    def enable
+      if block_given?
+        enable
+        yield
+        disable
+      else
+        clazz.connection.execute "set foreign_key_checks = 1"
+      end
+    end
+   
+  end #end ForeignKeyController
+  
+  def foreign_keys
+    ForeignKeyController.new( self )
   end
 
-  def self.enable
-    if block_given?
-      enable
-      yield
-      disable
-    else
-      connection.execute "set foreign_key_checks = 1"
-    end
-  end
 end
+
+ActiveRecord::Base.extend( ActiveRecord::Extensions::ForeignKeys )
