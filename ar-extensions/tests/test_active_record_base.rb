@@ -327,13 +327,41 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end  
 
   def test_import_with_array_of_column_names_and_array_of_model_objects
-    
     topic = Topic.new :title=>"Book", :author_name=>"Someguy", :author_email_address=>"me@me.com"
     topic2 = Topic.new :title=>"Book2", :author_name=>"Someguy2", :author_email_address=>"me2@me.com"
     
     assert_equal 0, Topic.count
     Topic.import( [ :title ], [ topic, topic2 ], :validate => false )
     assert_equal 2, Topic.count
+  end
+
+  def test_get_insert_value_sets
+    base_sql = "INSERT INTO atable (a,b,c)"
+    values = [ '(1,2,3)','(2,3,4)', '(3,4,5)' ]
+
+    max_allowed_bytes = 33
+    value_sets = ActiveRecord::ConnectionAdapters::AbstractAdapter.get_insert_value_sets( values, base_sql.size, max_allowed_bytes )
+    assert_equal 3, value_sets.size
+    
+    max_allowed_bytes = 40
+    value_sets = ActiveRecord::ConnectionAdapters::AbstractAdapter.get_insert_value_sets( values, base_sql.size, max_allowed_bytes )
+    assert_equal 3, value_sets.size
+
+    max_allowed_bytes = 41
+    value_sets = ActiveRecord::ConnectionAdapters::AbstractAdapter.get_insert_value_sets( values, base_sql.size, max_allowed_bytes )
+    assert_equal 2, value_sets.size
+
+    max_allowed_bytes = 48
+    value_sets = ActiveRecord::ConnectionAdapters::AbstractAdapter.get_insert_value_sets( values, base_sql.size, max_allowed_bytes )
+    assert_equal 2, value_sets.size
+
+    max_allowed_bytes = 49
+    value_sets = ActiveRecord::ConnectionAdapters::AbstractAdapter.get_insert_value_sets( values, base_sql.size, max_allowed_bytes )
+    assert_equal 1, value_sets.size
+
+    max_allowed_bytes = 999999
+    value_sets = ActiveRecord::ConnectionAdapters::AbstractAdapter.get_insert_value_sets( values, base_sql.size, max_allowed_bytes )
+    assert_equal 1, value_sets.size
   end
   
   
