@@ -2,6 +2,7 @@ dir = File.dirname( __FILE__ )
 
 require File.expand_path( File.join( dir, '..', 'boot' ) )
 require File.join( dir, '..', 'db', 'migrate', 'version' )
+require 'mocha'
 require 'test/unit'
 require 'fileutils'
 require 'active_record/fixtures'

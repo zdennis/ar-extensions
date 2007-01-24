@@ -187,10 +187,8 @@ module ActiveRecord::Extensions::Import::Base
       return
     else
 
-
     # generate the sql
     insert_sql = connection.multiple_value_sets_insert_sql( table_name, escaped_column_names, options )
-
     values_sql = connection.values_sql_for_column_names_and_attributes( columns, array_of_attributes )
     post_sql_statements = connection.post_sql_statements( table_name, options )
     

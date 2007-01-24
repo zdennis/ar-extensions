@@ -13,7 +13,7 @@ module ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter
   end
   
   def multiple_value_sets_insert_sql( table_name, column_names, options )
-    "INSERT #{options[:ignore]?'IGNORE':''} INTO #{table_name} (#{column_names.join(', ')}) "
+    "INSERT #{options[:ignore]?'IGNORE ':''}INTO #{table_name} (#{column_names.join(',')}) VALUES "
   end
   
   # Returns a generated ON DUPLICATE KEY UPDATE statement given the passed
@@ -35,7 +35,7 @@ module ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter
     qt = quote_column_name( table_name )
     results = arr.map do |column|
       qc = quote_column_name( column )
-      "#{qt}.#{qc}=VALUES( #{qc} )"        
+      "#{qt}.#{qc}=VALUES(#{qc})"        
     end
     results.join( ',' )
   end
@@ -63,8 +63,6 @@ module ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter
       values << my_values
     end   
     values_arr = values.map{ |arr| '(' + arr.join( ',' ) + ')' }
-    values_arr[0] = "VALUES" + values_arr[0]
-    values_arr
   end
   
 end

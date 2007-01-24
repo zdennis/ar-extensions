@@ -1,3 +1,9 @@
+2007-01-24  zdennis  <zdennis@mktec.com>
+
+	* Added dependency for Mocha 0.4.0 or higher for testing
+
+	* Fixed bug for import functionality where it was never actually splitting up values correctly (thx to Mark Van Holstyn!!)
+
 2007-01-09  zdennis  <zdennis@aries>
 
 	* Added support for embedded to_csv includes

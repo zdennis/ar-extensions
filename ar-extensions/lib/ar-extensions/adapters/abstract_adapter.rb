@@ -27,16 +27,17 @@ module ActiveRecord
         total_bytes = sql_size + values_in_bytes + comma_separated_bytes
         
         max = max_allowed_packet
-        sql2insert = base_sql + values.join( ',' ) + post_sql
         
         # if we can insert it all as one statement
         if NO_MAX_PACKET == max or total_bytes < max
           number_of_inserts += 1
+          sql2insert = base_sql + values.join( ',' ) + post_sql
           insert( sql2insert, *args )
         else
           value_sets = self.class.get_insert_value_sets( values, sql_size, max )
           value_sets.each do |values|
             number_of_inserts += 1
+            sql2insert = base_sql + values.join( ',' ) + post_sql
             insert( sql2insert, *args )
           end
         end        
@@ -60,9 +61,9 @@ module ActiveRecord
         value_sets = []          
         arr, current_arr_values_size, current_size = [], 0, 0
         values.each_with_index do |val,i|
-          comma_bytes = arr.size-1
+          comma_bytes = arr.size
           sql_size_thus_far = sql_size + current_size + val.size + comma_bytes
-          if NO_MAX_PACKET == max_bytes or sql_size_thus_far < max_bytes
+          if NO_MAX_PACKET == max_bytes or sql_size_thus_far <= max_bytes
             current_size += val.size            
             arr << val
           else

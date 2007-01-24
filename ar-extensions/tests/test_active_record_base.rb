@@ -35,7 +35,8 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end
 
   def test_import_without_validations
-
+    Topic.connection.expects( :max_allowed_packet ).returns( 100 )
+    
     columns = import_test_column_names
     values = import_topic_values
 
@@ -51,12 +52,9 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     assert_equal expected_ldap_author, ldap_topic.author_name
     assert_equal expected_rails_topic, rails_topic.title
     assert_equal expected_rails_author, rails_topic.author_name  
-
   end
 
   def test_import_with_validations
-
-
     columns, values = import_test_column_names, import_topic_values
     expected_count = Topic.count + values.size
 
@@ -71,14 +69,10 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     assert_equal expected_ldap_author, ldap_topic.author_name
     assert_equal expected_rails_topic, rails_topic.title
     assert_equal expected_rails_author, rails_topic.author_name  
-
-
   end
 
   # these are expected to fail
   def test_import_with_validations_that_fail
-
-    
     columns = [ 'title' ]
     values = [['LDAP'],['Rails Recipes']] # missing author names, these should fail
 
@@ -89,8 +83,6 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     assert_equal expected_count, Topic.count
     assert_equal values.size, invalid_topics.size
     invalid_topics.each{ |e| assert_kind_of Topic, e }
-    
-
   end
   
   # sets up base data for on duplicate key update tests
@@ -116,8 +108,6 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     topic = Topic.find_by_id( 1 )
     assert_equal updated_values[0][1], topic.title, "The book title is wrong! It was supposed to change!"
     assert_equal orig_topic.author_name, topic.author_name, "The author's name is incorrect! It wasn't supposed to change!"
- 
-
   end
  
   def test_import_without_validations_but_with_on_duplicate_key_update_using_string_array2
@@ -135,8 +125,6 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     topic = Topic.find_by_id( 1 )
     assert_equal updated_values[0][1], topic.title, "The book title is wrong! It was supposed to change!"
     assert_equal updated_values[0][2], topic.author_name, "The author's name is incorrect! It was supposed to change!"
-    
- 
   end    
   
   def test_import_without_validations_but_with_on_duplicate_key_update_using_symbol_array1
@@ -154,9 +142,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     topic = Topic.find_by_id( 1 )
     assert_equal updated_values[0][1], topic.title, "The book title is wrong! It was supposed to change!"
     assert_equal orig_topic.author_name, topic.author_name, "The author's name is incorrect! It wasn't supposed to change!"
-    
- 
-  end    
+  end
    
   def test_import_without_validations_but_with_on_duplicate_key_update_using_symbol_array2
     return unless Topic.supports_on_duplicate_key_update?
@@ -173,8 +159,6 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     topic = Topic.find_by_id( 1 )
     assert_equal updated_values[0][1], topic.title, "The book title is wrong! It was supposed to change!"
     assert_equal updated_values[0][2], topic.author_name, "The author's name is incorrect! It was supposed to change!"
-   
-
   end
   
   def test_import_without_validations_but_with_on_duplicate_key_update_using_string_hash1
@@ -192,8 +176,6 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     topic = Topic.find_by_id( 1 )
     assert_equal updated_values[0][1], topic.title, "The book title is wrong! It was supposed to change!"
     assert_equal orig_topic.author_name, topic.author_name, "The author's name is incorrect! It wasn't supposed to change!"
-   
-
   end
 
   def test_import_without_validations_but_with_on_duplicate_key_update_using_string_hash2
@@ -212,8 +194,6 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     topic = Topic.find_by_id( 1 )
     assert_equal updated_values[0][2], topic.title, "The book title is wrong! It was supposed to change to the author's name!"
     assert_equal orig_topic.author_name, topic.author_name, "The author's name is incorrect! It wasn't supposed to change!"
-   
-
   end
   
   def test_import_without_validations_but_with_on_duplicate_key_update_using_string_hash3
@@ -231,8 +211,6 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     topic = Topic.find_by_id( 1 )
     assert_equal updated_values[0][1], topic.title, "The book title is wrong! It was supposed to change!"
     assert_equal updated_values[0][2], topic.author_name, "The author's name is incorrect! It was supposed to change!"
-   
-
   end
   
   def test_import_without_validations_but_with_on_duplicate_key_update_using_symbol_hash1
@@ -250,8 +228,6 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     topic = Topic.find_by_id( 1 )
     assert_equal updated_values[0][1], topic.title, "The book title is wrong! It was supposed to change!"
     assert_equal orig_topic.author_name, topic.author_name, "The author's name is incorrect! It wasn't supposed to change!"
-   
-
   end
 
   def test_import_without_validations_but_with_on_duplicate_key_update_using_symbol_hash2
@@ -280,13 +256,14 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     # Note that the title AND the author_name is supposed to change
     columns2update = { :title=>:title, :author_name=>:author_name }
     updated_values = [ [ 1, 'Book - 10th Edition', 'New Author' ] ]
+
     Topic.import( columns, updated_values, 
       :validate=>false,
       :on_duplicate_key_update=>columns2update )
+
     topic = Topic.find_by_id( 1 )
     assert_equal updated_values[0][1], topic.title, "The book title is wrong! It was supposed to change!"
     assert_equal updated_values[0][2], topic.author_name, "The author's name is incorrect! It was supposed to change!"
-   
   end
 
   def test_import_with_array_of_model_objects
