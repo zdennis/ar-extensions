@@ -6,10 +6,10 @@ ActiveRecord::Base.logger = Logger.new("debug.log")
 
 db1 = 'aroptests'
 
-ActiveRecord::Base.establish_connection(
-  :adapter  => "mysql",
+config = ActiveRecord::Base.configurations['test'] = { :adapter  => "mysql",
   :username => "zdennis",
   :encoding => "utf8",
-  :database => db1
-)
+  :database => db1 }
+
+ActiveRecord::Base.establish_connection( config )
 

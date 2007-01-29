@@ -35,8 +35,6 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   end
 
   def test_import_without_validations
-    Topic.connection.expects( :max_allowed_packet ).returns( 100 )
-    
     columns = import_test_column_names
     values = import_topic_values
 

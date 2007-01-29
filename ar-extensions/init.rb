@@ -24,6 +24,8 @@ require File.join( dir, 'lib/ar-extensions', 'import', 'postgresql' )
 
 require File.join( dir, 'lib/ar-extensions', 'finders' )
 
+require File.join( dir, 'lib/ar-extensions', 'temporary_table' )
+
 require File.join( db_adapters_path, 'abstract_adapter' )
 require File.join( db_adapters_path,'mysql_adapter' )
 

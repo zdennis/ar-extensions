@@ -1,3 +1,7 @@
+2007-01-29  zdennis  <zdennis@mktec.com>
+
+	* Added initial support for temporary tables and permanent like tables. 
+
 2007-01-24  zdennis  <zdennis@mktec.com>
 
 	* Added dependency for Mocha 0.4.0 or higher for testing
