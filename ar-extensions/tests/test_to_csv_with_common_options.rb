@@ -1,5 +1,6 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot') )
 require 'fileutils'
+require 'breakpoint'
 
 class TestToCSVWithCommonOptions < Test::Unit::TestCase
   self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/to_csv_with_common_options' )
@@ -471,7 +472,7 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
     assert_equal expected_data, parsed_csv.data
   end
 
-  def test_find_to_csv_for_multiple_has_many_included_associations
+  def test_find_to_csv_for_multiple_has_many_included_associations_as_hash
     @developer = Developer.find(2)
     csv = @developer.to_csv( :only=>%W( name ),
                              :include=>{ 
@@ -482,7 +483,7 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
     
     expected_headers = %W( name address[address] language[name] )
     assert_equal expected_headers, parsed_csv.headers
-    
+
     expected_data = []
     expected_data << [ @developer.name, 
                        @developer.addresses[0].address,
@@ -520,6 +521,144 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
     expected_data << [ @developer.name, 
                        @developer.addresses[2].address,
                        @developer.languages[3].name ]
+
+    assert_equal expected_data, parsed_csv.data
+  end
+
+  def test_find_to_csv_for_multiple_has_many_included_associations_as_array
+    @developer = Developer.find(2)
+    csv = @developer.to_csv( :only=>%W( name ),
+                             :include=>%W( addresses languages ) )
+    parsed_csv = parse_csv( csv )
+    assert_equal 13, parsed_csv.size
+    
+    expected_headers = %W( name address[address] address[city]
+                          address[developer_id] address[id] address[state]
+                          address[zip] language[developer_id] language[id] language[name] )
+    assert_equal expected_headers, parsed_csv.headers
+
+    expected_data = []
+    expected_data << [ @developer.name, 
+                       @developer.addresses[0].address,
+                       @developer.addresses[0].city,
+                       @developer.addresses[0].developer_id,
+                       @developer.addresses[0].id,
+                       @developer.addresses[0].state,
+                       @developer.addresses[0].zip,
+                       @developer.languages[0].developer_id,
+                       @developer.languages[0].id,
+                       @developer.languages[0].name ]
+    expected_data << [ @developer.name, 
+                       @developer.addresses[1].address,
+                       @developer.addresses[1].city,
+                       @developer.addresses[1].developer_id,
+                       @developer.addresses[1].id,
+                       @developer.addresses[1].state,
+                       @developer.addresses[1].zip,
+                       @developer.languages[0].developer_id,
+                       @developer.languages[0].id,
+                       @developer.languages[0].name ]
+    expected_data << [ @developer.name, 
+                       @developer.addresses[2].address,
+                       @developer.addresses[2].city,
+                       @developer.addresses[2].developer_id,
+                       @developer.addresses[2].id,
+                       @developer.addresses[2].state,
+                       @developer.addresses[2].zip,
+                       @developer.languages[0].developer_id,
+                       @developer.languages[0].id,
+                       @developer.languages[0].name ]
+    expected_data << [ @developer.name, 
+                       @developer.addresses[0].address,
+                       @developer.addresses[0].city,
+                       @developer.addresses[0].developer_id,
+                       @developer.addresses[0].id,
+                       @developer.addresses[0].state,
+                       @developer.addresses[0].zip,
+                       @developer.languages[1].developer_id,
+                       @developer.languages[1].id,
+                       @developer.languages[1].name ]
+    expected_data << [ @developer.name, 
+                       @developer.addresses[1].address,
+                       @developer.addresses[1].city,
+                       @developer.addresses[1].developer_id,
+                       @developer.addresses[1].id,
+                       @developer.addresses[1].state,
+                       @developer.addresses[1].zip,
+                       @developer.languages[1].developer_id,
+                       @developer.languages[1].id,
+                       @developer.languages[1].name ]
+    expected_data << [ @developer.name, 
+                       @developer.addresses[2].address,
+                       @developer.addresses[2].city,
+                       @developer.addresses[2].developer_id,
+                       @developer.addresses[2].id,
+                       @developer.addresses[2].state,
+                       @developer.addresses[2].zip,
+                       @developer.languages[1].developer_id,
+                       @developer.languages[1].id,
+                       @developer.languages[1].name ]
+    expected_data << [ @developer.name, 
+                       @developer.addresses[0].address,
+                       @developer.addresses[0].city,
+                       @developer.addresses[0].developer_id,
+                       @developer.addresses[0].id,
+                       @developer.addresses[0].state,
+                       @developer.addresses[0].zip,
+                       @developer.languages[2].developer_id,
+                       @developer.languages[2].id,
+                       @developer.languages[2].name ]
+    expected_data << [ @developer.name, 
+                       @developer.addresses[1].address,
+                       @developer.addresses[1].city,
+                       @developer.addresses[1].developer_id,
+                       @developer.addresses[1].id,
+                       @developer.addresses[1].state,
+                       @developer.addresses[1].zip,
+                       @developer.languages[2].developer_id,
+                       @developer.languages[2].id,
+                       @developer.languages[2].name ]
+    expected_data << [ @developer.name, 
+                       @developer.addresses[2].address,
+                       @developer.addresses[2].city,
+                       @developer.addresses[2].developer_id,
+                       @developer.addresses[2].id,
+                       @developer.addresses[2].state,
+                       @developer.addresses[2].zip,
+                       @developer.languages[2].developer_id,
+                       @developer.languages[2].id,
+                       @developer.languages[2].name ]
+    expected_data << [ @developer.name, 
+                       @developer.addresses[0].address,
+                       @developer.addresses[0].city,
+                       @developer.addresses[0].developer_id,
+                       @developer.addresses[0].id,
+                       @developer.addresses[0].state,
+                       @developer.addresses[0].zip,
+                       @developer.languages[3].developer_id,
+                       @developer.languages[3].id,
+                       @developer.languages[3].name ]
+    expected_data << [ @developer.name, 
+                       @developer.addresses[1].address,
+                       @developer.addresses[1].city,
+                       @developer.addresses[1].developer_id,
+                       @developer.addresses[1].id,
+                       @developer.addresses[1].state,
+                       @developer.addresses[1].zip,
+                       @developer.languages[3].developer_id,
+                       @developer.languages[3].id,
+                       @developer.languages[3].name ]
+    expected_data << [ @developer.name, 
+                       @developer.addresses[2].address,
+                       @developer.addresses[2].city,
+                       @developer.addresses[2].developer_id,
+                       @developer.addresses[2].id,
+                       @developer.addresses[2].state,
+                       @developer.addresses[2].zip,
+                       @developer.languages[3].developer_id,
+                       @developer.languages[3].id,
+                       @developer.languages[3].name ]
+    expected_data.map!{ |arr| arr.map{ |e| e.to_s } }
 
     assert_equal expected_data, parsed_csv.data
   end

@@ -128,15 +128,39 @@ module ActiveRecord::Extensions::FindToCSV
           [ *association.to_csv_data ]
         end
       when Array
-        includes.inject( [] ) do |arr,association_name| 
+        siblings = []
+        includes.each do |association_name|
           association = self.send( association_name )
           association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
           if association.nil?
-            arr.push( get_class.call( association_name ).columns.map{ '' } )
+            association_data = [ get_class.call( association_name ).columns.map{ '' }  ]
           else
-            arr.push( *association.to_csv_data )
+            association_data = association.to_csv_data
+          end
+
+          if siblings.empty?
+            siblings.push( *association_data )
+          else
+            temp = []
+            association_data.each do |assoc_csv|
+              siblings.each do |sibling|
+                temp.push( sibling + assoc_csv )
+              end
+            end
+            siblings = temp            
           end
         end
+        siblings
+#
+#        includes.inject( [] ) do |arr,association_name| 
+#          association = self.send( association_name )
+#          association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
+#          if association.nil?
+#            arr.push( get_class.call( association_name ).columns.map{ '' } )
+#          else
+#            arr.push( *association.to_csv_data )
+#          end
+#        end
       when Hash
         sorted_includes = includes.sort_by{ |k| k.to_s }
         siblings = []
