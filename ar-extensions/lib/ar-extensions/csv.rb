@@ -123,7 +123,7 @@ module ActiveRecord::Extensions::FindToCSV
       when Symbol
         association = self.send( includes )
         association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
-        if association.nil? or association.empty?
+        if association.nil? or (association.respond_to?( :empty? ) and association.empty?)
           [ get_class.call( includes ).columns.map{ '' } ]
         else
           [ *association.to_csv_data ]
@@ -133,7 +133,7 @@ module ActiveRecord::Extensions::FindToCSV
         includes.each do |association_name|
           association = self.send( association_name )
           association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
-          if association.nil? or association.empty?
+          if association.nil? or (association.respond_to?( :empty? ) and association.empty?)
             association_data = [ get_class.call( association_name ).columns.map{ '' }  ]
           else
             association_data = association.to_csv_data
@@ -158,7 +158,7 @@ module ActiveRecord::Extensions::FindToCSV
         sorted_includes.each do |(association_name,options)|
           association = self.send( association_name )
           association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
-          if association.nil? or association.empty?
+          if association.nil? or (association.respond_to?( :empty ) and association.empty?)
             association_data = [ get_class.call( association_name ).columns.map{ '' }  ]
           else
             association_data = association.to_csv_data( options )
