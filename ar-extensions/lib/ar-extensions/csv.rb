@@ -1,3 +1,4 @@
+
 require 'faster_csv'
 require 'ostruct'
 
@@ -122,7 +123,7 @@ module ActiveRecord::Extensions::FindToCSV
       when Symbol
         association = self.send( includes )
         association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
-        if association.nil?
+        if association.nil? or association.empty?
           [ get_class.call( includes ).columns.map{ '' } ]
         else
           [ *association.to_csv_data ]
@@ -132,7 +133,7 @@ module ActiveRecord::Extensions::FindToCSV
         includes.each do |association_name|
           association = self.send( association_name )
           association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
-          if association.nil?
+          if association.nil? or association.empty?
             association_data = [ get_class.call( association_name ).columns.map{ '' }  ]
           else
             association_data = association.to_csv_data
@@ -151,23 +152,13 @@ module ActiveRecord::Extensions::FindToCSV
           end
         end
         siblings
-#
-#        includes.inject( [] ) do |arr,association_name| 
-#          association = self.send( association_name )
-#          association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
-#          if association.nil?
-#            arr.push( get_class.call( association_name ).columns.map{ '' } )
-#          else
-#            arr.push( *association.to_csv_data )
-#          end
-#        end
       when Hash
         sorted_includes = includes.sort_by{ |k| k.to_s }
         siblings = []
         sorted_includes.each do |(association_name,options)|
           association = self.send( association_name )
           association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
-          if association.nil?
+          if association.nil? or association.empty?
             association_data = [ get_class.call( association_name ).columns.map{ '' }  ]
           else
             association_data = association.to_csv_data( options )
