@@ -140,6 +140,11 @@ module ActiveRecord::Extensions::Import::Base
     end
   end
 
+  # Imports the passed in +column_names+ 
+  def import_from_table( options )
+
+  end
+
   # Imports the passed in +column_names+ and +array_of_attributes+ given the passed in +options+ Hash
   # with validations. Returns an array of instances that failed validations.
   def import_with_validations( column_names, array_of_attributes, options={} ) # :nodoc:

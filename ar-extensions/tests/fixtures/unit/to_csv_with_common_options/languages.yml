@@ -1,0 +1,29 @@
+ruby:
+  id: 1
+  name: Ruby
+  developer_id: 1
+
+perl:
+  id: 2
+  name: Perl
+  developer_id: 1
+
+java:
+  id: 3
+  name: Java
+  developer_id: 2
+
+php:
+  id: 4
+  name: PHP
+  developer_id: 2
+
+xml:
+  id: 5
+  name: XML
+  developer_id: 2
+
+python:
+  id: 6
+  name: Python
+  developer_id: 2

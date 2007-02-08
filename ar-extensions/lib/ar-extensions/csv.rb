@@ -40,13 +40,15 @@ module ActiveRecord::Extensions::FindToCSV
       get_class = proc { |str| Object.const_get( self.reflections[ str.to_sym ].class_name ) }
 
       case includes
+      when Symbol
+        [ get_class.call( includes ).to_csv_headers( :headers=>true, :naming=>":model[:header]" ) ]
       when Array
         includes.map do |association| 
           clazz = get_class.call( association )
           clazz.to_csv_headers( :headers=>true, :naming=>":model[:header]" )
         end
       when Hash
-        includes.inject( [] ) do |arr,(association,options)|
+        includes.sort_by{ |k| k.to_s }.inject( [] ) do |arr,(association,options)|
           clazz = get_class.call( association )
           if options[:headers].is_a?( Hash )
             options.merge!( :naming=>":header" ) 
@@ -102,21 +104,8 @@ module ActiveRecord::Extensions::FindToCSV
 
       fieldmap = to_csv_fields( options )
       headers = fieldmap.headers
-      
       headers.push( *to_csv_headers_for_included_associations( options[ :include ] ).flatten )
-
-      headers.map!{ |header| options[:naming].gsub( /:header/, header ).gsub( /:model/, self.name.downcase ) }
-
-      if options[:include] and false
-        included_headers = 
-          case options[:include]
-          when Array
-            arr = options[:include].map{ |association| Object.const_get( self.reflections[ association.to_sym ].class_name ).to_csv_headers( :headers=>true ) }
-            headers.push( *arr.flatten )
-          when Hash
-          end
-      end
-      headers
+      headers.map{ |header| options[:naming].gsub( /:header/, header ).gsub( /:model/, self.name.downcase ) }
     end
 
   end
@@ -127,17 +116,52 @@ module ActiveRecord::Extensions::FindToCSV
     private
     
     def to_csv_data_for_included_associations( includes )
+      get_class = proc { |str| Object.const_get( self.class.reflections[ str.to_sym ].class_name ) }
+
       case includes
+      when Symbol
+        association = self.send( includes )
+        association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
+        if association.nil?
+          [ get_class.call( includes ).columns.map{ '' } ]
+        else
+          [ *association.to_csv_data ]
+        end
       when Array
-        includes.map { |association| self.send( association ).to_csv_data }
-      when Hash
-        includes.inject( [] ) do |arr,(association,options)|
-          begin
-            arr << self.send( association ).to_csv_data( options )
-          rescue NoMethodError
-            arr << Object.const_get( Inflector.classify( association ) ).columns.map{ |e| nil.to_s }
+        includes.inject( [] ) do |arr,association_name| 
+          association = self.send( association_name )
+          association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
+          if association.nil?
+            arr.push( get_class.call( association_name ).columns.map{ '' } )
+          else
+            arr.push( *association.to_csv_data )
           end
         end
+      when Hash
+        sorted_includes = includes.sort_by{ |k| k.to_s }
+        siblings = []
+        sorted_includes.each do |(association_name,options)|
+          association = self.send( association_name )
+          association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
+          if association.nil?
+            association_data = [ get_class.call( association_name ).columns.map{ '' }  ]
+          else
+            association_data = association.to_csv_data( options )
+          end
+
+          if siblings.empty?
+            siblings.push( *association_data )
+          else
+            temp = []
+            association_data.each do |assoc_csv|
+              siblings.each do |sibling|
+                temp.push( sibling + assoc_csv )
+              end
+            end
+            siblings = temp            
+          end
+        end
+        siblings
       else
         []
       end
@@ -147,8 +171,14 @@ module ActiveRecord::Extensions::FindToCSV
     
     def to_csv_data( options={} )
       fields = self.class.to_csv_fields( options ).fields
-      data = fields.inject( [] ) { |arr,field| arr << attributes[field].to_s }
-      data.push( *to_csv_data_for_included_associations( options[:include ] ).flatten )
+      data, model_data = [], fields.inject( [] ) { |arr,field| arr << attributes[field].to_s }
+      if options[:include]
+        to_csv_data_for_included_associations( options[:include ] ).map do |assoc_csv_data|
+          data << model_data + assoc_csv_data
+        end
+      else
+        data << model_data
+      end
       data
     end
     
@@ -156,7 +186,7 @@ module ActiveRecord::Extensions::FindToCSV
       FasterCSV.generate do |csv|
         headers = self.class.to_csv_headers( options )
         csv << headers if headers
-        csv << to_csv_data( options )
+        to_csv_data( options ).each{ |data| csv << data }
       end
     end
     
@@ -174,60 +204,12 @@ module ActiveRecord::Extensions::FindToCSV
     
     public
 
-    def to_csv( options={} )
-      raise NoRecordsError.new if self.size == 0
-#      fields = to_csv_fields_for_options( options )
-      csv_info = to_csv_info( options )
-     
-      included_fields = nil
-      if options.has_key?( :include )
-        included_fields = self.first.to_csv_fields_included_from_associations( options[ :include ] ) 
+    def to_csv_data( options={} )
+      inject( [] ) do |arr,model_instance|
+        arr.push( *model_instance.to_csv_data( options ) )
       end
-
-      csv = FasterCSV.generate do |csv|
-         
-        unless options[:headers] == false
-          headers = []
-          headers.push( *fields )
-
-          included_fields.each do |obj|
-            headers.push( *obj.headers )
-          end unless included_fields.nil?
-
-
-          csv << headers
-        end
-
-        data = []
-        each do |e|
-          fields.each{ |field| data << e.attributes[ field ].to_s }
-          csv << data
-          data.clear
-        end
-      end
-      csv
     end
     
-    def to_csv_file( filepath, *args )
-      mode, options = nil, {}
-
-      if args.empty?
-        mode = 'w'
-      elsif args.first.is_a?( String )
-        mode = args.first
-      elsif args.first.is_a?( Hash )
-        mode, options = 'w', args.first
-      elsif args.size == 2
-        mode, options = args
-      end
-
-      raise ArgumentError.new( "Unknown arguments: #{args}" ) if mode.nil?
-
-      csv = to_csv( options )
-      File.open( filepath, mode ){ |io| io.write( csv ) }
-      csv
-    end
-    
-  end
+   end
 
 end

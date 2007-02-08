@@ -50,4 +50,9 @@ ActiveRecord::Schema.define do
     t.column :author_name, :string, :null=>false
   end  
 
+  create_table :languages, :force=>true do |t|
+    t.column :name, :string
+    t.column :developer_id, :integer
+  end
+
 end
