@@ -132,12 +132,15 @@ class ActiveRecord::Base
           column_names = args.first
         else
           models = args.first
-          column_names = self.column_names
+          column_names = self.column_names.dup
+          column_names.delete( self.primary_key ) unless options[ :on_duplicate_key_update ]
         end
         
         array_of_attributes = models.inject( [] ) do |arr,model|
           attributes = []
-          column_names.each{ |name| attributes << model.send( "#{name}_before_type_cast" ) }
+          column_names.each do |name| 
+            attributes << model.send( "#{name}_before_type_cast" ) 
+          end
           arr << attributes
         end
         # supports 2-element array and array
