@@ -1,11 +1,11 @@
-module ActiveRecord
-  module ConnectionAdapters
-    class AbstractAdapter
+module ActiveRecord # :nodoc:
+  module ConnectionAdapters # :nodoc:
+    class AbstractAdapter # :nodoc:
       NO_MAX_PACKET = 0
     
       # +sql+ can be a single string or an array. If it is an array all 
       # elements that are in position >= 1 will be appended to the final SQL.
-      def insert_many( sql, values, *args )
+      def insert_many( sql, values, *args ) # :nodoc:
         # the number of inserts default
         number_of_inserts = 0
         
@@ -57,7 +57,7 @@ module ActiveRecord
         NO_MAX_PACKET
       end
       
-      def self.get_insert_value_sets( values, sql_size, max_bytes )
+      def self.get_insert_value_sets( values, sql_size, max_bytes ) # :nodoc:
         value_sets = []          
         arr, current_arr_values_size, current_size = [], 0, 0
         values.each_with_index do |val,i|

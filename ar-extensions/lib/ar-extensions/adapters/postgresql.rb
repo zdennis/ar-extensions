@@ -1,6 +1,6 @@
-module ActiveRecord
-  module ConnectionAdapters
-    class PostgreSQLAdapter
+module ActiveRecord # :nodoc:
+  module ConnectionAdapters # :nodoc:
+    class PostgreSQLAdapter # :nodoc:
     
     end
   end

@@ -1,7 +1,7 @@
 module ActiveRecord::ConnectionAdapters::Quoting
 
   alias :quote_orig :quote
-  def quote( value, column=nil )
+  def quote( value, column=nil ) # :nodoc:
     if value.is_a?( Regexp )
       "'#{value.inspect[1...-1]}'"
     else
@@ -13,12 +13,12 @@ end
 
 class ActiveRecord::Base
 
- private
-
   class << self
 
+    private
+    
     alias :sanitize_sql_orig :sanitize_sql
-    def sanitize_sql( arg )
+    def sanitize_sql( arg ) # :nodoc:
       return sanitize_sql_orig( arg ) if arg.nil?
       if arg.respond_to?( :to_sql )
         arg = sanitize_sql_by_way_of_duck_typing( arg ) #if arg.respond_to?( :to_sql )
@@ -30,11 +30,11 @@ class ActiveRecord::Base
       sanitize_sql_orig( arg )
     end
     
-    def sanitize_sql_by_way_of_duck_typing( arg )
+    def sanitize_sql_by_way_of_duck_typing( arg ) #: nodoc:
       arg.to_sql( caller )
     end
 
-    def sanitize_sql_from_string_and_hash( arr )
+    def sanitize_sql_from_string_and_hash( arr ) # :nodoc:
       return arr if arr.first =~ /\:[\w]+/        
       arr2 = sanitize_sql_from_hash( arr.last )
       if arr2.empty?
@@ -46,7 +46,7 @@ class ActiveRecord::Base
       conditions
     end
     
-    def sanitize_sql_from_hash( hsh )
+    def sanitize_sql_from_hash( hsh ) #:nodoc:
       conditions, values = [], []
       
       hsh.each_pair do |key,val|

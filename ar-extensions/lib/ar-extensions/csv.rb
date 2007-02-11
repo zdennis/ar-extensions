@@ -2,10 +2,68 @@
 require 'faster_csv'
 require 'ostruct'
 
+# Adds CSV export options to ActiveRecord::Base models. 
+#
+# === Example 1, exporting all fields
+#  class Book < ActiveRecord::Base ; end
+#  
+#  book = Book.find( 1 )
+#  book.to_csv
+#
+# === Example 2, only exporting certain fields
+#  class Book < ActiveRecord::Base ; end
+#
+#  book = Book.find( 1 ) 
+#  book.to_csv( :only=>%W( title isbn )
+#
+# === Example 3, exporting a model including a belongs_to association
+#  class Book < ActiveRecord::Base 
+#    belongs_to :author
+#  end
+# 
+#  book = Book.find( 1 )
+#  book.to_csv( :include=>:author )
+#
+# This also works for a has_one relationship. The :include
+# option can also be an array of has_one/belongs_to 
+# associations. This by default includes all fields
+# on the belongs_to association.
+#
+# === Example 4, exporting a model including a has_many association
+#  class Book < ActiveRecord::Base 
+#    has_many :tags
+#  end
+# 
+#  book = Book.find( 1 )
+#  book.to_csv( :include=>:tags )
+#
+# This by default includes all fields on the has_many assocaition.
+# This can also be an array of multiple has_many relationships. The
+# array can be mixed with has_one/belongs_to associations array
+# as well. IE: :include=>[ :author, :sales ]
+#
+# === Example 5, nesting associations
+#  class Book < ActiveRecord::Base 
+#    belongs_to :author
+#    has_many :tags
+#  end
+#
+#  book = Book.find( 1 )
+#  book.to_csv( :includes=>{ 
+#                  :author => { :only=>%W( name ) },
+#                  :tags => { :only=>%W( tagname ) } )
+#
+# Each included association can receive an options Hash. This
+# allows you to nest the associations as deep as you want 
+# for your CSV export. 
+#
+# It is not recommended to nest multiple has_many associations, 
+# although nesting multiple has_one/belongs_to associations.
+#
 module ActiveRecord::Extensions::FindToCSV
   ALIAS_FOR_FIND = :_original_find_before_arext
 
-  def self.included( cl )
+  def self.included( cl ) # :nodoc:
     virtual_class = class << cl ; self ; end
     if not virtual_class.ancestors.include?( self::ClassMethods )
       cl.instance_eval "alias #{ALIAS_FOR_FIND} :find"
@@ -13,31 +71,28 @@ module ActiveRecord::Extensions::FindToCSV
       cl.send( :include, InstanceMethods )
     end
   end
-
   
-  class FieldMap
+  class FieldMap# :nodoc:
     attr_reader :fields, :fields_to_headers
  
-    def initialize( fields, fields_to_headers )
+    def initialize( fields, fields_to_headers ) # :nodoc:
       @fields, @fields_to_headers = fields, fields_to_headers
     end
     
-    def headers
+    def headers # :nodoc:
       @headers ||= fields.inject( [] ){ |arr,field| arr << fields_to_headers[ field ] }
     end
     
   end
 
-  
-  module ClassMethods
-      
+  module ClassMethods # :nodoc:      
     private
 
-    def to_csv_fields_for_nil
+    def to_csv_fields_for_nil # :nodoc:
       self.columns.map{ |column| column.name }.sort
     end                         
 
-    def to_csv_headers_for_included_associations( includes )
+    def to_csv_headers_for_included_associations( includes ) # :nodoc:
       get_class = proc { |str| Object.const_get( self.reflections[ str.to_sym ].class_name ) }
 
       case includes
@@ -65,13 +120,13 @@ module ActiveRecord::Extensions::FindToCSV
     
     public
 
-    def find( *args )
+    def find( *args ) # :nodoc:
       results = self.send( ALIAS_FOR_FIND, *args )
       results.extend( ArrayInstanceMethods ) if results.is_a?( Array )
       results
     end
 
-    def to_csv_fields( options={} )
+    def to_csv_fields( options={} ) # :nodoc:
       fields_to_headers, fields = {}, []
       
       headers = options[:headers]
@@ -99,6 +154,7 @@ module ActiveRecord::Extensions::FindToCSV
       FieldMap.new( fields, fields_to_headers )
     end
     
+    # Returns an array of CSV headers passed in the array of +options+.
     def to_csv_headers( options={} )
       options = { :headers=>true, :naming=>":header" }.merge( options )
       return nil if not options[:headers]
@@ -116,7 +172,7 @@ module ActiveRecord::Extensions::FindToCSV
 
     private
     
-    def to_csv_data_for_included_associations( includes )
+    def to_csv_data_for_included_associations( includes ) # :nodoc:
       get_class = proc { |str| Object.const_get( self.class.reflections[ str.to_sym ].class_name ) }
 
       case includes
@@ -184,6 +240,7 @@ module ActiveRecord::Extensions::FindToCSV
     
     public
     
+    # Returns CSV data without any header rows for the passed in +options+.
     def to_csv_data( options={} )
       fields = self.class.to_csv_fields( options ).fields
       data, model_data = [], fields.inject( [] ) { |arr,field| arr << attributes[field].to_s }
@@ -197,6 +254,7 @@ module ActiveRecord::Extensions::FindToCSV
       data
     end
     
+    # Returns CSV data including header rows for the passed in +options+.
     def to_csv( options={} )
       FasterCSV.generate do |csv|
         headers = self.class.to_csv_headers( options )
@@ -207,24 +265,34 @@ module ActiveRecord::Extensions::FindToCSV
     
   end
 
-  module ArrayInstanceMethods
-    class NoRecordsError < StandardError ; end
+  module ArrayInstanceMethods # :nodoc:
+    class NoRecordsError < StandardError ; end #:nodoc:
 
-    private
-    
-    def to_csv_headers( options )
+    # Returns CSV headers for an array of ActiveRecord::Base
+    # model objects by calling to_csv_headers on the first
+    # element.
+    def to_csv_headers( options ) 
       first.to_csv_headers( options )
     end
-    
-    
-    public
 
+    # Returns CSV data without headers for an array of
+    # ActiveRecord::Base model objects by iterating over them and
+    # calling to_csv_data with the passed in +options+.
     def to_csv_data( options={} )
       inject( [] ) do |arr,model_instance|
         arr.push( *model_instance.to_csv_data( options ) )
       end
     end
+
+    # Returns CSV data with headers for an array of ActiveRecord::Base
+    # model objects by iterating over them and calling to_csv with
+    # the passed in +options+.
+    def to_csv( options={} )
+      inject( [] ) do |arr,model_instance|
+        arr.push( *model_instance.to_csv( options ) )
+      end
+    end
     
-   end
+  end
 
 end

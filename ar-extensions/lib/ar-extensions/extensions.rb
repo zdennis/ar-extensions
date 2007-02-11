@@ -71,6 +71,7 @@ require 'forwardable'
 #  )
 # 
 # == Importing Lots of Data
+#
 # ActiveRecord executes a single INSERT statement for every cal to 'create'
 # and for every call to 'save' on a new model object. When you have only
 # a handful of records to create or save this is not a big deal, but when
@@ -96,26 +97,25 @@ require 'forwardable'
 # performance using +import+, but you will definitely get no worse then
 # ActiveRecord's create or save methods.
 #
-# Currently supported optimized database adapters are:
-# * MySQL using multi-value insert statements. Benchmarks show up to a 48x speed increase
-#
+# See ActiveRecord::Base.import for more information and other ways to use
+# this functionality.
 #
 # == Developers
-# * Zach Dennis
+# * Zach Dennis 
 # * Mark Van Holsytn
 #
 # == Homepage
-# * Project Site: http://www.continuousthinking.com/are
+# * Project Site: http://www.continuousthinking.com/tags/arext
 # * Rubyforge Project: http://rubyforge.org/projects/arext
 # * Anonymous SVN: svn checkout svn://rubyforge.org/var/svn/arext
 #
-module ActiveRecord::Extensions
+module ActiveRecord::Extensions 
   
   Result = Struct.new( :sql, :value )
 
   # ActiveRecored::Extensions::Registry is used to register finder extensions.
   # Extensions are processed in last in first out order, like a stack.
-  class Registry
+  class Registry # :nodoc:
 
     def options( extension )
       extension_arr = @registry.detect{ |arr| arr.first == extension }
@@ -123,19 +123,19 @@ module ActiveRecord::Extensions
       extension_arr.last
     end
 
-    def registers?( extension )
+    def registers?( extension ) # :nodoc:
       @registry.detect{ |arr| arr.first == extension }
     end
     
-    def register( extension, options )
+    def register( extension, options ) # :nodoc:
       @registry << [ extension, options ]
     end
       
-    def initialize
+    def initialize # :nodoc:
       @registry = []
     end
 
-    def process( field, value, caller )
+    def process( field, value, caller ) # :nodoc:
       current_adapter = caller.connection.adapter_name.downcase
       @registry.reverse.each do |(extension,options)|
         adapters = options[:adapters]
@@ -153,7 +153,7 @@ module ActiveRecord::Extensions
   class << self
     extend Forwardable
     
-    def register( extension, options )
+    def register( extension, options ) # :nodoc:
       @registry ||= Registry.new
       @registry.register( extension, options )
     end

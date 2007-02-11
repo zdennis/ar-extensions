@@ -1,49 +1,73 @@
+module ActiveRecord::Extensions::TemporaryTableSupport # :nodoc:
+  def supports_temporary_tables? #:nodoc:
+    true
+  end
+end
+
 
 class ActiveRecord::Base
   @@temporary_table_hsh ||= {}		
-	
+
+  # Returns true if the underlying database connection supports temporary tables
+  def self.supports_temporary_tables?
+    connection.supports_temporary_tables?
+  rescue NoMethodError
+    false
+  end
+  
   ######################################################################
-  # Creates a temporary in memory-only table given the passed in options hash.
-  # The temporary table is created based off from another table. (Currently
-  # defining a new temporary table which is not based off from an existing
-  # table is not supported.) This method returns the constant for the new
-  # new model. This currently is only supported when using the MySQL Adapter. 
-  # The temporary table thatis created has the scope that is set by the MySQL 
-  # server. 
+  # Creates a temporary table given the passed in options hash.  The
+  # temporary table is created based off from another table the
+  # current model class. This method returns the constant for the new
+  # new model. This can also be used with block form (see below).
   # 
-  # === Parameters
+  # == Parameters
   # * options - the options hash used to define the temporary table. 
   # 
-  # ==== Available Options
-  # * :table_name - the desired name of the temporary table. If not supplied
-  #   then a name of "temp_" + the current table_name of the current model
+  # ==== Options
+  # * :table_name - the desired name of the temporary table. If not supplied \
+  #   then a name of "temp_" + the current table_name of the current model \
   #   will be used.
-  # * :like - the table model you want to base the temporary tables
-  #   structure off from. If this is not supplied then the table_name of the
+  # * :like - the table model you want to base the temporary tables \
+  #   structure off from. If this is not supplied then the table_name of the \
   #   current model will be used.
-  # * :model_name - the name of the model you want to use for the temporary
-  #   table. This must be compliant with Ruby's naming conventions for 
-  #   constants. If this is not supplied a rails-generated table name will
-  #   be created which is based off from the table_name of the temporary table.
+  # * :model_name - the name of the model you want to use for the temporary \
+  #   table. This must be compliant with Ruby's naming conventions for \
+  #   constants. If this is not supplied a rails-generated table name will \
+  #   be created which is based off from the table_name of the temporary table. \
+  #   IE: Account.create_temporary_table creates the TempAccount model class
   #
-  # === Example
-  # 	Table::create_temporary_table => TempTable
-  #	Table.create_temporary_table( :table_name=>'my_temp_table' ) => MyTempTable
-  #	Table.create_temporary_table( :table_name=>'my_temp_table', :model=>:ATempTable ) => ATempTable
-  #	Table.create_temporary_table( :model=>:MyTempTable ) => MyTempTable
-  #	Table.create_temporary_table( :table_name=>'my_temp_table', :like=>AnotherTable ) => MyTempTable
+  # ==== Example 1, using defaults
+  #  class Project < ActiveRecord::Base ; end
   #
-  #	Table.create_temporary_table( :like=>'AnotherTable' ) # wrong!
-  #	Table.create_temporary_table( :like=>:AnotherTable ) => # wrong!
+  #  Project.create_temporary_table
   #
-  # === Exceptions
-  # * Exception - if the MySQL Adapter is not being used
-  # * Mysql::Error - if the passed in model's table name is unknown to the
-  #   database
+  # This creates a temporary table named 'temp_projects' and creates a constant
+  # name TempProject. The table structure is copied from the _projects_ table.
+  #
+  # ==== Example 2, using :table_name and :model options
+  #   Project.create_temporary_table :table_name=>'my_projects', :model=>'MyProject'
+  #
+  # This creates a temporary table named 'my_projects' and creates a constant named
+  # MyProject. The table structure is copied from the _projects_ table.
+  #
+  # ==== Example 3, using :like
+  #   ActiveRecord::Base.create_temporary_table :like=>Project 
+  #  
+  # This is the same as calling Project.create_temporary_table.
+  #
+  # ==== Example 4, using block form
+  #   Project.create_temporary_table do |t|
+  #     # ...
+  #   end
+  # 
+  # Using the block form will automatically drop the temporary table
+  # when the block exits. _t_ which is passed into the block is the temporary
+  # table class. In the above example _t_ equals TempProject. The block form
+  # can be used with all of the available options.
   #
   # === See
   # * drop
-  # * database_check
   ######################################################################
   def self.create_temporary_table( options={} )
     options[:table_name] = "temp_#{self.table_name}" unless options[:table_name]
@@ -76,6 +100,15 @@ end
 
 class ActiveRecord::TemporaryTable < ActiveRecord::Base
   
+  # Drops a temporary table from the database and removes
+  # the temporary table constant.
+  #
+  # ==== Example
+  #   Project.create_temporary_table
+  #   Object.const_defined?( :TempProject ) # => true
+  #   TempProject.drop
+  #   Object.const_defined?( :TempProject ) # => false
+  #
   def self.drop
     if @@temporary_table_hsh[ self ]
       sql = 'DROP TABLE ' + self.table_name + ';'
@@ -89,5 +122,3 @@ class ActiveRecord::TemporaryTable < ActiveRecord::Base
   
 end
 
-
-  

@@ -175,9 +175,7 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     unless Book.supports_full_text_searching?
       STDERR.puts "test_find_three_results_using_match is not testing, since your database adapter doesn't support fulltext searching"
     else
-#breakpoint
-      books = Book.find( :all,
-                         :conditions=>{ :match_title=> 'Terry' } )
+      books = Book.find( :all, :conditions=>{ :match_title=> 'Terry' } )
       assert_equal( 4, books.size )
     end
   end

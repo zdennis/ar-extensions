@@ -1,6 +1,6 @@
-module ActiveRecord
-  module ConnectionAdapters
-    class MysqlAdapter       
+module ActiveRecord # :nodoc:
+  module ConnectionAdapters # :nodoc:
+    class MysqlAdapter # :nodoc:
            
       # Returns the maximum number of bytes that the server will allow
       # in a single packet
