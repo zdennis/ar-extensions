@@ -6,15 +6,18 @@ Author: Zach Dennis
 Web Site: http://www.continuousthinking.com/tags/arext
 Email: zach.dennis@gmail.com
 
- - For How-To information see http://www.continuousthinking.com/are
+ - For How-To information see http://www.continuousthinking.com/tags/arext
  - For project information and feedback please consult http://rubyforge.org/projects/arext/
  - For release information please see below
 
 ActiveRecord::Extensions 0.4.0
 ------------------------------
-January 14th, 2006
- - Updated to_csv functionality to include support for the :include option
+February 11th, 2007
+ - Added to_csv functionality
+ - Added temporary table support (MySQL)
+ - Added foreign key support (MySQL)
  - Updated tests to keep schema information. Test database will automatically rebuild themselves if they are out of sync
+ - Added dependency for Mocha 0.4.0 or higher for tests
 
 ActiveRecord::Extensions 0.3.0
 ------------------------------
