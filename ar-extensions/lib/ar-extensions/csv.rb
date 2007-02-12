@@ -271,8 +271,8 @@ module ActiveRecord::Extensions::FindToCSV
     # Returns CSV headers for an array of ActiveRecord::Base
     # model objects by calling to_csv_headers on the first
     # element.
-    def to_csv_headers( options ) 
-      first.to_csv_headers( options )
+    def to_csv_headers( options={} ) 
+      first.class.to_csv_headers( options )
     end
 
     # Returns CSV data without headers for an array of
@@ -288,8 +288,12 @@ module ActiveRecord::Extensions::FindToCSV
     # model objects by iterating over them and calling to_csv with
     # the passed in +options+.
     def to_csv( options={} )
-      inject( [] ) do |arr,model_instance|
-        arr.push( *model_instance.to_csv( options ) )
+      FasterCSV.generate do |csv|
+        headers = to_csv_headers( options )
+        csv << headers if headers
+        each do |model_instance| 
+          model_instance.to_csv_data( options ).each{ |data| csv << data }
+        end
       end
     end
     
