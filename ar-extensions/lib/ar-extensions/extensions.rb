@@ -228,6 +228,7 @@ module ActiveRecord::Extensions
         match_data = key.to_s.match( /(.+)_#{k}$/ )
         if match_data
           fieldname = match_data.captures[0]
+          return nil unless caller.columns_hash.has_key?( fieldname )
           str = "#{caller.table_name}.#{caller.connection.quote_column_name( fieldname )} " +
             "#{v} #{caller.connection.quote( val, caller.columns_hash[ fieldname ] )} "
           return Result.new( str, nil )
@@ -421,6 +422,43 @@ module ActiveRecord::Extensions
     end
         
   end
+  
+  class MySQLTimeSupport
+    SUFFIX_MAP = { 'eq'=>'=', 'lt'=>'<', 'lte'=>'<=', 'gt'=>'>', 'gte'=>'>=', 'ne'=>'!=', 'not'=>'!=' }
+    
+    def self.process( key, val, caller )
+      return unless val.is_a?( Time )
+      process_without_suffix( key, val, caller ) || process_with_suffix( key, val, caller )
+    end
+    
+    def self.process_without_suffix( key, val, caller )
+      return nil unless caller.columns_hash.has_key?( key )
+      if val.nil?
+        str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )} IS NULL"
+      else
+        str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )}=" +
+          "#{caller.connection.quote( val.to_s(:db), caller.columns_hash[ key ] )} "
+      end
+      Result.new( str, nil )
+    end
+
+    def self.process_with_suffix( key, val, caller )
+      SUFFIX_MAP.each_pair do |k,v|
+        match_data = key.to_s.match( /(.+)_#{k}$/ )
+        if match_data
+          fieldname = match_data.captures[0]
+          return nil unless caller.columns_hash.has_key?( fieldname )
+          str = "#{caller.table_name}.#{caller.connection.quote_column_name( fieldname )} " +
+            "#{v} #{caller.connection.quote( val.to_s(:db), caller.columns_hash[ fieldname ] )} "
+          return Result.new( str, nil )
+        end
+      end
+      nil
+    end
+
+
+end
+  
 
   register Comparison, :adapters=>:all
   register Like, :adapters=>:all 
@@ -429,6 +467,7 @@ module ActiveRecord::Extensions
   register MySQLRegexp, :adapters=>[ :mysql ]
   register PostgreSQLRegexp, :adapters=>[ :postgresql ]
   register SqliteRegexp, :adapters =>[ :sqlite ]
+  register MySQLTimeSupport, :adapters =>[ :mysql, :sqlite ]
 end
 
 

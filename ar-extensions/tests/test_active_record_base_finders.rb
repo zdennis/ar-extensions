@@ -73,12 +73,12 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
 
   def test_find_with_regex
     developers = Developer.find( :all, :conditions=>{ :name=>/^Zach/ } )
-#    assert_equal( 1, developers.size )
+    assert_equal( 1, developers.size )
 
- #   developers = Developer.find( :all, :conditions=>{ :name=>/Dennis$/ } )
-#    assert_equal( 1, developers.size )
+    developers = Developer.find( :all, :conditions=>{ :name=>/Dennis$/ } )
+    assert_equal( 1, developers.size )
   end
-  
+
   def test_find_with_less_than
     developers = Developer.find( :all, :conditions=>{ :id_lt=>2 } )
     assert_equal( 1, developers.size )
@@ -103,10 +103,40 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     developers = Developer.find( :all, :conditions=>{ :id_ne=>9999 } )
     assert_equal( Developer.count, developers.size )
 
-     developers = Developer.find( :all, :conditions=>{ :id_not=>9999 } )
+    developers = Developer.find( :all, :conditions=>{ :id_not=>9999 } )
     assert_equal( Developer.count, developers.size )
   end
 
+  def test_find_greater_than_time
+    books = Book.find( :all, :conditions=>{ :created_at_gt => Time.now } )
+    assert_equal 0, books.size
+    
+    time = Time.local( 2007, 01, 01 )
+    books = Book.find( :all, :conditions=>{ :created_at_gt => time } )
+    assert_equal 2, books.size
+  end
+  
+  def test_find_less_than_time
+    books = Book.find( :all, :conditions=>{ :created_at_lt => Time.now } )
+    assert_equal 9, books.size
+    
+    time = Time.local( 2004, 01, 01 )
+    books = Book.find( :all, :conditions=>{ :created_at_lt => time } )
+    assert_equal 3, books.size
+  end
+  
+  def test_find_greater_than_or_equal_to_time
+    assert false, "Implement me!"
+  end
+  
+  def test_find_less_than_or_equal_to_time
+    assert false, "Implement me!"
+  end
+  
+  def test_find_not_equal_to_time
+    assert false, "Implement me!"
+  end
+  
   def test_find_not_in_array
     developers = Developer.find( :all, :conditions=>{ :id_ne=>[ 9999 ] } )
     assert_equal( Developer.count, developers.size )
