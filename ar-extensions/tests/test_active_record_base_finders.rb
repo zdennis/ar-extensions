@@ -113,28 +113,33 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     
     time = Time.local( 2007, 01, 01 )
     books = Book.find( :all, :conditions=>{ :created_at_gt => time } )
-    assert_equal 2, books.size
+    assert books.size == 2
   end
   
   def test_find_less_than_time
     books = Book.find( :all, :conditions=>{ :created_at_lt => Time.now } )
-    assert_equal 9, books.size
+    assert books.size == 9
     
     time = Time.local( 2004, 01, 01 )
     books = Book.find( :all, :conditions=>{ :created_at_lt => time } )
-    assert_equal 3, books.size
+    assert books.size == 3
   end
   
   def test_find_greater_than_or_equal_to_time
-    assert false, "Implement me!"
+    time = Time.local( 2006, 03, 12, 21, 38, 04 )
+    books = Book.find( :all, :conditions=>{ :created_at_gte => time } )
+    assert books.size == 3
   end
   
   def test_find_less_than_or_equal_to_time
-    assert false, "Implement me!"
+    time = Time.local( 2004, 03, 12, 21, 38, 04 )
+    books = Book.find( :all, :conditions=>{ :created_at_lte => time } )
+    assert books.size == 5
   end
   
   def test_find_not_equal_to_time
-    assert false, "Implement me!"
+    books = Book.find( :all, :conditions=>{ :created_at_ne => Time.now } )
+    assert books.size == 9
   end
   
   def test_find_not_in_array

@@ -1,4 +1,4 @@
 class SchemaInfo < ActiveRecord::Base
   set_table_name 'schema_info'
-  VERSION = 4
+  VERSION = 5
 end
