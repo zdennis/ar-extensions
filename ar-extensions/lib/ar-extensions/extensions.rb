@@ -423,7 +423,7 @@ module ActiveRecord::Extensions
         
   end
   
-  class MySQLTimeSupport
+  class DatetimeSupport
     SUFFIX_MAP = { 'eq'=>'=', 'lt'=>'<', 'lte'=>'<=', 'gt'=>'>', 'gte'=>'>=', 'ne'=>'!=', 'not'=>'!=' }
     
     def self.process( key, val, caller )
@@ -467,7 +467,7 @@ end
   register MySQLRegexp, :adapters=>[ :mysql ]
   register PostgreSQLRegexp, :adapters=>[ :postgresql ]
   register SqliteRegexp, :adapters =>[ :sqlite ]
-  register MySQLTimeSupport, :adapters =>[ :mysql, :sqlite ]
+  register DatetimeSupport, :adapters =>[ :mysql, :sqlite ]
 end
 
 
