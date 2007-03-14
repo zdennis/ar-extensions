@@ -10,6 +10,11 @@ Email: zach.dennis@gmail.com
  - For project information and feedback please consult http://rubyforge.org/projects/arext/
  - For release information please see below
 
+ActiveRecord::Extensions 0.5.0
+------------------------------
+March 13th, 2007
+ - Added Time based query support which works on ActiveRecord columns which match a type supported by :datetime
+
 ActiveRecord::Extensions 0.4.0
 ------------------------------
 February 11th, 2007
