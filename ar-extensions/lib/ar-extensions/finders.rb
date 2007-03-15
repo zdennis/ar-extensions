@@ -1,11 +1,11 @@
 module ActiveRecord::ConnectionAdapters::Quoting
 
-  alias :quote_orig :quote
+  alias :quote_before_arext :quote
   def quote( value, column=nil ) # :nodoc:
     if value.is_a?( Regexp )
       "'#{value.inspect[1...-1]}'"
     else
-      quote_orig( value, column )
+      quote_before_arext( value, column )
     end
   end
 end
