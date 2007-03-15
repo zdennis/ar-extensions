@@ -1,3 +1,4 @@
+
 module ActiveRecord::Extensions::TemporaryTableSupport # :nodoc:
   def supports_temporary_tables? #:nodoc:
     true

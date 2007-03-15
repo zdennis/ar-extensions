@@ -7,9 +7,9 @@ DIR = File.dirname( __FILE__ )
 task :default => [ "test:mysql" ]
 
 task :boot do 
-  require File.join( DIR, 'boot' )
-  require File.join( DIR, 'tests', 'connections', "native_#{ENV['ARE_DB']}", 'connection' )  
-  require File.join( DIR, 'db/migrate/version' )
+  require File.expand_path( File.join( DIR, 'lib', 'ar-extensions' ) )
+  require File.expand_path( File.join( DIR, 'tests', 'connections', "native_#{ENV['ARE_DB']}", 'connection' ) )
+  require File.expand_path( File.join( DIR, 'db/migrate/version' ) )
 end
 
 ADAPTERS = %w( mysql postgresql sqlite sqlite3 )
@@ -71,5 +71,27 @@ namespace :test do
     end  
           
   end    
+
+  namespace :gem do
+    
+    ADAPTERS.each do |adapter|
+      desc "load ar-extensions from rubygems and test base extensions for #{adapter}"
+      task adapter do |t|
+        ENV['ARE_DB'] = adapter
+        Rake::Task[ 'boot' ].invoke
+      
+        task = Rake::Task[ "db:test:prepare_#{adapter}" ]
+        begin
+          task = false  if SchemaInfo::VERSION == SchemaInfo.find( :first ).version
+        rescue Exception => ex        
+        end
+        task.invoke if task
+        
+        system "ruby #{File.join( DIR, 'tests/run_from_gem.rb ' )} #{adapter}" 
+      end
+      
+    end
+    
+  end
   
 end
