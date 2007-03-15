@@ -72,26 +72,4 @@ namespace :test do
           
   end    
 
-  namespace :gem do
-    
-    ADAPTERS.each do |adapter|
-      desc "load ar-extensions from rubygems and test base extensions for #{adapter}"
-      task adapter do |t|
-        ENV['ARE_DB'] = adapter
-        Rake::Task[ 'boot' ].invoke
-      
-        task = Rake::Task[ "db:test:prepare_#{adapter}" ]
-        begin
-          task = false  if SchemaInfo::VERSION == SchemaInfo.find( :first ).version
-        rescue Exception => ex        
-        end
-        task.invoke if task
-        
-        system "ruby #{File.join( DIR, 'tests/run_from_gem.rb ' )} #{adapter}" 
-      end
-      
-    end
-    
-  end
-  
-end
+ end
