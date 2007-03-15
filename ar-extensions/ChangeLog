@@ -1,3 +1,9 @@
+2007-03-14  zdennis  <zdennis@elijah.xrite.com>
+
+	* Fixed a bug by renaming the alias for the ActiveRecord::Base#quote method in finders.rb. See rubyforge bug #8996
+
+	* Made a .gemspec for ar-extensions
+
 2007-03-13  zdennis  <zdennis@elijah>
 
 	* Added :datetime searching support for better finder support. 
