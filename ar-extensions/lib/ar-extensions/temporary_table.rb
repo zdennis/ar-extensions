@@ -117,7 +117,7 @@ class ActiveRecord::TemporaryTable < ActiveRecord::Base
       Object.send( :remove_const, self.name.to_sym )
       @@temporary_table_hsh.delete( self )
     else
-      raise StandardError.new "Trying to drop nonexistance temporary table: #{self.name}"
+      raise StandardError.new( "Trying to drop nonexistance temporary table: #{self.name}" )
     end
   end
   
