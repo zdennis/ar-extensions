@@ -1,6 +1,6 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot' ) )
 
-class ActiveRecordBaseFinderTest < Test::Unit::TestCase
+class FindersTest < Test::Unit::TestCase
   include ActiveRecord::ConnectionAdapters
   self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/active_record_base_finders' )
   self.fixtures 'developers', 'books'
@@ -202,18 +202,6 @@ class ActiveRecordBaseFinderTest < Test::Unit::TestCase
     assert_equal( 1, developers.size )
   end
   
-  # FIXME this won't work until full text index/searching is added for 
-  #   any db adapter outside of MySQL.
-  # For PostgreSQL support look into TSearch2 support which is
-  # builtin to PostgreSQL 8.x (but not in 7.x)
-  def test_find_three_results_using_match
-    unless Book.supports_full_text_searching?
-      STDERR.puts "test_find_three_results_using_match is not testing, since your database adapter doesn't support fulltext searching"
-    else
-      books = Book.find( :all, :conditions=>{ :match_title=> 'Terry' } )
-      assert_equal( 4, books.size )
-    end
-  end
 
   def test_find_with_duck_typing_to_sql_for_an_id
     search_object = Object.new
