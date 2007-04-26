@@ -10,6 +10,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
   
   def teardown
     Topic.delete_all
+    Book.delete_all
   end
 
   # sets up base data for on duplicate key update tests
@@ -192,7 +193,7 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     assert_equal updated_values[0][1], topic.title, "The book title is wrong! It was supposed to change!"
     assert_equal updated_values[0][2], topic.author_name, "The author's name is incorrect! It was supposed to change!"
   end
-
+  
   def test_import_with_array_of_model_objects_with_on_duplicate_key_update
     return unless Topic.supports_on_duplicate_key_update?
     
@@ -209,6 +210,64 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     assert_equal "SomeNewguy", topic.author_name
     assert_equal "SomeOtherNewguy", topic2.author_name
   end  
+  
+  
+  def test_import_without_validations_but_with_on_duplicate_key_update_using_associated_objects
+    return unless Topic.supports_on_duplicate_key_update?
+
+    topic1 = Topic.create( :title=>"Topic1", :author_name=>"Someguy" ) 
+    topic2 = Topic.create( :title=>"Topic2", :author_name=>"Someguy" ) 
+
+    book1 = Book.create :title=>"book1", :author_name=>"Zach", :publisher=>"Pub", :topic_id=>topic1.id
+    book2 = Book.create :title=>"book2", :author_name=>"Mark", :publisher=>"Pub", :topic_id=>topic1.id
+    
+    book1.topic = topic2
+    book2.topic = topic1
+    
+    # Note that the title is supposed to change
+    columns = [ :id, :title, :author_name, :topic_id ]
+    columns2update = [ :title, :author_name, :topic_id ]
+    updated_values = [ 
+      [ book1.id, 'Book - 1st Edition', 'New Author', book1.topic.id ],
+      [ book2.id, 'Book - 2nd Edition', 'New Author', book2.topic.id ] ]
+    Book.import( columns, updated_values, 
+      :validate=>false,
+      :on_duplicate_key_update=>columns2update )
+
+    book1.reload
+    book2.reload
+    
+    assert_equal updated_values[0][1], book1.title, "The book title is wrong! It was supposed to change!"
+    assert_equal updated_values[0][2], book1.author_name, "The author's name is incorrect! It was supposed to change!"
+    assert_equal updated_values[0][3], book1.topic_id, "The topic id is wrong!"
+    
+    assert_equal updated_values[1][1], book2.title, "The book title is wrong! It was supposed to change!"
+    assert_equal updated_values[1][2], book2.author_name, "The author's name is incorrect! It was supposed to change!"
+    assert_equal updated_values[1][3], book2.topic_id, "The topic id is wrong!"
+  end  
+  
+  def test_import_with_on_duplicate_key_update_with_associated_objects_saves_foreign_keys
+    return unless Topic.supports_on_duplicate_key_update?
+
+    topic1 = Topic.create( :title=>"Topic1", :author_name=>"Someguy" ) 
+    topic2 = Topic.create( :title=>"Topic2", :author_name=>"Someguy" ) 
+
+    book1 = Book.create :title=>"book1", :author_name=>"Zach", :publisher=>"Pub", :topic_id=>topic1.id
+    book2 = Book.create :title=>"book2", :author_name=>"Mark", :publisher=>"Pub", :topic_id=>topic1.id
+    book3 = Book.create :title=>"book3", :author_name=>"Zach", :publisher=>"Pub", :topic_id=>topic1.id
+    
+    book1.topic = topic2
+    book2.topic = topic1
+    book3.topic = topic2
+    
+    books = [ book1, book2, book3 ]
+    Book.import( books, :on_duplicate_key_update=>[ :topic_id ])
+    books.each{ |b| b.reload }
+
+    assert book1.topic_id == topic2.id, "wrong topic id for book1!"
+    assert book2.topic_id == topic1.id, "wrong topic id for book2!"
+    assert book3.topic_id == topic2.id, "wrong topic id for book3!"
+  end
 
   
 end
