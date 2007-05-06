@@ -1,6 +1,14 @@
 module ActiveRecord # :nodoc:
   module ConnectionAdapters # :nodoc:
     class AbstractAdapter # :nodoc:
+      
+      # Synchronizes the passed in ActiveRecord instances with data
+      # from the database. This is like calling reload
+      # on an individual ActiveRecord instance but it is intended for use on
+      # multiple instances. 
+      #
+      # This uses one query for all instance updates and then updates existing
+      # instances rather sending one query for each instance
       def self.synchronize(instances, key=ActiveRecord::Base.primary_key)
         return if instances.empty?
         
@@ -14,7 +22,8 @@ module ActiveRecord # :nodoc:
           instance.instance_variable_set '@attributes', fresh_instances[index].attributes
         end
       end
-      
+
+      # See ActiveRecord::ConnectionAdapters::AbstractAdapter.synchronize
       def synchronize(instances, key=ActiveRecord::Base.primary_key)
         self.class.synchronize(instances, key)
       end

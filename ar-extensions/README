@@ -9,6 +9,13 @@ Email: zach.dennis@gmail.com
  - For How-To information see http://www.continuousthinking.com/tags/arext
  - For project information and feedback please consult http://rubyforge.org/projects/arext/
  - For release information please see below
+ 
+ActiveRecord::Extensions 0.6.0
+------------------------------
+May 5th, 2007
+ - Fixed bug with URI escaped strings and the Comparison better finder extension
+ - Added support for arrays with the Like better finder extension when using the '_contains' suffix
+ - Added 'synchronize' support for ActiveRecord::Base instances when using Import functionality
 
 ActiveRecord::Extensions 0.5.2
 ------------------------------

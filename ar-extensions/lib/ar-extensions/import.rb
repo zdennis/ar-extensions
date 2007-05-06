@@ -80,6 +80,9 @@ class ActiveRecord::Base
     # * +on_duplicate_key_update+ - an Array or Hash, tells import to \
     #    use MySQL's ON DUPLICATE KEY UPDATE ability. See On Duplicate\
     #    Key Update below.
+    # * +synchronize+ - an array of ActiveRecord instances for the model
+    #   that you are currently importing data into. This synchronizes
+    #   existing model instances in memory with updates from the import.
     #
     # == Examples  
     #  class BlogPost < ActiveRecord::Base ; end
@@ -99,6 +102,14 @@ class ActiveRecord::Base
     #  columns = [ :author_name, :title ]
     #  values = [ [ 'zdennis', 'test post' ], [ 'jdoe', 'another test post' ] ]
     #  BlogPost.import( columns, values, :validate => false  )
+    #
+    #  # Example synchronizing existing instances in memory
+    #  post = BlogPost.find_by_author_name( 'zdennis' )
+    #  puts post.author_name # => 'zdennis'
+    #  columns = [ :author_name, :title ]
+    #  values = [ [ 'yoda', 'test post' ] ]
+    #  BlogPost.import posts, :synchronize=>[ post ]
+    #  puts post.author_name # => 'yoda'
     #
     # == On Duplicate Key Update (MySQL only)
     #

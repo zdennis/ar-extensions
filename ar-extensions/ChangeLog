@@ -1,3 +1,11 @@
+2007-05-05  zdennis  <zdennis@elijah.local>
+
+	* Added ActiveRecord::Base::AbstractAdapter#synchronize method which allows a mass re-synchronization of ActiveRecord instances. This is similar to ActiveRecord::Base#reload except that it works on multiple instances at a time rather then one. This sends one query for all instances rather then 1 per instance reloaded.
+
+	* Fixed bug with URI encoded strings with a workaround in the Comparison extension. ActiveRecord needs to be fixed to not use the String#%  method so strings that do contains percentage signs will not fail
+
+	* Applied patch from Grant Goodale to allow the Like extension to support arrays when using the '_contains' suffix
+
 2007-03-14  zdennis  <zdennis@elijah.xrite.com>
 
 	* Fixed a bug by renaming the alias for the ActiveRecord::Base#quote method in finders.rb. See rubyforge bug #8996
