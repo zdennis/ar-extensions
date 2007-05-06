@@ -172,7 +172,7 @@ class ActiveRecord::Base
       end
       
       if options[:synchronize]
-        connection.synchronize( options[:synchronize] )
+        synchronize( options[:synchronize] )
       end
       
       number_of_inserts
