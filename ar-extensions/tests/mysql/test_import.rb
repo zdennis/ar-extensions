@@ -21,6 +21,30 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     Topic.find_by_id( 1 )
   end
   
+ 
+  def test_import_without_validations_but_with_on_duplicate_key_update_that_synchronizes_existing_AR_instances
+    topics = []
+    topics << Topic.create!( :title=>"LDAP", :author_name=>"Big Bird" )
+    topics << Topic.create!( :title=>"Rails Recipes", :author_name=>"Elmo") 
+      
+    columns = %W{ id author_name }
+    values = []
+    values << [ topics.first.id, "Jerry Carter" ]
+    values << [ topics.last.id, "Chad Fowler" ]
+    
+    columns2update = [ 'author_name' ]
+      
+    expected_count = Topic.count
+    Topic.import( columns, values,
+      :validate=>false,
+      :on_duplicate_key_update=>columns2update,
+      :synchronize=>topics )
+    
+    assert_equal expected_count, Topic.count, "no new records should have been created!"
+    assert_equal "Jerry Carter",  topics.first.author_name, "wrong author!"
+    assert_equal "Chad Fowler", topics.last.author_name, "wrong author!"
+  end  
+  
   def test_import_without_validations_but_with_on_duplicate_key_update_using_string_array1
     return unless Topic.supports_on_duplicate_key_update?
 

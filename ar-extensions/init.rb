@@ -24,6 +24,8 @@ require File.expand_path( File.join(  dir, 'lib/ar-extensions', 'import', 'postg
 
 require File.expand_path( File.join(  dir, 'lib/ar-extensions', 'finders' ) )
 
+require File.expand_path( File.join(  dir, 'lib/ar-extensions', 'synchronize' ) )
+
 require File.expand_path( File.join(  dir, 'lib/ar-extensions', 'temporary_table' ) )
 require File.expand_path( File.join(  dir, 'lib/ar-extensions', 'temporary_table', 'mysql' ) )
 

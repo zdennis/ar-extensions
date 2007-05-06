@@ -1,0 +1,16 @@
+first:
+  id: 1
+  title: "Book1"
+  publisher: Publisher1
+  author_name: Oscar The Grouch
+second:
+  id: 2
+  title: "Book2"
+  publisher: Publisher
+  author_name: Big Bird
+third:
+  id: 3
+  title: "Book3"
+  publisher: Publisher
+  author_name: Elmo
+

@@ -44,6 +44,12 @@ module ActiveRecord # :nodoc:
         
         number_of_inserts
       end
+      
+      # Synchronizes the passed in ActiveRecord instances with the records in
+      # the database by calling +reload+ on each instance.
+      def after_import_synchronize( instances )
+        instances.each { |e| e.reload }
+      end
 
       # Returns the sum of the sizes of the passed in objects. This should
       # probably be moved outside this class, but to where?

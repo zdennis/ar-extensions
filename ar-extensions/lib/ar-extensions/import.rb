@@ -154,11 +154,17 @@ class ActiveRecord::Base
       
       # dup the passed in array so we don't modify it unintentionally
       array_of_attributes = array_of_attributes.dup
-      if is_validating
+      number_of_inserts = if is_validating
         import_with_validations( column_names, array_of_attributes, options )
       else
         import_without_validations_or_callbacks( column_names, array_of_attributes, options )
       end
+      
+      if options[:synchronize]
+        connection.synchronize( options[:synchronize] )
+      end
+      
+      number_of_inserts
     end
     
     # TODO import_from_table needs to be implemented. 
