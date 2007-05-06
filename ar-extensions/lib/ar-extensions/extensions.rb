@@ -257,22 +257,29 @@ module ActiveRecord::Extensions
     ENDS_WITH_RGX =  /(.+)_ends_with$/
     
     def self.process( key, val, caller )
-      if match_data=key.to_s.match( LIKE_RGX )
-        fieldname = match_data.captures[0]
-        str = "#{caller.table_name}.#{caller.connection.quote_column_name( fieldname )} LIKE ?"
-        return Result.new( str, "%#{val}%" )
-      elsif match_data=key.to_s.match( STARTS_WITH_RGX )
-        fieldname = match_data.captures[0]
-        str = "#{caller.table_name}.#{caller.connection.quote_column_name( fieldname )} LIKE ?"
-        return Result.new( str, "#{val}%" )
-      elsif match_data=key.to_s.match( ENDS_WITH_RGX )
-        fieldname = match_data.captures[0]
-        str = "#{caller.table_name}.#{caller.connection.quote_column_name( fieldname )} LIKE ?"
-        return Result.new( str, "%#{val}" )
+      values = [*val]
+      case key.to_s
+      when LIKE_RGX
+        str = values.collect do |v|
+           "#{caller.table_name}.#{caller.connection.quote_column_name( $1 )} LIKE " +
+            "#{caller.connection.quote( '%%' + v + '%%', caller.columns_hash[ $1 ] )} "
+        end
+      when STARTS_WITH_RGX
+        str = values.collect do |v|
+           "#{caller.table_name}.#{caller.connection.quote_column_name( $1 )} LIKE " +
+            "#{caller.connection.quote( v + '%%', caller.columns_hash[ $1 ] )} "
+        end
+      when ENDS_WITH_RGX
+        str = values.collect do |v|
+           "#{caller.table_name}.#{caller.connection.quote_column_name( $1 )} LIKE " +
+            "#{caller.connection.quote( '%%' + v, caller.columns_hash[ $1 ] )} "
+        end
+      else
+        return nil
       end
-      nil
+
+      return Result.new( str.join(' OR '), nil)
     end
-    
   end
 
 
@@ -461,8 +468,8 @@ end
   
 
   register Comparison, :adapters=>:all
-  register Like, :adapters=>:all 
   register ArrayExt, :adapters=>:all  
+  register Like, :adapters=>:all 
   register RangeExt, :adapters=>:all  
   register MySQLRegexp, :adapters=>[ :mysql ]
   register PostgreSQLRegexp, :adapters=>[ :postgresql ]

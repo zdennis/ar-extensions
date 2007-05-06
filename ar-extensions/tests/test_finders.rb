@@ -43,6 +43,9 @@ class FindersTest < Test::Unit::TestCase
 
     developers = Developer.find( :all, :conditions=>{ :name_like=>'Zach' } )
     assert_equal( 1, developers.size )
+ 
+    developers = Developer.find( :all, :conditions=>{ :name_like=>['ach', 'oe'] } )
+    assert_equal( 2, developers.size )
   end
   
   def test_find_with_contains
@@ -51,6 +54,9 @@ class FindersTest < Test::Unit::TestCase
 
     developers = Developer.find( :all, :conditions=>{ :name_contains=>'Zach' } )
     assert_equal( 1, developers.size )
+
+    developers = Developer.find( :all, :conditions=>{ :name_contains=>['ach', 'oe'] } )
+    assert_equal( 2, developers.size )
   end
 
   def test_find_with_starts_with
@@ -60,6 +66,9 @@ class FindersTest < Test::Unit::TestCase
     # we shouldn't find a record which starts with the last name Dennis
     developers = Developer.find( :all, :conditions=>{ :name_starts_with=>'Dennis' } )
     assert_equal( 0, developers.size )
+
+    developers = Developer.find( :all, :conditions=>{ :name_starts_with=>['Za', 'Jo'] } )
+    assert_equal( 2, developers.size )
   end
 
   def test_find_with_ends_with
@@ -69,6 +78,9 @@ class FindersTest < Test::Unit::TestCase
     # we shouldn't find an issue which ends with the first name Zach
     developers = Developer.find( :all, :conditions=>{ :name_ends_with=>'Zach' } )
     assert_equal( 0, developers.size )
+
+    developers = Developer.find( :all, :conditions=>{ :name_ends_with=>['is', 'oe'] } )
+    assert_equal( 2, developers.size )
   end
 
   def test_find_with_regex

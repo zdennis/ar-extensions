@@ -13,8 +13,9 @@ class SynchronizeTest < Test::Unit::TestCase
     books = [ Book.find(1), Book.find(2), Book.find(3) ]
     titles = books.map(&:title)
     
-    @connection.execute( "UPDATE #{Book.table_name} SET title=CONCAT(title,'_haha')", 
-                         "Updating records without ActiveRecord" )  
+    @connection.execute( "UPDATE #{Book.table_name} SET title='#{titles[0]}_haha' WHERE id=#{books[0].id}", "Updating records without ActiveRecord" )  
+    @connection.execute( "UPDATE #{Book.table_name} SET title='#{titles[1]}_haha' WHERE id=#{books[1].id}", "Updating records without ActiveRecord" )  
+    @connection.execute( "UPDATE #{Book.table_name} SET title='#{titles[2]}_haha' WHERE id=#{books[2].id}", "Updating records without ActiveRecord" )  
     @connection.synchronize( books )
 
     actual_titles = books.map(&:title)
