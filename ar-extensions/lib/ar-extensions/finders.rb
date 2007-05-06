@@ -21,11 +21,11 @@ class ActiveRecord::Base
     def sanitize_sql( arg ) # :nodoc:
       return sanitize_sql_orig( arg ) if arg.nil?
       if arg.respond_to?( :to_sql )
-        arg = sanitize_sql_by_way_of_duck_typing( arg ) #if arg.respond_to?( :to_sql )
+        arg = sanitize_sql_by_way_of_duck_typing( arg )
       elsif arg.is_a?( Hash )
-        arg = sanitize_sql_from_hash( arg ) #if arg.is_a?( Hash )
+        arg = sanitize_sql_from_hash( arg ) 
       elsif arg.size == 2 and arg.first.is_a?( String ) and arg.last.is_a?( Hash )
-         arg = sanitize_sql_from_string_and_hash( arg ) # if arg.size == 2 and arg.first.is_a?( String ) and arg.last.is_a?( Hash )
+        arg = sanitize_sql_from_string_and_hash( arg ) 
       end
       sanitize_sql_orig( arg )
     end

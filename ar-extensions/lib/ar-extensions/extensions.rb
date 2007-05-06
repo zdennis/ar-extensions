@@ -216,10 +216,9 @@ module ActiveRecord::Extensions
       if val.nil?
         str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )} IS NULL"
       else
-        str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )}=" +
-          "#{caller.connection.quote( val, caller.columns_hash[ key ] )} "
+        str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )}=?" 
       end
-      Result.new( str, nil )
+      Result.new( str, val )
     end
 
     def self.process_with_suffix( key, val, caller )

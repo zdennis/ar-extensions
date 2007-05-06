@@ -274,4 +274,8 @@ class FindersTest < Test::Unit::TestCase
     assert_equal( 0, developers.size )
   end
   
+  def test_find_should_not_break_proper_string_escapes
+    assert Book.find_or_create_by_title_and_publisher_and_author_name( "Book1%20Something", "Publisher%20", "%20Author%20" );
+  end
+  
 end
