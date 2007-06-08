@@ -2,8 +2,8 @@ require 'rake'
 
 Gem::Specification.new do |s|
   s.name = %q{ar-extensions}
-  s.version = "0.6.0"
-  s.date = %q{2007-05-05}
+  s.version = "0.7.0"
+  s.date = %q{2007-06-07}
   s.summary = %q{Extends ActiveRecord functionality.}
   s.email = %q{zach.dennis@gmail.com}
   s.homepage = %q{http://www.continuousthinking.com/tags/arext}

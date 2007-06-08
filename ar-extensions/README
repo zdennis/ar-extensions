@@ -9,6 +9,13 @@ Email: zach.dennis@gmail.com
  - For How-To information see http://www.continuousthinking.com/tags/arext
  - For project information and feedback please consult http://rubyforge.org/projects/arext/
  - For release information please see below
+
+AciveRecord::Extensions 0.7.0
+-----------------------------
+June 7th, 2007
+ - Committed patch to fix MySQL query padding, thanks to Gabe da Silveira
+ - Added functionality for MySQL to work with created_on, created_at, updated_on or updated_at fields
+ - Added more test coverage for import functionality 
  
 ActiveRecord::Extensions 0.6.0
 ------------------------------
