@@ -132,6 +132,10 @@ class ActiveRecord::Base
     #   
     #   BlogPost.import columns, attributes, :on_duplicate_key_update=>{ :title => :title } 
     #  
+    # = Returns
+    # This returns an object which responds to +failed_instances+ and +num_inserts+.
+    # * failed_instances - an array of objects that fails validation and were not committed to the database. An empty array if no validation is performed.
+    # * num_inserts - the number of insert statements it took to import the data
     def import( *args )
       options = { :validate=>true }
       options.merge!( args.pop ) if args.last.is_a? Hash
@@ -165,17 +169,17 @@ class ActiveRecord::Base
       
       # dup the passed in array so we don't modify it unintentionally
       array_of_attributes = array_of_attributes.dup
-      number_of_inserts = if is_validating
-        obj = import_with_validations( column_names, array_of_attributes, options )
-        obj.num_inserts
+      return_obj = if is_validating
+        import_with_validations( column_names, array_of_attributes, options )
       else
-        import_without_validations_or_callbacks( column_names, array_of_attributes, options )
+        num_inserts = import_without_validations_or_callbacks( column_names, array_of_attributes, options )
+        OpenStruct.new :failed_instances=>[], :num_inserts=>num_inserts
       end
       if options[:synchronize]
         synchronize( options[:synchronize] )
       end
       
-      number_of_inserts
+      return_obj
     end
     
     # TODO import_from_table needs to be implemented. 

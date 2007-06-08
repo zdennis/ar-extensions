@@ -20,24 +20,6 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     Topic.import( columns, values, :validate=>false )
     Topic.find_by_id( 1 )
   end
-  
-  def test_import_with_default_validation_should_return_a_number_of_inserts
-    values = [[ "LDAP", "Bird Bird" ]]
-    number_of_inserts = Topic.import [:title, :author_name], values
-    assert_equal 1, number_of_inserts, "wrong number of inserts"
-  end
-
-  def test_import_with_validation_should_return_a_number_of_inserts
-   values = [["LDAP", "Bird Bird"]]
-   number_of_inserts = Topic.import [:title, :author_name], values, :validation=>false
-   assert_equal 1, number_of_inserts, "wrong number of inserts"
-  end
-
-  def test_import_without_validation_should_return_a_number_of_inserts
-   values = [["LDAP", "Bird Bird"]]
-   number_of_inserts = Topic.import [:title, :author_name], values, :validation=>true
-   assert_equal 1, number_of_inserts, "wrong number of inserts"
-  end
  
   def test_import_without_validations_but_with_on_duplicate_key_update_that_synchronizes_existing_AR_instances
     topics = []

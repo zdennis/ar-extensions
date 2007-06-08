@@ -76,7 +76,8 @@ class ImportTest < Test::Unit::TestCase
 
     # these should fail, so we should end up with the same count for Topics
     expected_count = Topic.count
-    invalid_topics = Topic.import( columns, values, :validate=>true )
+    result = Topic.import( columns, values, :validate=>true )
+    invalid_topics = result.failed_instances
     
     assert_equal expected_count, Topic.count
     assert_equal values.size, invalid_topics.size
@@ -140,7 +141,24 @@ class ImportTest < Test::Unit::TestCase
     value_sets = ActiveRecord::ConnectionAdapters::AbstractAdapter.get_insert_value_sets( values, base_sql.size, max_allowed_bytes )
     assert_equal 1, value_sets.size
   end
-  
+
+  def test_import_with_default_validation_should_return_a_number_of_inserts
+    values = [[ "LDAP", "Bird Bird" ]]
+    result = Topic.import [:title, :author_name], values
+    assert_equal 1, result.num_inserts, "wrong number of inserts"
+  end
+
+  def test_import_with_validation_should_return_a_number_of_inserts
+   values = [["LDAP", "Bird Bird"]]
+   result = Topic.import [:title, :author_name], values, :validation=>false
+   assert_equal 1, result.num_inserts, "wrong number of inserts"
+  end
+
+  def test_import_without_validation_should_return_a_number_of_inserts
+   values = [["LDAP", "Bird Bird"]]
+   result = Topic.import [:title, :author_name], values, :validation=>true
+   assert_equal 1, result.num_inserts, "wrong number of inserts"
+  end
   
 end
 
