@@ -2,7 +2,8 @@ module ActiveRecord # :nodoc:
   module ConnectionAdapters # :nodoc:
     class AbstractAdapter # :nodoc:
       NO_MAX_PACKET = 0
-    
+      QUERY_OVERHEAD = 8 #This was shown to be true for MySQL, but it's not clear where the overhead is from.
+      
       # +sql+ can be a single string or an array. If it is an array all 
       # elements that are in position >= 1 will be appended to the final SQL.
       def insert_many( sql, values, *args ) # :nodoc:
@@ -15,7 +16,7 @@ module ActiveRecord # :nodoc:
           [ sql.shift, sql.join( ' ' ) ]
         end
         
-        sql_size = base_sql.size + post_sql.size 
+        sql_size = QUERY_OVERHEAD + base_sql.size + post_sql.size 
 
         # the number of bytes the requested insert statement values will take up
         values_in_bytes = self.class.sum_sizes( *values )
@@ -41,7 +42,7 @@ module ActiveRecord # :nodoc:
             insert( sql2insert, *args )
           end
         end        
-        
+
         number_of_inserts
       end
       

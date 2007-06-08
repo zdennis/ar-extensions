@@ -166,11 +166,11 @@ class ActiveRecord::Base
       # dup the passed in array so we don't modify it unintentionally
       array_of_attributes = array_of_attributes.dup
       number_of_inserts = if is_validating
-        import_with_validations( column_names, array_of_attributes, options )
+        obj = import_with_validations( column_names, array_of_attributes, options )
+        obj.num_inserts
       else
         import_without_validations_or_callbacks( column_names, array_of_attributes, options )
       end
-      
       if options[:synchronize]
         synchronize( options[:synchronize] )
       end
@@ -184,7 +184,9 @@ class ActiveRecord::Base
     
     # Imports the passed in +column_names+ and +array_of_attributes+
     # given the passed in +options+ Hash with validations. Returns an
-    # array of instances that failed validations. See
+    # object with the methods +failed_instances+ and +num_inserts+. 
+    # +failed_instances+ is an array of instances that failed validations. 
+    # +num_inserts+ is the number of inserts it took to import the data. See
     # ActiveRecord::Base.import for more information on
     # +column_names+, +array_of_attributes+ and +options+.
     def import_with_validations( column_names, array_of_attributes, options={} )
@@ -204,10 +206,8 @@ class ActiveRecord::Base
       end
       array_of_attributes.compact!
       
-      if not array_of_attributes.empty?
-        import_without_validations_or_callbacks( column_names, array_of_attributes, options )
-      end
-      failed_instances   
+      num_inserts = array_of_attributes.empty? ? 0 : import_without_validations_or_callbacks( column_names, array_of_attributes, options )
+      OpenStruct.new :failed_instances=>failed_instances, :num_inserts => num_inserts
     end
     
     # Imports the passed in +column_names+ and +array_of_attributes+
