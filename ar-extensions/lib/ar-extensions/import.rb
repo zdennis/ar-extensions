@@ -18,6 +18,14 @@ end
 
 class ActiveRecord::Base
   class << self
+        
+    AREXT_RAILS_COLUMNS = {
+      :create => { "created_on" => proc { Time.now },
+                   "created_at" => proc { Time.now } },
+      :update => { "updated_on" => proc { Time.now },
+                   "updated_at" => proc { Time.now } }
+    }
+    AREXT_RAILS_COLUMN_NAMES = AREXT_RAILS_COLUMNS[:create].keys + AREXT_RAILS_COLUMNS[:update].keys
   
     # Returns true if the current database connection adapter
     # supports import functionality, otherwise returns false.
@@ -148,7 +156,7 @@ class ActiveRecord::Base
         else
           models = args.first
           column_names = self.column_names.dup
-          column_names.delete( self.primary_key ) unless options[ :on_duplicate_key_update ]
+          # column_names.delete( self.primary_key ) unless options[ :on_duplicate_key_update ]
         end
         
         array_of_attributes = models.inject( [] ) do |arr,model|
@@ -166,9 +174,12 @@ class ActiveRecord::Base
       end
       
       is_validating = options.delete( :validate )
-      
+
+
       # dup the passed in array so we don't modify it unintentionally
       array_of_attributes = array_of_attributes.dup
+      
+      add_special_rails_stamps column_names, array_of_attributes, options
       return_obj = if is_validating
         import_with_validations( column_names, array_of_attributes, options )
       else
@@ -198,10 +209,10 @@ class ActiveRecord::Base
       
       # create instances for each of our column/value sets
       arr = validations_array_for_column_names_and_attributes( column_names, array_of_attributes )    
-      
+
       # keep track of the instance and the position it is currently at. if this fails
       # validation we'll use the index to remove it from the array_of_attributes
-      arr.each_with_index do |hsh,i| 
+      arr.each_with_index do |hsh,i|
         instance = new( hsh )
         if not instance.valid?
           array_of_attributes[ i ] = nil
@@ -259,6 +270,42 @@ class ActiveRecord::Base
 
     
     private
+
+    
+    def add_special_rails_stamps( column_names, array_of_attributes, options )
+      AREXT_RAILS_COLUMNS[:create].each_pair do |key, blk|
+        if self.column_names.include?(key)
+          value = blk.call
+          if index=column_names.index(key)
+             # replace every instance of the array of attributes with our value
+             array_of_attributes.each{ |arr| arr[index] = value }
+          else
+            column_names << key
+            array_of_attributes.each { |arr| arr << value }
+          end
+        end
+      end
+
+      AREXT_RAILS_COLUMNS[:update].each_pair do |key, blk|
+        if self.column_names.include?(key)
+          value = blk.call
+          if index=column_names.index(key)
+             # replace every instance of the array of attributes with our value
+             array_of_attributes.each{ |arr| arr[index] = value }
+          else
+            column_names << key
+            array_of_attributes.each { |arr| arr << value }
+          end
+          
+          if options[:on_duplicate_key_update]
+            options[:on_duplicate_key_update] << key.to_sym if options[:on_duplicate_key_update].is_a?(Array)
+            options[:on_duplicate_key_update][key.to_sym] = key.to_sym if options[:on_duplicate_key_update].is_a?(Hash)
+          else
+            options[:on_duplicate_key_update] = [ key.to_sym ]
+          end
+        end
+      end
+    end
     
     # Returns an Array of Hashes for the passed in +column_names+ and +array_of_attributes+.
     def validations_array_for_column_names_and_attributes( column_names, array_of_attributes ) # :nodoc:

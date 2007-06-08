@@ -292,5 +292,48 @@ class ActiveRecordBaseTest < Test::Unit::TestCase
     assert book3.topic_id == topic2.id, "wrong topic id for book3!"
   end
 
+  def test_import_should_not_update_created_at_or_created_on_columns_on_duplicate_keys_by_default
+    return unless Topic.supports_on_duplicate_key_update?
+
+    book1 = Book.create :title=>"book1", :author_name=>"Zach", :publisher=>"Pub"
+    book2 = Book.create :title=>"book2", :author_name=>"Mark", :publisher=>"Pub"
+    book3 = Book.create :title=>"book3", :author_name=>"Zach", :publisher=>"Pub"
+    books = [ book1, book2, book3 ]
+    created_at_arr = books.inject([]){ |arr,book| arr << book.created_at }
+    created_on_arr = books.inject([]){ |arr,book| arr << book.created_on }
+    
+    Book.import books
+    books.each{ |b| b.reload }
+
+    created_at_arr.each_with_index do |time,i|
+      assert_equal time.to_s(:db), books[i].created_at.to_s(:db)
+    end
+
+    created_on_arr.each_with_index do |time,i|
+      assert_equal time.to_s(:db), books[i].created_on.to_s(:db)
+    end
+  end
+
+  def test_import_should_update_updated_at_or_updated_on_columns_with_duplicate_keys_by_default
+    return unless Topic.supports_on_duplicate_key_update?
+
+    book1 = Book.create :title=>"book1", :author_name=>"Zach", :publisher=>"Pub"
+    book2 = Book.create :title=>"book2", :author_name=>"Mark", :publisher=>"Pub"
+    sleep 2
+    books = [ book1, book2 ]
+    updated_at_arr = books.inject([]){ |arr,book| arr << book.updated_at }
+    updated_on_arr = books.inject([]){ |arr,book| arr << book.updated_on }
+    Book.import books
+    books.each{ |b| b.reload }
+
+    updated_at_arr.each_with_index do |time,i|
+      assert time.to_f < books[i].updated_at.to_f
+    end
+
+    updated_on_arr.each_with_index do |time,i|
+     assert time.to_f < books[i].updated_on.to_f
+    end
+  end
+
   
 end

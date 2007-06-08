@@ -160,5 +160,85 @@ class ImportTest < Test::Unit::TestCase
    assert_equal 1, result.num_inserts, "wrong number of inserts"
   end
   
+  def test_import_should_automatically_update_created_on_columns_for_new_imported_records
+    Book.destroy_all
+    
+    start_time = Time.now
+    Book.import [:title, :author_name], [["LDAP", "Big Bird"]]
+    stop_time = Time.now
+    
+    book = Book.find(:first)
+    assert_within start_time.to_f-1, book.created_on.to_f, stop_time.to_f+1, "Book created time was incorrect"    
+  end
+
+  def test_import_should_automatically_update_created_at_columns_for_new_imported_records
+    Book.destroy_all
+    
+    start_time = Time.now
+    Book.import [:title, :author_name], [["LDAP", "Big Bird"]]
+    stop_time = Time.now
+    
+    book = Book.find(:first)
+    assert_within start_time.to_f-1, book.created_at.to_f, stop_time.to_f+1, "Book created time was incorrect"    
+  end
+  
+  def test_import_should_automatically_update_updated_on_columns_for_new_imported_records
+    Book.destroy_all
+    
+    start_time = Time.now
+    Book.import [:title, :author_name], [["LDAP", "Big Bird"]]
+    stop_time = Time.now
+    
+    book = Book.find(:first)
+    assert_within start_time.to_f-1, book.updated_on.to_f, stop_time.to_f+1, "Book created time was incorrect"    
+  end
+
+  def test_import_should_automatically_update_updated_at_columns_for_new_imported_records
+    Book.destroy_all
+    
+    start_time = Time.now
+    Book.import [:title, :author_name], [["LDAP", "Big Bird"]]
+    stop_time = Time.now
+    
+    book = Book.find(:first)
+    assert_within start_time.to_f-1, book.updated_at.to_f, stop_time.to_f+1, "Book created time was incorrect"    
+  end  
+  
+  def test_import_should_not_add_or_overwrite_existing_models
+    Book.destroy_all
+    
+    book = Book.create :title=>"book1", :author_name=>"Zach", :publisher=>"Pub"
+    assert_equal 1, Book.count
+
+    book.title = "New Title"
+    Book.import [ book ]
+    assert_equal 1, Book.count
+    
+    book.reload
+    assert_equal "book1", book.title, "the title of the book shouldn't have changed since it was an existing record"
+  end
+
+  def test_import_should_add_nonsaved_models
+    Book.destroy_all
+    
+    book = Book.new :title=>"book1", :author_name=>"Zach", :publisher=>"Pub"
+    assert_equal 0, Book.count
+
+    Book.import [ book ]
+    assert_equal 1, Book.count
+    
+    book = Book.find(:first)
+    assert_equal "book1", book.title
+    assert_equal "Zach", book.author_name
+    assert_equal "Pub", book.publisher
+  end
+
+
+  private
+  
+  def assert_within low, mid, high, msg=""
+    assert (low < mid && mid < high), msg
+  end
+  
 end
 
