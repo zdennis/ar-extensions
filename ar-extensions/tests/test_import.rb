@@ -164,7 +164,7 @@ class ImportTest < Test::Unit::TestCase
     Book.destroy_all
     
     start_time = Time.now
-    Book.import [:title, :author_name], [["LDAP", "Big Bird"]]
+    Book.import [:title, :author_name, :publisher], [["LDAP", "Big Bird", "Del Rey"]]
     stop_time = Time.now
     
     book = Book.find(:first)
@@ -175,7 +175,7 @@ class ImportTest < Test::Unit::TestCase
     Book.destroy_all
     
     start_time = Time.now
-    Book.import [:title, :author_name], [["LDAP", "Big Bird"]]
+    Book.import [:title, :author_name, :publisher], [["LDAP", "Big Bird", "Del Rey"]]
     stop_time = Time.now
     
     book = Book.find(:first)
@@ -186,7 +186,7 @@ class ImportTest < Test::Unit::TestCase
     Book.destroy_all
     
     start_time = Time.now
-    Book.import [:title, :author_name], [["LDAP", "Big Bird"]]
+    Book.import [:title, :author_name, :publisher], [["LDAP", "Big Bird", "Del Rey"]]
     stop_time = Time.now
     
     book = Book.find(:first)
@@ -197,7 +197,7 @@ class ImportTest < Test::Unit::TestCase
     Book.destroy_all
     
     start_time = Time.now
-    Book.import [:title, :author_name], [["LDAP", "Big Bird"]]
+    Book.import [:title, :author_name, :publisher], [["LDAP", "Big Bird", "Del Rey"]]
     stop_time = Time.now
     
     book = Book.find(:first)

@@ -156,15 +156,18 @@ class ActiveRecord::Base
         else
           models = args.first
           column_names = self.column_names.dup
-          # column_names.delete( self.primary_key ) unless options[ :on_duplicate_key_update ]
         end
         
-        array_of_attributes = models.inject( [] ) do |arr,model|
-          attributes = []
-          column_names.each do |name| 
-            attributes << model.send( "#{name}_before_type_cast" ) 
-          end
-          arr << attributes
+        array_of_attributes  = []
+        models.each do |model|
+          # this next line breaks sqlite.so with a segmentation fault
+          # if model.new_record? || options[:on_duplicate_key_update]
+            attributes = []
+            column_names.each do |name| 
+              attributes << model.send( "#{name}_before_type_cast" ) 
+            end
+            array_of_attributes << attributes
+          # end
         end
         # supports 2-element array and array
       elsif args.size == 2 and args.first.is_a?( Array ) and args.last.is_a?( Array )
@@ -174,7 +177,6 @@ class ActiveRecord::Base
       end
       
       is_validating = options.delete( :validate )
-
 
       # dup the passed in array so we don't modify it unintentionally
       array_of_attributes = array_of_attributes.dup
