@@ -12,7 +12,7 @@ task :boot do
   require File.expand_path( File.join( DIR, 'db/migrate/version' ) )
 end
 
-ADAPTERS = %w( mysql postgresql sqlite sqlite3 )
+ADAPTERS = %w( mysql postgresql sqlite sqlite3 oracle )
 
 namespace :db do
 

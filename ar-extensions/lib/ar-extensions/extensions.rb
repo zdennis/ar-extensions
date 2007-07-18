@@ -72,7 +72,7 @@ require 'forwardable'
 # 
 # == Importing Lots of Data
 #
-# ActiveRecord executes a single INSERT statement for every cal to 'create'
+# ActiveRecord executes a single INSERT statement for every call to 'create'
 # and for every call to 'save' on a new model object. When you have only
 # a handful of records to create or save this is not a big deal, but when
 # you have hundreds, thousands or hundreds of thousands of records
@@ -203,8 +203,8 @@ module ActiveRecord::Extensions
   #  Model.find :all, :conditions=>{ 'number_lt'=>100 } 
   #  Model.find :all, :conditions=>{ 'number_gte'=>100 } 
   #  Model.find :all, :conditions=>{ 'number_lte'=>100 }
-  class Comparison 
- 
+  class Comparison
+
     SUFFIX_MAP = { 'eq'=>'=', 'lt'=>'<', 'lte'=>'<=', 'gt'=>'>', 'gte'=>'>=', 'ne'=>'!=', 'not'=>'!=' }
     
     def self.process( key, val, caller )
@@ -394,6 +394,19 @@ module ActiveRecord::Extensions
     end
 
   end
+
+  # ActiveRecord::Extension for implementing Regexp implementation for Oracle.
+  # See documention for RegexpBase.
+  #
+  class OracleRegexp < RegexpBase
+   
+    def self.process( key, val, caller )
+      return nil unless val.is_a?( Regexp )
+      r = field_result( key, caller )
+      return Result.new( "#{r.negate? ? ' NOT ':''} REGEXP_LIKE(#{caller.table_name}.#{r.fieldname} , ?)", val )
+    end
+
+  end
   
   
   # ActiveRecord::Extension for implementing Regexp implementation for MySQL.
@@ -473,7 +486,8 @@ end
   register MySQLRegexp, :adapters=>[ :mysql ]
   register PostgreSQLRegexp, :adapters=>[ :postgresql ]
   register SqliteRegexp, :adapters =>[ :sqlite ]
-  register DatetimeSupport, :adapters =>[ :mysql, :sqlite ]
+  register OracleRegexp, :adapters =>[ :oracle ]
+  register DatetimeSupport, :adapters =>[ :mysql, :sqlite, :oracle ]
 end
 
 

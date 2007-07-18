@@ -4,15 +4,17 @@ To run the tests you can run rake tasks from the top level directory.
 For more information on what tasks can be run, run "rake -T" from
 the command line.
 
-Currently the four available tasks are:
+Currently the ten available tasks are:
  - test:mysql
  - test:postgresql
  - test:sqlite
  - test:sqlite3
+ - test:oracle
  - test:activerecord:mysql
  - test:activerecord:postgresql
  - test:activerecord:sqlite
  - test:activerecord:sqlite3
+ - test:activerecord:oracle
 
 Task - test:<db_adapter>
 -----------------

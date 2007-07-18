@@ -18,7 +18,9 @@ end
 
 class ActiveRecord::Base
   class << self
-        
+
+    # Should use utc when appropriate
+    #  self.class.default_timezone == :utc ? Time.now.utc : Time.now
     AREXT_RAILS_COLUMNS = {
       :create => { "created_on" => proc { Time.now },
                    "created_at" => proc { Time.now } },
@@ -34,7 +36,7 @@ class ActiveRecord::Base
     rescue NoMethodError
       false
     end
-    
+
     # Returns true if the current database connection adapter
     # supports on duplicate key update functionality, otherwise
     # returns false.
@@ -145,6 +147,8 @@ class ActiveRecord::Base
     # * failed_instances - an array of objects that fails validation and were not committed to the database. An empty array if no validation is performed.
     # * num_inserts - the number of insert statements it took to import the data
     def import( *args )
+      @logger = Logger.new(STDOUT)
+      @logger.level = Logger::DEBUG
       options = { :validate=>true }
       options.merge!( args.pop ) if args.last.is_a? Hash
       
@@ -175,13 +179,25 @@ class ActiveRecord::Base
       else
         raise ArgumentError.new( "Invalid arguments!" )
       end
-      
+
+      # Force the primary key col into the insert if it's not
+      # on the list and we are using a sequence and stuff a nil
+      # value for it into each row so the sequencer will fire later
+      if !column_names.include?(primary_key) && sequence_name && connection.prefetch_primary_key?
+         column_names << primary_key
+         array_of_attributes.each { |a| a << nil }
+      end
+
       is_validating = options.delete( :validate )
 
       # dup the passed in array so we don't modify it unintentionally
       array_of_attributes = array_of_attributes.dup
-      
-      add_special_rails_stamps column_names, array_of_attributes, options
+
+      # record timestamps unless disabled in ActiveRecord::Base
+      if record_timestamps
+         add_special_rails_stamps column_names, array_of_attributes, options
+      end
+
       return_obj = if is_validating
         import_with_validations( column_names, array_of_attributes, options )
       else
@@ -191,7 +207,8 @@ class ActiveRecord::Base
       if options[:synchronize]
         synchronize( options[:synchronize] )
       end
-      
+
+      return_obj.num_inserts = 0 if return_obj.num_inserts.nil?
       return_obj
     end
     
@@ -241,15 +258,20 @@ class ActiveRecord::Base
       if not supports_import?
         columns_sql = "(" + escaped_column_names.join( ',' ) + ")"
         insert_statements, values = [], []
+        number_inserted = 0
         array_of_attributes.each do |arr|
           my_values = []
           arr.each_with_index do |val,j|
-            my_values << connection.quote( val, columns[j] )
+            if sequence_name && column_names[j] == primary_key && val.nil?
+               my_values << "#{sequence_name}.nextval"
+            else
+               my_values << connection.quote( val, columns[j] )
+            end
           end
           insert_statements << "INSERT INTO #{self.table_name} #{columns_sql} VALUES(" + my_values.join( ',' ) + ")"
-          connection.execute( insert_statements.last )
+           number_inserted = number_inserted + connection.execute( insert_statements.last )
         end
-        return
+        return number_inserted
       else
         
         # generate the sql
