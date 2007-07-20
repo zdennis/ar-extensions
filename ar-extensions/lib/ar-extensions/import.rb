@@ -19,13 +19,13 @@ end
 class ActiveRecord::Base
   class << self
 
-    # Should use utc when appropriate
-    #  self.class.default_timezone == :utc ? Time.now.utc : Time.now
+    # use tz as set in ActiveRecord::Base
+    tproc = @@default_timezone == :utc ? lambda { Time.now.utc } : lambda { Time.now }
     AREXT_RAILS_COLUMNS = {
-      :create => { "created_on" => proc { Time.now },
-                   "created_at" => proc { Time.now } },
-      :update => { "updated_on" => proc { Time.now },
-                   "updated_at" => proc { Time.now } }
+      :create => { "created_on" => tproc ,
+                   "created_at" => tproc },
+      :update => { "updated_on" => tproc ,
+                   "updated_at" => tproc }
     }
     AREXT_RAILS_COLUMN_NAMES = AREXT_RAILS_COLUMNS[:create].keys + AREXT_RAILS_COLUMNS[:update].keys
   

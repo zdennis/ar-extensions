@@ -3,6 +3,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot') )
 class ImportTest < Test::Unit::TestCase
 
   def setup
+    ActiveRecord
     @connection = ActiveRecord::Base.connection
     @columns_for_on_duplicate_key_update = [ 'id', 'title', 'author_name']
     Topic.delete_all
@@ -201,6 +202,62 @@ class ImportTest < Test::Unit::TestCase
     stop_time = Time.now
     
     book = Book.find(:first)
+    assert_within start_time.to_f-1, book.updated_at.to_f, stop_time.to_f+1, "Book created time was incorrect"    
+  end  
+  
+  def test_import_should_automatically_update_created_on_columns_for_new_imported_records_using_utc
+    Book.destroy_all
+
+    old_tz = ActiveRecord::Base.default_timezone
+    ActiveRecord::Base.default_timezone = :utc        
+    start_time = Time.now.utc
+    Book.import [:title, :author_name, :publisher], [["LDAP", "Big Bird", "Del Rey"]]
+    stop_time = Time.now.utc
+    
+    book = Book.find(:first)
+    ActiveRecord::Base.default_timezone = old_tz
+    assert_within start_time.to_f-1, book.created_on.to_f, stop_time.to_f+1, "Book created time was incorrect"    
+  end
+
+  def test_import_should_automatically_update_created_at_columns_for_new_imported_records_using_utc
+    Book.destroy_all
+    
+    old_tz = ActiveRecord::Base.default_timezone
+    ActiveRecord::Base.default_timezone = :utc        
+    start_time = Time.now.utc
+    Book.import [:title, :author_name, :publisher], [["LDAP", "Big Bird", "Del Rey"]]
+    stop_time = Time.now.utc
+    
+    book = Book.find(:first)
+    ActiveRecord::Base.default_timezone = old_tz
+    assert_within start_time.to_f-1, book.created_at.to_f, stop_time.to_f+1, "Book created time was incorrect"    
+  end
+  
+  def test_import_should_automatically_update_updated_on_columns_for_new_imported_records_using_utc
+    Book.destroy_all
+    
+    old_tz = ActiveRecord::Base.default_timezone
+    ActiveRecord::Base.default_timezone = :utc        
+    start_time = Time.now.utc
+    Book.import [:title, :author_name, :publisher], [["LDAP", "Big Bird", "Del Rey"]]
+    stop_time = Time.now.utc
+    
+    book = Book.find(:first)
+    ActiveRecord::Base.default_timezone = old_tz
+    assert_within start_time.to_f-1, book.updated_on.to_f, stop_time.to_f+1, "Book created time was incorrect"    
+  end
+
+  def test_import_should_automatically_update_updated_at_columns_for_new_imported_records_using_utc
+    Book.destroy_all
+    
+    old_tz = ActiveRecord::Base.default_timezone
+    ActiveRecord::Base.default_timezone = :utc        
+    start_time = Time.now.utc
+    Book.import [:title, :author_name, :publisher], [["LDAP", "Big Bird", "Del Rey"]]
+    stop_time = Time.now.utc
+    
+    book = Book.find(:first)
+    ActiveRecord::Base.default_timezone = old_tz
     assert_within start_time.to_f-1, book.updated_at.to_f, stop_time.to_f+1, "Book created time was incorrect"    
   end  
   
