@@ -12,7 +12,9 @@ Email: zach.dennis@gmail.com
 
 AciveRecord::Extensions 0.7.0
 -----------------------------
-June 7th, 2007
+July 20th, 2007
+ - Fixes timezone issue (thanks Michael Flester)
+ - Adds better finder and import support for Oracle (thanks Michael Flester)
  - Committed patch to fix MySQL query padding, thanks to Gabe da Silveira
  - Added functionality for MySQL to work with created_on, created_at, updated_on or updated_at fields
  - Added more test coverage for import functionality 

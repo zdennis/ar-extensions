@@ -1,3 +1,11 @@
+2007-07-20  zdennis  <zdennis@dhcp-22.atomicobject.localnet>
+
+	* Added patch from Michael Flester to fix bug with created_at/updated_at fields to use proper timezone. 
+
+2007-07-18  zdennis  <zdennis@dhcp-22.atomicobject.localnet>
+
+	* Added patch for Oracle support from Michael Flester.
+
 2007-05-05  zdennis  <zdennis@elijah.local>
 
 	* Added ActiveRecord::Base::AbstractAdapter#synchronize method which allows a mass re-synchronization of ActiveRecord instances. This is similar to ActiveRecord::Base#reload except that it works on multiple instances at a time rather then one. This sends one query for all instances rather then 1 per instance reloaded.
