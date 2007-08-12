@@ -24,6 +24,7 @@ ActiveRecord::Schema.define do
     t.column :updated_at, :datetime
     t.column :updated_on, :datetime
     t.column :topic_id, :integer
+    t.column :for_sale, :boolean, :default => true
   end
   execute "ALTER TABLE books ADD FULLTEXT( `title`, `publisher`, `author_name` )"
 

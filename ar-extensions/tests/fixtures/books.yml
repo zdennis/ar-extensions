@@ -8,6 +8,7 @@ second:
   title: "The Voyage of Jerle Shannara: Ilse Witch"
   publisher: Del Rey
   author_name: Terry Brooks
+  for_sale: false
 third:
   id: 3
   title: "The Voyage of Jerle Shannara: Jarka Ruus"

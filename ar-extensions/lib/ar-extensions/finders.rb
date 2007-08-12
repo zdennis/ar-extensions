@@ -57,8 +57,8 @@ class ActiveRecord::Base
           sql = nil
           result = ActiveRecord::Extensions.process( key, val, self )
           if result
-            conditions << result.sql if result.sql
-            values.push( result.value ) if result.value
+            conditions << result.sql
+            values.push( result.value ) 
           else
             conditions << "#{table_name}.#{connection.quote_column_name(key.to_s)} #{attribute_condition( val )} "
             values << val

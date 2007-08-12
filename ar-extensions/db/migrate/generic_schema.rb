@@ -53,6 +53,7 @@ ActiveRecord::Schema.define do
     t.column :updated_at, :time
     t.column :updated_on, :datetime
     t.column :topic_id, :integer
+    t.column :for_sale, :boolean, :default => true
   end  
 
   create_table :languages, :force=>true do |t|
