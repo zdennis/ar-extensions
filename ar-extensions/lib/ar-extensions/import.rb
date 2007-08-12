@@ -262,16 +262,16 @@ class ActiveRecord::Base
         array_of_attributes.each do |arr|
           my_values = []
           arr.each_with_index do |val,j|
-            if sequence_name && column_names[j] == primary_key && val.nil?
+            if !sequence_name.blank? && column_names[j] == primary_key && val.nil?
                my_values << "#{sequence_name}.nextval"
             else
                my_values << connection.quote( val, columns[j] )
             end
           end
           insert_statements << "INSERT INTO #{self.table_name} #{columns_sql} VALUES(" + my_values.join( ',' ) + ")"
-           number_inserted = number_inserted + connection.execute( insert_statements.last )
+          connection.execute( insert_statements.last )
+          number_inserted += 1
         end
-        return number_inserted
       else
         
         # generate the sql
@@ -280,11 +280,12 @@ class ActiveRecord::Base
         post_sql_statements = connection.post_sql_statements( table_name, options )
         
         # perform the inserts
-        number_of_inserts = connection.insert_many( 
+        number_inserted = connection.insert_many( 
                                                    [ insert_sql, post_sql_statements ].flatten, 
                                                    values_sql,
                                                    "#{self.class.name} Create Many Without Validations Or Callbacks" )
       end
+      return number_inserted
     end
     
     # Returns an array of quoted column names
