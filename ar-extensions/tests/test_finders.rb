@@ -9,6 +9,16 @@ class FindersTest < Test::Unit::TestCase
     @connection = ActiveRecord::Base.connection
   end
 
+  def setup_time
+    Book.destroy_all
+    3.times do |i|
+      book = Book.create! :title=>"a#{i}", :publisher=>"b#{i}", :author_name=>"c#{i}"
+      assert book.update_attribute(:created_at, Time.local(2007, 01, 01, 21, 38, i))
+    end
+    book = Book.create! :title=>"nope", :publisher=>"not i", :author_name=>"not me"
+    assert book.update_attribute(:created_at, Time.local(2007, 01, 01, 20, 38, 04))    
+  end
+
   def test_find_by_array1
     developers = Developer.find( :all, :conditions=>[ 'ID IN(?)', [1,2] ] )
     assert_equal( 2, developers.size )
@@ -120,38 +130,38 @@ class FindersTest < Test::Unit::TestCase
   end
 
   def test_find_greater_than_time
-    books = Book.find( :all, :conditions=>{ :created_at_gt => Time.now } )
-    assert_equal 0, books.size
+    setup_time
     
-    time = Time.local( 2007, 01, 01 )
-    books = Book.find( :all, :conditions=>{ :created_at_gt => time } )
-    assert books.size == 2
+    books = Book.find( :all, :conditions=>{ :created_at_gt => Time.local(2007, 01, 01, 21, 38, 0) } )
+    assert_equal 2, books.size
   end
   
   def test_find_less_than_time
-    books = Book.find( :all, :conditions=>{ :created_at_lt => Time.now } )
-    assert books.size == 9
+    setup_time
     
-    time = Time.local( 2004, 01, 01 )
-    books = Book.find( :all, :conditions=>{ :created_at_lt => time } )
-    assert books.size == 3
+    books = Book.find( :all, :conditions=>{ :created_at_lt => Time.local(2007, 01, 01, 21, 38, 0) } )
+    assert_equal 1, books.size
   end
   
   def test_find_greater_than_or_equal_to_time
-    time = Time.local( 2006, 03, 12, 21, 38, 04 )
-    books = Book.find( :all, :conditions=>{ :created_at_gte => time } )
-    assert books.size == 3
+    time = setup_time
+    
+    books = Book.find( :all, :conditions=>{ :created_at_gte => Time.local(2007, 01, 01, 21, 38, 0) } )
+    assert_equal 3, books.size
   end
   
   def test_find_less_than_or_equal_to_time
-    time = Time.local( 2004, 03, 12, 21, 38, 04 )
-    books = Book.find( :all, :conditions=>{ :created_at_lte => time } )
-    assert books.size == 5
+    setup_time
+    
+    books = Book.find( :all, :conditions=>{ :created_at_lte => Time.local(2007, 01, 01, 21, 38, 0) } )
+    assert_equal 2, books.size
   end
   
   def test_find_not_equal_to_time
-    books = Book.find( :all, :conditions=>{ :created_at_ne => Time.now } )
-    assert books.size == 9
+    setup_time
+    
+    books = Book.find( :all, :conditions=>{ :created_at_ne => Time.local(2007, 01, 01, 21, 38, 0) } )
+    assert_equal 3, books.size
   end
   
   def test_find_not_in_array
@@ -279,8 +289,11 @@ class FindersTest < Test::Unit::TestCase
   end
   
   def test_find_should_not_break_boolean_searches
+    Book.destroy_all
+    book = Book.create! :title=>"Blah", :publisher=>"Del Rey", :author_name=>"Terry Brooks", :for_sale => false
+    
     record = Book.find_by_author_name_and_for_sale('Terry Brooks', false)
-    assert_equal books(:second), record, "wrong record"
+    assert_equal book, record, "wrong record"
   end
   
 end

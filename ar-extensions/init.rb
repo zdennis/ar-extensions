@@ -31,4 +31,7 @@ require File.expand_path( File.join(  dir, 'lib/ar-extensions', 'temporary_table
 
 require File.expand_path( File.join(  db_adapters_path, 'abstract_adapter' ) )
 require File.expand_path( File.join(  db_adapters_path,'mysql_adapter' ) )
+require File.expand_path( File.join(  db_adapters_path,'oracle' ) )
+require File.expand_path( File.join(  db_adapters_path,'postgresql' ) )
+require File.expand_path( File.join(  db_adapters_path,'sqlite' ) )
 

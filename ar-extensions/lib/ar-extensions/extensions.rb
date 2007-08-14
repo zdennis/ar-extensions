@@ -206,6 +206,7 @@ module ActiveRecord::Extensions
   class Comparison
 
     SUFFIX_MAP = { 'eq'=>'=', 'lt'=>'<', 'lte'=>'<=', 'gt'=>'>', 'gte'=>'>=', 'ne'=>'!=', 'not'=>'!=' }
+    ACCEPTABLE_COMPARISONS = [ String, Numeric, Time, DateTime ]
     
     def self.process( key, val, caller )
       process_without_suffix( key, val, caller ) || process_with_suffix( key, val, caller )
@@ -221,8 +222,8 @@ module ActiveRecord::Extensions
       Result.new( str, val )
     end
 
-    def self.process_with_suffix( key, val, caller )
-      return nil unless val.is_a?( String ) or val.is_a?( Numeric )
+    def self.process_with_suffix( key, val, caller ) 
+      return nil unless ACCEPTABLE_COMPARISONS.find{ |klass| val.is_a?(klass) }
       SUFFIX_MAP.each_pair do |k,v|
         match_data = key.to_s.match( /(.+)_#{k}$/ )
         if match_data

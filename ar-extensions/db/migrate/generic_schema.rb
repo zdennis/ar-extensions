@@ -48,9 +48,9 @@ ActiveRecord::Schema.define do
     t.column :title, :string, :null=>false
     t.column :publisher, :string, :null=>false
     t.column :author_name, :string, :null=>false
-    t.column :created_at, :time
+    t.column :created_at, :datetime
     t.column :created_on, :datetime
-    t.column :updated_at, :time
+    t.column :updated_at, :datetime
     t.column :updated_on, :datetime
     t.column :topic_id, :integer
     t.column :for_sale, :boolean, :default => true

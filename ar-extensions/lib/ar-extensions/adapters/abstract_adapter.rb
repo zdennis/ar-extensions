@@ -4,6 +4,10 @@ module ActiveRecord # :nodoc:
       NO_MAX_PACKET = 0
       QUERY_OVERHEAD = 8 #This was shown to be true for MySQL, but it's not clear where the overhead is from.
       
+      def next_value_for_sequence(sequence_name)
+        %{#{sequence_name}.nextval}
+      end
+      
       # +sql+ can be a single string or an array. If it is an array all 
       # elements that are in position >= 1 will be appended to the final SQL.
       def insert_many( sql, values, *args ) # :nodoc:

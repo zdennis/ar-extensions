@@ -6,11 +6,28 @@ class ImportTest < Test::Unit::TestCase
     ActiveRecord
     @connection = ActiveRecord::Base.connection
     @columns_for_on_duplicate_key_update = [ 'id', 'title', 'author_name']
-    Topic.delete_all
+    Topic.destroy_all
   end
   
   def teardown
-    Topic.delete_all
+    Topic.destroy_all
+  end
+
+  def wrap_within_a_transaction(&blk)
+    # sqlite doesn't support nested transactions. Since
+    # postgresql is ritarded and requires people to manually
+    # handle constraint exceptions we have to wrap the passed
+    # in block in a transaction block. MySQL and PostgreSQL support
+    # this fine. 
+    #
+    # TODO - find out from Michael Flester is Oracle supports this
+    if Book.connection.class.name =~ /sqlite/i
+      blk.call
+    else
+      Book.connection.transaction do
+        blk.call
+      end
+    end
   end
   
   def test_quoted_column_names  
@@ -174,11 +191,12 @@ class ImportTest < Test::Unit::TestCase
 
   def test_import_should_automatically_update_created_at_columns_for_new_imported_records
     Book.destroy_all
+    assert_equal 0, Book.count
     
     start_time = Time.now
     Book.import [:title, :author_name, :publisher], [["LDAP", "Big Bird", "Del Rey"]]
     stop_time = Time.now
-    
+
     book = Book.find(:first)
     assert_within start_time.to_f-1, book.created_at.to_f, stop_time.to_f+1, "Book created time was incorrect"    
   end
@@ -262,18 +280,22 @@ class ImportTest < Test::Unit::TestCase
   end  
   
   def test_import_should_not_add_or_overwrite_existing_models
-    Book.destroy_all
-    
-    book = Book.create :title=>"book1", :author_name=>"Zach", :publisher=>"Pub"
-    assert_equal 1, Book.count
+    book = nil
+    wrap_within_a_transaction do
+      Book.destroy_all
+      book = Book.create! :title=>"book1", :author_name=>"Zach", :publisher=>"Pub"
+      assert_equal 1, Book.count
+    end
 
-    book.title = "New Title"
-    begin
-       Book.import [ book ]
-    rescue
+    wrap_within_a_transaction do
+      book.title = "New Title"
+      begin
+         Book.import [ book ]
+      rescue Exception
+      end
     end
     assert_equal 1, Book.count
-    
+  
     book.reload
     assert_equal "book1", book.title, "the title of the book shouldn't have changed since it was an existing record"
   end

@@ -44,3 +44,16 @@ Dir[ models_dir + '/*.rb'].each { |m| require m }
 # Load Connection Adapter Specific Models
 models_dir = File.join( dir, 'models', ENV['ARE_DB'].downcase )
 Dir[ models_dir + '/*.rb' ].each{ |m| require m }
+
+
+
+module ActiveRecord # :nodoc:
+  module ConnectionAdapters # :nodoc:
+    class PostgreSQLAdapter # :nodoc:
+      def default_sequence_name(table_name, pk = nil)
+        default_pk, default_seq = pk_and_sequence_for(table_name)
+        default_seq || "#{table_name}_#{pk || default_pk || 'id'}_seq"
+      end 
+    end
+  end
+end

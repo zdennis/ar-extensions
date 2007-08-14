@@ -263,7 +263,7 @@ class ActiveRecord::Base
           my_values = []
           arr.each_with_index do |val,j|
             if !sequence_name.blank? && column_names[j] == primary_key && val.nil?
-               my_values << "#{sequence_name}.nextval"
+               my_values << connection.next_value_for_sequence(sequence_name)
             else
                my_values << connection.quote( val, columns[j] )
             end
