@@ -21,6 +21,7 @@ db_adapters_path = File.expand_path( File.join(  dir, 'lib/ar-extensions', 'adap
 require File.expand_path( File.join(  dir, 'lib/ar-extensions', 'import' ) )
 require File.expand_path( File.join(  dir, 'lib/ar-extensions', 'import', 'mysql' ) )
 require File.expand_path( File.join(  dir, 'lib/ar-extensions', 'import', 'postgresql' ) )
+require File.expand_path( File.join(  dir, 'lib/ar-extensions', 'import', 'sqlite' ) )
 
 require File.expand_path( File.join(  dir, 'lib/ar-extensions', 'finders' ) )
 
