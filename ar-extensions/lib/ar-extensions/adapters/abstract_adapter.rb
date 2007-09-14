@@ -56,6 +56,25 @@ module ActiveRecord # :nodoc:
         instances.each { |e| e.reload }
       end
 
+      # Generates the INSERT statement used in insert multiple value sets.
+      def multiple_value_sets_insert_sql( table_name, column_names, options ) # :nodoc:    
+        "INSERT #{options[:ignore] ? 'IGNORE ':''}INTO #{table_name} (#{column_names.join(',')}) VALUES "
+      end  
+  
+      # Returns SQL the VALUES for an INSERT statement given the passed in +columns+ 
+      # and +array_of_attributes+.
+      def values_sql_for_column_names_and_attributes( columns, array_of_attributes )   # :nodoc:
+        values = []
+        array_of_attributes.each do |arr|
+          my_values = []
+          arr.each_with_index do |val,j|
+            my_values << quote( val, columns[j] )
+          end
+          values << my_values
+        end   
+        values_arr = values.map{ |arr| '(' + arr.join( ',' ) + ')' }
+      end
+
       # Returns the sum of the sizes of the passed in objects. This should
       # probably be moved outside this class, but to where?
       def self.sum_sizes( *objects ) # :nodoc:

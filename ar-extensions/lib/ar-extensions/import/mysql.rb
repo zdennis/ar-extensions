@@ -12,10 +12,6 @@ module ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter # :nodoc:
     post_sql_statements
   end
   
-  def multiple_value_sets_insert_sql( table_name, column_names, options ) # :nodoc:    
-    "INSERT #{options[:ignore] ? 'IGNORE ':''} INTO #{table_name} (#{column_names.join(',')}) VALUES "
-  end
-  
   # Returns a generated ON DUPLICATE KEY UPDATE statement given the passed
   # in +args+. 
   def sql_for_on_duplicate_key_update( table_name, *args ) # :nodoc:
@@ -51,20 +47,8 @@ module ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter # :nodoc:
     results.join( ',')
   end  
 
-  # Returns SQL the VALUES for an INSERT statement given the passed in +columns+ 
-  # and +array_of_attributes+.
-  def values_sql_for_column_names_and_attributes( columns, array_of_attributes )   # :nodoc:
-    values = []
-    array_of_attributes.each do |arr|
-      my_values = []
-      arr.each_with_index do |val,j|
-        my_values << quote( val, columns[j] )
-      end
-      values << my_values
-    end   
-    values_arr = values.map{ |arr| '(' + arr.join( ',' ) + ')' }
-  end
-    
 end
 
-ActiveRecord::ConnectionAdapters::MysqlAdapter.send( 'include', ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter )
+ActiveRecord::ConnectionAdapters::MysqlAdapter.class_eval do
+  include ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter
+end
