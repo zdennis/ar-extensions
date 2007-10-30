@@ -11,7 +11,7 @@ module ActiveRecord::Extensions::ConnectionAdapters::SQLiteAdapter # :nodoc:
       sql2insert << "#{sql} #{value};"
     end
     
-    raw_connection.execute_batch(sql2insert.join("\n"))
+    raw_connection.transaction { |db| db.execute_batch(sql2insert.join("\n")) }
     number_of_rows_inserted = sql2insert.size
   end
 

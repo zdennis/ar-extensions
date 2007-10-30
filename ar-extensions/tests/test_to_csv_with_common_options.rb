@@ -1,6 +1,5 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot') )
 require 'fileutils'
-require 'breakpoint'
 
 class TestToCSVWithCommonOptions < Test::Unit::TestCase
   self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/to_csv_with_common_options' )

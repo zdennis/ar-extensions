@@ -2,16 +2,7 @@ module ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter # :nodoc:
 
   include ActiveRecord::Extensions::Import::ImportSupport  
   include ActiveRecord::Extensions::Import::OnDuplicateKeyUpdateSupport
-  
-  # Returns an array of post SQL statements given the passed in options.
-  def post_sql_statements( table_name, options ) # :nodoc:
-    post_sql_statements = []
-    if options[:on_duplicate_key_update]
-      post_sql_statements << sql_for_on_duplicate_key_update( table_name, options[:on_duplicate_key_update] )
-    end
-    post_sql_statements
-  end
-  
+    
   # Returns a generated ON DUPLICATE KEY UPDATE statement given the passed
   # in +args+. 
   def sql_for_on_duplicate_key_update( table_name, *args ) # :nodoc:

@@ -56,6 +56,16 @@ module ActiveRecord # :nodoc:
         instances.each { |e| e.reload }
       end
 
+      # Returns an array of post SQL statements given the passed in options.
+      def post_sql_statements( table_name, options ) # :nodoc:
+        post_sql_statements = []
+        if options[:on_duplicate_key_update]
+          post_sql_statements << sql_for_on_duplicate_key_update( table_name, options[:on_duplicate_key_update] )
+        end
+        post_sql_statements
+      end
+
+
       # Generates the INSERT statement used in insert multiple value sets.
       def multiple_value_sets_insert_sql( table_name, column_names, options ) # :nodoc:    
         "INSERT #{options[:ignore] ? 'IGNORE ':''}INTO #{table_name} (#{column_names.join(',')}) VALUES "

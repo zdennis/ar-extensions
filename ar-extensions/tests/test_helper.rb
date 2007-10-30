@@ -5,7 +5,6 @@ require 'mocha'
 require 'test/unit'
 require 'fileutils'
 require 'active_record/fixtures'
-require 'breakpoint'
 
 # ActiveRecord 1.14.4 (and earlier supported accessor methods for
 # fixture_path as class singleton methods. These tests rely on fixture_path
