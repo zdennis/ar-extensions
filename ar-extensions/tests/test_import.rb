@@ -1,9 +1,12 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot') )
 
 class ImportTest < Test::Unit::TestCase
+  if ActiveRecord::Base.connection.class.name =~ /sqlite/i
+    self.use_transactional_fixtures = false
+  end
+  
 
   def setup
-    ActiveRecord
     @connection = ActiveRecord::Base.connection
     @columns_for_on_duplicate_key_update = [ 'id', 'title', 'author_name']
     Topic.destroy_all
@@ -20,7 +23,7 @@ class ImportTest < Test::Unit::TestCase
     # in block in a transaction block. MySQL and PostgreSQL support
     # this fine. 
     #
-    # TODO - find out from Michael Flester is Oracle supports this
+    # TODO - find out from Michael Flester if Oracle supports this
     if Book.connection.class.name =~ /sqlite/i
       blk.call
     else
