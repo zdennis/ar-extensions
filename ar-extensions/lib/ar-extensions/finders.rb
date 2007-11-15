@@ -25,7 +25,7 @@ class ActiveRecord::Base
       elsif arg.is_a?( Hash )
         arg = sanitize_sql_from_hash( arg ) 
       elsif arg.is_a?( Array ) and arg.size == 2 and arg.first.is_a?( String ) and arg.last.is_a?( Hash )
-        arg = sanitize_sql_from_string_and_hash( arg ) 
+      arg = sanitize_sql_from_string_and_hash( arg ) 
       end
       sanitize_sql_orig( arg )
     end
@@ -48,7 +48,7 @@ class ActiveRecord::Base
     
     def sanitize_sql_from_hash( hsh ) #:nodoc:
       conditions, values = [], []
-      
+
       hsh.each_pair do |key,val|
         if val.respond_to?( :to_sql )  
           conditions << sanitize_sql_by_way_of_duck_typing( val ) 

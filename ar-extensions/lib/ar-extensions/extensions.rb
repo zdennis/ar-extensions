@@ -255,13 +255,12 @@ module ActiveRecord::Extensions
     LIKE_RGX = /(.+)_(like|contains)$/
     STARTS_WITH_RGX = /(.+)_starts_with$/
     ENDS_WITH_RGX =  /(.+)_ends_with$/
-    
     def self.process( key, val, caller )
       values = [*val]
       case key.to_s
       when LIKE_RGX
         str = values.collect do |v|
-           "#{caller.table_name}.#{caller.connection.quote_column_name( $1 )} LIKE " +
+          "#{caller.table_name}.#{caller.connection.quote_column_name( $1 )} LIKE " +
             "#{caller.connection.quote( '%%' + v + '%%', caller.columns_hash[ $1 ] )} "
         end
       when STARTS_WITH_RGX
@@ -278,7 +277,13 @@ module ActiveRecord::Extensions
         return nil
       end
 
-      return Result.new( str.join(' OR '), nil)
+      str = str.join(' OR ')
+      result_values = []
+      str.gsub!(/'((%%)?([^\?]*\?[^%]*|[^%]*%[^%]*)(%%)?)'/) do |match|
+        result_values << $2
+        '?'
+      end
+      return Result.new(str , result_values)
     end
   end
 

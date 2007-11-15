@@ -296,4 +296,26 @@ class FindersTest < Test::Unit::TestCase
     assert_equal book, record, "wrong record"
   end
   
+  def test_find_should_not_break_with_question_marks
+    Book.destroy_all
+    book = Book.create! :title=>"Where's Waldo?", :publisher=>"Candlewick", :author_name=>"Martin Handford", :for_sale => false
+    
+    record = Book.find :first, :conditions => { :title_contains =>  '?' }
+    assert_equal book, record, "wrong record"
+
+    record = Book.find :first, :conditions => { :title_contains =>  'Waldo?' }
+    assert_equal book, record, "wrong record 2"
+  end
+
+  def test_find_should_not_break_with_percent_signs
+    Book.destroy_all
+    book = Book.create! :title=>"Where's % Waldo", :publisher=>"Candlewick", :author_name=>"Martin Handford", :for_sale => false
+
+    record = Book.find :first, :conditions => { :title_contains =>  '%' }
+    assert_equal book, record, "wrong record"
+
+    record = Book.find :first, :conditions => { :title_contains =>  '% Waldo' }
+    assert_equal book, record, "wrong record 2"
+  end
+  
 end
