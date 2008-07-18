@@ -61,7 +61,7 @@ class ActiveRecord::Base
             conditions << result.sql
             values.push( result.value ) 
           else
-            conditions << "#{table_name}.#{connection.quote_column_name(key.to_s)} #{attribute_condition( val )} "
+            conditions << "#{connection.quote_table_name(table_name)}.#{connection.quote_column_name(key.to_s)} #{attribute_condition( val )} "
             values << val
           end
         end

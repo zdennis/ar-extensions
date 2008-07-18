@@ -5,6 +5,10 @@ ActiveRecord::Schema.define do
   end
   SchemaInfo.create :version=>SchemaInfo::VERSION
 
+  create_table :group, :force => true do |t|
+    t.column :order, :string
+  end
+
   create_table :topics, :force=>true do |t|
     t.column :title, :string, :null=>false
     t.column :author_name, :string

@@ -316,6 +316,17 @@ class ImportTest < Test::Unit::TestCase
     assert_equal "Zach", book.author_name
     assert_equal "Pub", book.publisher
   end
+  
+  def test_import_with_models_that_use_reserved_words
+    Group.destroy_all
+    
+    group1 = Group.new(:order => "superx")
+    Group.import [group1]
+    assert_equal 1, Group.count
+    
+    group = Group.find(:first)
+    assert_equal "superx", group.order
+  end
 
 
   private
