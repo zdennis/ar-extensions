@@ -35,7 +35,7 @@ class ActiveRecord::Extensions::FullTextSearching::MySQLFullTextExtension
 end
 ActiveRecord::Extensions.register ActiveRecord::Extensions::FullTextSearching::MySQLFullTextExtension.new, :adapters=>[:mysql]
 
-class ActiveRecord::ConnectionAdapters::MysqlAdapter # :nodoc:
+ActiveRecord::ConnectionAdapters::MysqlAdapter.class_eval do
   include ActiveRecord::Extensions::FullTextSearching::FullTextSupport
 
   def register_fulltext_extension( fulltext_key, options ) # :nodoc:

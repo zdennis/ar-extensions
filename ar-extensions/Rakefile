@@ -34,12 +34,11 @@ namespace :test do
     desc "test base extensions for #{adapter}"
     task adapter do |t|
       ENV['ARE_DB'] = adapter
-      Rake::Task[ 'boot' ].invoke
-      
+            
       task = Rake::Task[ "db:test:prepare_#{adapter}" ]
-			begin
+      begin
         task = false  if SchemaInfo::VERSION == SchemaInfo.find( :first ).version
-		  rescue Exception => ex        
+      rescue Exception => ex        
       end
       task.invoke if task
         

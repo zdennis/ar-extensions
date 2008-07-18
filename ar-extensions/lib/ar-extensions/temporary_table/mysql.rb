@@ -1,3 +1,3 @@
-class ActiveRecord::ConnectionAdapters::MysqlAdapter # :nodoc:
+ActiveRecord::ConnectionAdapters::MysqlAdapter.class_eval do
   include ActiveRecord::Extensions::TemporaryTableSupport 
 end

@@ -87,7 +87,6 @@ class ActiveRecord::Base
 				end"
 
     @@temporary_table_hsh[ model = Object.const_get( model_name ) ] = true
-
     if block_given?
       yield model
       model.drop

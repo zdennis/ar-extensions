@@ -1,4 +1,7 @@
 dir = File.dirname( __FILE__ )
+begin ; require 'active_record' ; rescue LoadError; require 'rubygems'; require 'active_record'; end
+require File.join( dir, 'connections', "native_#{ENV["ARE_DB"]}", 'connection.rb' )
+require File.expand_path( File.join( dir, 'boot' ) )
 
 require File.expand_path( File.join( dir, '..', 'db', 'migrate', 'version' ) )
 require 'mocha'
@@ -34,7 +37,6 @@ class Test::Unit::TestCase #:nodoc:
   self.use_instantiated_fixtures = false
 end
 
-require File.join( dir, 'connections', "native_#{ENV["ARE_DB"]}", 'connection.rb' )
 
 # Load Generic Models
 models_dir = File.join( dir, 'models' )
@@ -43,8 +45,6 @@ Dir[ models_dir + '/*.rb'].each { |m| require m }
 # Load Connection Adapter Specific Models
 models_dir = File.join( dir, 'models', ENV['ARE_DB'].downcase )
 Dir[ models_dir + '/*.rb' ].each{ |m| require m }
-
-
 
 module ActiveRecord # :nodoc:
   module ConnectionAdapters # :nodoc:

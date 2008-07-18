@@ -51,7 +51,7 @@ class TemporaryTableCRUDTest < Test::Unit::TestCase
       model_name = ''
       Book.create_temporary_table do |model_clazz|
         model_name = model_clazz.name
-        rec = model_clazz.create :author_name=>"Zach Dennis"
+        rec = model_clazz.create :author_name=>"Zach Dennis", :title => "SomeBook", :publisher=>"SomePublisher"
         assert_equal 1, model_clazz.count
       end
       assert !Object.const_defined?( model_name )
@@ -66,6 +66,7 @@ class TemporaryTableCRUDTest < Test::Unit::TestCase
       model_class = Book.create_temporary_table :model_name=>model_name, :table_name=>table_name
       assert_equal model_name, model_class.name
       assert_equal table_name, model_class.table_name
+      model_class.drop
     end
   end
 
@@ -76,8 +77,9 @@ class TemporaryTableCRUDTest < Test::Unit::TestCase
       model_class = Book.create_temporary_table
       assert_kind_of ActiveRecord::TemporaryTable, model_class.allocate
       
-      model_class.connection.reconnect!
-      assert_raises( ActiveRecord::StatementInvalid ){ model_class.count }
+      # model_class.connection.reconnect!
+      # assert_raises( ActiveRecord::StatementInvalid ){ model_class.count }
+      model_class.drop
     end
   end
 
