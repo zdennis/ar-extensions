@@ -3,7 +3,11 @@ first_developer:
   name: Zach Dennis
   salary: 1
   team_id: 1
+  created_at:
+  updated_at:
 second_developer:
   id: 2
   name: Mark Van Holstyn
   salary: 10
+  created_at:
+  updated_at:

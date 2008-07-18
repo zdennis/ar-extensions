@@ -1,4 +1,4 @@
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot') )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper') )
 require 'fileutils'
 
 class TestToCSVWithCommonOptions < Test::Unit::TestCase
@@ -12,6 +12,9 @@ class TestToCSVWithCommonOptions < Test::Unit::TestCase
   
   def teardown
     Developer.delete_all
+    Address.delete_all
+    Team.delete_all
+    Language.delete_all
   end
   
   def parse_csv( csv )

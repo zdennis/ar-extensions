@@ -1,4 +1,4 @@
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper' ) )
 
 class SynchronizeTest < Test::Unit::TestCase
   include ActiveRecord::ConnectionAdapters
@@ -7,6 +7,10 @@ class SynchronizeTest < Test::Unit::TestCase
 
   def setup
     @connection = ActiveRecord::Base.connection
+  end
+  
+  def teardown
+    Book.delete_all
   end
 
   def test_synchronize

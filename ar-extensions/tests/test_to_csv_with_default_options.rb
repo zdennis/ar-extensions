@@ -1,12 +1,12 @@
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot') )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper') )
 require 'fileutils'
 require 'fastercsv'
 
 class TestToCSVWithDefaultOptions < Test::Unit::TestCase
   self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/to_csv_with_default_options' )
+  fixtures :developers
 
   def setup
-    self.class.fixtures 'developers'
     @csv = Developer.find( 1 ).to_csv
     assert @csv
   end
@@ -22,7 +22,7 @@ class TestToCSVWithDefaultOptions < Test::Unit::TestCase
     expected_headers = %w( created_at id name salary team_id updated_at )
     assert_equal expected_headers, actual_headers
   end
-
+  
   def test_find_to_csv_with_default_options_verify_data
     parsed_csv = FasterCSV.parse( @csv )
     actual_data = parsed_csv.last

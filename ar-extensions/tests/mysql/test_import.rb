@@ -1,6 +1,7 @@
-require File.expand_path( File.join( File.dirname( __FILE__ ), '..', 'boot') )
+require File.expand_path( File.join( File.dirname( __FILE__ ), '..', 'test_helper') )
 
 class MysqlImportTest < Test::Unit::TestCase
+  fixtures :topics, :books
 
   def setup
     @connection = ActiveRecord::Base.connection

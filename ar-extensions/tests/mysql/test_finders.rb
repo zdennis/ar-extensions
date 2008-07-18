@@ -1,14 +1,17 @@
-require File.expand_path( File.join( File.dirname( __FILE__ ), '..', 'boot' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), '..', 'test_helper' ) )
 
 class MysqlFindersTest < Test::Unit::TestCase
   include ActiveRecord::ConnectionAdapters
   self.fixture_path = File.join( File.dirname( __FILE__ ), '../fixtures/unit/active_record_base_finders' )
-  self.fixtures 'developers', 'books'
+  self.fixtures :books
 
   def setup
     @connection = ActiveRecord::Base.connection
   end
-
+  
+  def teardown
+    Book.delete_all
+  end
 
   # FIXME this won't work until full text index/searching is added for 
   #   any db adapter outside of MySQL.

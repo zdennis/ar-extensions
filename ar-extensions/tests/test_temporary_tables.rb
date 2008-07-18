@@ -1,4 +1,4 @@
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper' ) )
 
 class TemporaryTableCRUDTest < Test::Unit::TestCase
 #  self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/temporary_table' )

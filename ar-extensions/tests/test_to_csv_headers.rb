@@ -1,9 +1,14 @@
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper' ) )
 
 class TestToCSVHeaders < Test::Unit::TestCase
   self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/to_csv_headers' )
   self.fixtures 'developers', 'addresses'
-
+  
+  def teardown
+    Developer.delete_all
+    Address.delete_all
+  end  
+  
   def test_to_csv_headers_verify_order_and_names_with_default_options
     headers = Developer.to_csv_headers
     assert headers

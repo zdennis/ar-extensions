@@ -1,4 +1,4 @@
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper' ) )
 
 class FindersTest < Test::Unit::TestCase
   include ActiveRecord::ConnectionAdapters
@@ -7,6 +7,11 @@ class FindersTest < Test::Unit::TestCase
 
   def setup
     @connection = ActiveRecord::Base.connection
+  end
+  
+  def teardown
+    Developer.delete_all
+    Book.delete_all
   end
 
   def setup_time

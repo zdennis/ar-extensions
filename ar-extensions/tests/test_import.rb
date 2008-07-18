@@ -1,11 +1,10 @@
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'boot') )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper') )
 
 class ImportTest < Test::Unit::TestCase
   if ActiveRecord::Base.connection.class.name =~ /sqlite/i
     self.use_transactional_fixtures = false
   end
   
-
   def setup
     @connection = ActiveRecord::Base.connection
     @columns_for_on_duplicate_key_update = [ 'id', 'title', 'author_name']
