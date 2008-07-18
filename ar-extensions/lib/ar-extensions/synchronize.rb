@@ -8,7 +8,7 @@ module ActiveRecord # :nodoc:
     #
     # This uses one query for all instance updates and then updates existing
     # instances rather sending one query for each instance
-    def self.synchronize(instances, key=ActiveRecord::Base.primary_key)
+    def self.synchronize(instances, key=self.primary_key)
       return if instances.empty?
       
       keys = instances.map(&"#{key}".to_sym)
