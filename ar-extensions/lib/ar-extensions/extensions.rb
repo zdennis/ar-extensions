@@ -46,7 +46,7 @@ require 'forwardable'
 #      fieldname = caller.connection.quote_column_name( key )
 #      min = caller.connection.quote( val.first, caller.columns_hash[ key ] )
 #      max = caller.connection.quote( val.last, caller.columns_hash[ key ] )
-#      str = "#{caller.table_name}.#{fieldname} #{match_data ? 'NOT ' : '' } BETWEEN #{min} AND #{max}"
+#      str = "#{caller.quoted_table_name}.#{fieldname} #{match_data ? 'NOT ' : '' } BETWEEN #{min} AND #{max}"
 #      Result.new( str, nil )
 #   end
 #
@@ -180,7 +180,7 @@ module ActiveRecord::Extensions
       if val.is_a?( Array )
         match_data = key.to_s.match( NOT_EQUAL_RGX )
         key = match_data.captures[0] if match_data
-        str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )} " +
+        str = "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( key )} " +
           (match_data ? 'NOT ' : '') + "IN( ? )"
         return Result.new( str, val )
       end
@@ -215,9 +215,9 @@ module ActiveRecord::Extensions
     def self.process_without_suffix( key, val, caller )
       return nil unless caller.columns_hash.has_key?( key )
       if val.nil?
-        str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )} IS NULL"
+        str = "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( key )} IS NULL"
       else
-        str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )}=?" 
+        str = "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( key )}=?" 
       end
       Result.new( str, val )
     end
@@ -229,7 +229,7 @@ module ActiveRecord::Extensions
         if match_data
           fieldname = match_data.captures[0]
           return nil unless caller.columns_hash.has_key?( fieldname )
-          str = "#{caller.table_name}.#{caller.connection.quote_column_name( fieldname )} " +
+          str = "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( fieldname )} " +
             "#{v} #{caller.connection.quote( val, caller.columns_hash[ fieldname ] )} "
           return Result.new( str, nil )
         end
@@ -260,17 +260,17 @@ module ActiveRecord::Extensions
       case key.to_s
       when LIKE_RGX
         str = values.collect do |v|
-          "#{caller.table_name}.#{caller.connection.quote_column_name( $1 )} LIKE " +
+          "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( $1 )} LIKE " +
             "#{caller.connection.quote( '%%' + v + '%%', caller.columns_hash[ $1 ] )} "
         end
       when STARTS_WITH_RGX
         str = values.collect do |v|
-           "#{caller.table_name}.#{caller.connection.quote_column_name( $1 )} LIKE " +
+           "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( $1 )} LIKE " +
             "#{caller.connection.quote( v + '%%', caller.columns_hash[ $1 ] )} "
         end
       when ENDS_WITH_RGX
         str = values.collect do |v|
-           "#{caller.table_name}.#{caller.connection.quote_column_name( $1 )} LIKE " +
+           "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( $1 )} LIKE " +
             "#{caller.connection.quote( '%%' + v, caller.columns_hash[ $1 ] )} "
         end
       else
@@ -314,7 +314,7 @@ module ActiveRecord::Extensions
         fieldname = caller.connection.quote_column_name( key )
         min = caller.connection.quote( val.first, caller.columns_hash[ key ] )
         max = caller.connection.quote( val.last, caller.columns_hash[ key ] )
-        str = "#{caller.table_name}.#{fieldname} #{match_data ? 'NOT ' : '' } BETWEEN #{min} AND #{max}"
+        str = "#{caller.quoted_table_name}.#{fieldname} #{match_data ? 'NOT ' : '' } BETWEEN #{min} AND #{max}"
         return Result.new( str, nil )
       end
       nil      
@@ -381,7 +381,7 @@ module ActiveRecord::Extensions
     def self.process( key, val, caller )
       return nil unless val.is_a?( Regexp )
       r = field_result( key, caller )
-      Result.new( "#{caller.table_name}.#{r.fieldname} #{r.negate? ? 'NOT ':''} REGEXP ?", val )
+      Result.new( "#{caller.quoted_table_name}.#{r.fieldname} #{r.negate? ? 'NOT ':''} REGEXP ?", val )
     end
     
   end
@@ -396,7 +396,7 @@ module ActiveRecord::Extensions
     def self.process( key, val, caller )
       return nil unless val.is_a?( Regexp )
       r = field_result( key, caller )
-      return Result.new( "#{caller.table_name}.#{r.fieldname} #{r.negate? ? '!~ ':'~'} ?", val )
+      return Result.new( "#{caller.quoted_table_name}.#{r.fieldname} #{r.negate? ? '!~ ':'~'} ?", val )
     end
 
   end
@@ -409,7 +409,7 @@ module ActiveRecord::Extensions
     def self.process( key, val, caller )
       return nil unless val.is_a?( Regexp )
       r = field_result( key, caller )
-      return Result.new( "#{r.negate? ? ' NOT ':''} REGEXP_LIKE(#{caller.table_name}.#{r.fieldname} , ?)", val )
+      return Result.new( "#{r.negate? ? ' NOT ':''} REGEXP_LIKE(#{caller.quoted_table_name}.#{r.fieldname} , ?)", val )
     end
 
   end
@@ -459,9 +459,9 @@ module ActiveRecord::Extensions
     def self.process_without_suffix( key, val, caller )
       return nil unless caller.columns_hash.has_key?( key )
       if val.nil?
-        str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )} IS NULL"
+        str = "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( key )} IS NULL"
       else
-        str = "#{caller.table_name}.#{caller.connection.quote_column_name( key )}=" +
+        str = "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( key )}=" +
           "#{caller.connection.quote( val.to_s(:db), caller.columns_hash[ key ] )} "
       end
       Result.new( str, nil )
@@ -473,7 +473,7 @@ module ActiveRecord::Extensions
         if match_data
           fieldname = match_data.captures[0]
           return nil unless caller.columns_hash.has_key?( fieldname )
-          str = "#{caller.table_name}.#{caller.connection.quote_column_name( fieldname )} " +
+          str = "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( fieldname )} " +
             "#{v} #{caller.connection.quote( val.to_s(:db), caller.columns_hash[ fieldname ] )} "
           return Result.new( str, nil )
         end

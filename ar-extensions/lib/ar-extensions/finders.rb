@@ -25,7 +25,7 @@ class ActiveRecord::Base
       elsif arg.is_a?( Hash )
         arg = sanitize_sql_from_hash( arg ) 
       elsif arg.is_a?( Array ) and arg.size == 2 and arg.first.is_a?( String ) and arg.last.is_a?( Hash )
-      arg = sanitize_sql_from_string_and_hash( arg ) 
+        arg = sanitize_sql_from_string_and_hash( arg ) 
       end
       sanitize_sql_orig( arg )
     end
