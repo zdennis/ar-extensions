@@ -49,6 +49,7 @@ class ActiveRecord::Base
     
     def sanitize_sql_from_hash( hsh ) #:nodoc:
       conditions, values = [], []
+      hsh = expand_hash_conditions_for_aggregates(hsh) # introduced in Rails 2.0.2
 
       hsh.each_pair do |key,val|
         if val.respond_to?( :to_sql )  

@@ -215,7 +215,7 @@ module ActiveRecord::Extensions
     def self.process_without_suffix( key, val, caller )
       return nil unless caller.columns_hash.has_key?( key )
       if val.nil?
-        str = "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( key )} IS NULL"
+        str = "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( key )} is ?"
       else
         str = "#{caller.quoted_table_name}.#{caller.connection.quote_column_name( key )}=?" 
       end

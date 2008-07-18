@@ -6,7 +6,7 @@ class FindersTest < Test::Unit::TestCase
   def setup
     @connection = ActiveRecord::Base.connection
   end
-
+  
   def test_activerecord_model_can_be_used_with_reserved_words
     group1 = Group.create!(:order => "x")
     group2 = Group.create!(:order => "y")
@@ -27,6 +27,22 @@ class FindersTest < Test::Unit::TestCase
     assert_raises(ActiveRecord::RecordNotFound) { 
       Group.find(group1.id, :conditions => { 'group.order' => "y" }) 
     }
+  end
+
+  def test_exists_with_aggregate_having_three_mappings
+    topic = Topic.create! :title => "SomeBook", :author_name => "Joe Smith"
+    assert Topic.exists?(:description => topic.description)
+
+    topic = Topic.new :title => "MayDay", :author_name => "Joe Smith the 2nd"
+    assert !Topic.exists?(:description => topic.description)
+  end
+  
+  def test_find_with_aggregate
+    topic = Topic.create! :title => "SomeBook", :author_name => "Joe Smith"
+    assert_equal topic, Topic.find(:first, :conditions => { :description => topic.description })
+
+    topic = Topic.new :title => "MayDay", :author_name => "Joe Smith the 2nd"
+    assert !Topic.find(:first, :conditions => { :description => topic.description })
   end
   
 end
