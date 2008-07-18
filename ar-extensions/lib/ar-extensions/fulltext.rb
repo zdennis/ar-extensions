@@ -51,7 +51,6 @@ class ActiveRecord::Base
     rescue NoMethodError
       false
     end
-  
   end
 
 end

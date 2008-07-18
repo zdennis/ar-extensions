@@ -1,6 +1,11 @@
+begin 
+  require 'faster_csv'
+  require 'ar-extensions/csv'
+rescue LoadError => ex
+  STDERR.puts "FasterCSV is not installed. CSV functionality will not be included."
+  raise ex
+end
 
-require 'faster_csv'
-require 'ostruct'
 
 # Adds CSV export options to ActiveRecord::Base models. 
 #
