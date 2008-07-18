@@ -67,8 +67,7 @@ module ActiveRecord # :nodoc:
 
 
       # Generates the INSERT statement used in insert multiple value sets.
-      def multiple_value_sets_insert_sql( table_name, column_names, options ) # :nodoc:    
-        table_name = quote_table_name(table_name)
+      def multiple_value_sets_insert_sql(table_name, column_names, options) # :nodoc:
         "INSERT #{options[:ignore] ? 'IGNORE ':''}INTO #{table_name} (#{column_names.join(',')}) VALUES "
       end  
   

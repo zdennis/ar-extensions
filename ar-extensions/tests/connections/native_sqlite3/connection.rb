@@ -7,7 +7,7 @@ ActiveRecord::Base.logger = Logger.new("debug.log")
 db1 = 'aroptests'
 dbfile = File.join( File.dirname( __FILE__ ), 'test.db' )
 
-config = ActiveRecord::Base.configurations['test'] = {  :adapter  => "sqlite",
+config = ActiveRecord::Base.configurations['test'] = {  :adapter  => "sqlite3",
   :dbfile => dbfile }
 
 ActiveRecord::Base.establish_connection( config )

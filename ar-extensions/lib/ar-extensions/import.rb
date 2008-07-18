@@ -268,15 +268,15 @@ class ActiveRecord::Base
                my_values << connection.quote( val, columns[j] )
             end
           end
-          insert_statements << "INSERT INTO #{self.table_name} #{columns_sql} VALUES(" + my_values.join( ',' ) + ")"
+          insert_statements << "INSERT INTO #{quoted_table_name} #{columns_sql} VALUES(" + my_values.join( ',' ) + ")"
           connection.execute( insert_statements.last )
           number_inserted += 1
         end
       else
         # generate the sql
-        insert_sql = connection.multiple_value_sets_insert_sql( table_name, escaped_column_names, options )
+        insert_sql = connection.multiple_value_sets_insert_sql( quoted_table_name, escaped_column_names, options )
         values_sql = connection.values_sql_for_column_names_and_attributes( columns, array_of_attributes )
-        post_sql_statements = connection.post_sql_statements( table_name, options )
+        post_sql_statements = connection.post_sql_statements( quoted_table_name, options )
         
         # perform the inserts
         number_inserted = connection.insert_many( [ insert_sql, post_sql_statements ].flatten, 
