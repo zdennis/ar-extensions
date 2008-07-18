@@ -35,7 +35,8 @@ class ActiveRecord::Base
     end
 
     def sanitize_sql_from_string_and_hash( arr ) # :nodoc:
-      return arr if arr.first =~ /\:[\w]+/        
+      return arr if arr.first =~ /\:[\w]+/
+      return arr if arr.last.empty? # skip empty hash conditions, ie: :conditions => ["", {}]
       arr2 = sanitize_sql_from_hash( arr.last )
       if arr2.empty?
         conditions = arr.first
