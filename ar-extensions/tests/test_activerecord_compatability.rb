@@ -20,4 +20,13 @@ class FindersTest < Test::Unit::TestCase
     assert_nothing_raised { y = Group.find(group2.id) }
     x = Group.find(group1.id)
   end
+  
+  def test_find_on_hash_conditions_with_explicit_table_name
+    group1 = Group.create!(:order => "x")
+    assert Group.find(group1.id, :conditions => { "group.order" => "x" })
+    assert_raises(ActiveRecord::RecordNotFound) { 
+      Group.find(group1.id, :conditions => { 'group.order' => "y" }) 
+    }
+  end
+  
 end

@@ -61,7 +61,16 @@ class ActiveRecord::Base
             conditions << result.sql
             values.push( result.value ) 
           else
-            conditions << "#{quoted_table_name}.#{connection.quote_column_name(key.to_s)} #{attribute_condition( val )} "
+            # Extract table name from qualified attribute names.
+            attr = key.to_s
+            if attr.include?('.')
+              table_name, attr = attr.split('.', 2)
+              table_name = connection.quote_table_name(table_name)
+            else
+              table_name = quoted_table_name
+            end
+            
+            conditions << "#{table_name}.#{connection.quote_column_name(attr)} #{attribute_condition( val )} "
             values << val
           end
         end
