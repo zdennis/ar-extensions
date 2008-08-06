@@ -19,7 +19,7 @@ class ActiveRecord::Base
     
     alias :sanitize_sql_orig :sanitize_sql
     def sanitize_sql( arg ) # :nodoc:
-      return sanitize_sql_orig( arg ) if arg.nil?
+      return if arg.blank? # don't process arguments like [], {}, "" or nil
       if arg.respond_to?( :to_sql )
         arg = sanitize_sql_by_way_of_duck_typing( arg )
       elsif arg.is_a?( Hash )
