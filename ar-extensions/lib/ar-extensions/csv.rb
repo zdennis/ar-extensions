@@ -66,14 +66,16 @@ end
 # although nesting multiple has_one/belongs_to associations.
 #
 module ActiveRecord::Extensions::FindToCSV
-  ALIAS_FOR_FIND = :_original_find_before_arext
 
-  def self.included( cl ) # :nodoc:
-    virtual_class = class << cl ; self ; end
-    if not virtual_class.ancestors.include?( self::ClassMethods )
-      cl.instance_eval "alias #{ALIAS_FOR_FIND} :find"
-      cl.extend( ClassMethods )
-      cl.send( :include, InstanceMethods )
+  def self.included(base)
+    if !base.respond_to?(:find_with_csv)
+      base.class_eval do
+        extend ClassMethods
+        include InstanceMethods        
+      end
+      class << base
+        alias_method_chain :find, :csv
+      end
     end
   end
   
@@ -125,8 +127,8 @@ module ActiveRecord::Extensions::FindToCSV
     
     public
 
-    def find( *args ) # :nodoc:
-      results = self.send( ALIAS_FOR_FIND, *args )
+    def find_with_csv( *args ) # :nodoc:
+      results = find_without_csv( *args )
       results.extend( ArrayInstanceMethods ) if results.is_a?( Array )
       results
     end
