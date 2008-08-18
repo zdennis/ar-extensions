@@ -336,5 +336,20 @@ class MysqlImportTest < Test::Unit::TestCase
     end
   end
 
-  
+  def test_import_without_timestamps
+    columns = %W{ id author_name }
+    values = []
+    values << [ 1, "Jerry Carter" ]
+    values << [ 2, "Chad Fowler" ]
+    
+    expected_count = Topic.count
+    Topic.import( columns, values,
+      :validate=>false,
+      :timestamps=>false )
+    
+    assert_equal expected_count+values.size, Topic.count, "#{ values.size } new records should have been created!"
+    assert_equal Topic.find( 1 ).created_at, nil, "created_at should be nil"
+    assert_equal Topic.find( 2 ).updated_at, nil, "updated_at should be nil"
+  end
+
 end

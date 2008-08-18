@@ -22,6 +22,8 @@ ActiveRecord::Schema.define do
     t.column :replies_count, :integer
     t.column :parent_id, :integer
     t.column :type, :string
+    t.column :created_at, :datetime
+    t.column :updated_at, :datetime
   end
 
   create_table :projects, :force=>true do |t|

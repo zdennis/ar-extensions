@@ -93,6 +93,8 @@ class ActiveRecord::Base
     # * +synchronize+ - an array of ActiveRecord instances for the model
     #   that you are currently importing data into. This synchronizes
     #   existing model instances in memory with updates from the import.
+    # * +timestamps+ - true|false, tells import to not add timestamps \
+    #   (if false) even if record timestamps is disabled in ActiveRecord::Base
     #
     # == Examples  
     #  class BlogPost < ActiveRecord::Base ; end
@@ -149,7 +151,7 @@ class ActiveRecord::Base
     def import( *args )
       @logger = Logger.new(STDOUT)
       @logger.level = Logger::DEBUG
-      options = { :validate=>true }
+      options = { :validate=>true, :timestamps=>true }
       options.merge!( args.pop ) if args.last.is_a? Hash
       
       # assume array of model objects
@@ -194,7 +196,7 @@ class ActiveRecord::Base
       array_of_attributes = array_of_attributes.dup
 
       # record timestamps unless disabled in ActiveRecord::Base
-      if record_timestamps
+      if record_timestamps && options.delete( :timestamps )
          add_special_rails_stamps column_names, array_of_attributes, options
       end
 
