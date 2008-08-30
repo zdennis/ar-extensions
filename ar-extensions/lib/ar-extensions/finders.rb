@@ -60,7 +60,7 @@ class ActiveRecord::Base
           result = ActiveRecord::Extensions.process( key, val, self )
           if result
             conditions << result.sql
-            values.push( result.value ) 
+            values.push( result.value ) unless result.value.nil?
           else
             # Extract table name from qualified attribute names.
             attr = key.to_s

@@ -283,6 +283,7 @@ module ActiveRecord::Extensions
         result_values << $2
         '?'
       end
+      result_values = nil if result_values.empty?
       return Result.new(str , result_values)
     end
   end

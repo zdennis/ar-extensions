@@ -313,7 +313,7 @@ class FindersTest < Test::Unit::TestCase
     groups = Group.find( :all, :conditions=>{ :created_at_ne => now } )
     assert_equal [g1, g3], groups
   end
-  
+
   def test_find_not_in_array
     developers = Developer.find( :all, :conditions=>{ :id_ne=>[ 9999 ] } )
     assert_equal( Developer.count, developers.size )
@@ -384,8 +384,13 @@ class FindersTest < Test::Unit::TestCase
     groups = Group.find( :all, :conditions=>{ :order_does_not_match => /^a/ } )
     assert_equal [g2], groups
   end
-  
-  
+
+  def test_find_with_hash_containing_normal_and_arext_components
+    developers = Developer.find( :all, 
+      :conditions=>{ :id=>1, :name_starts_with=>'Zach' } )
+    assert_equal( 1, developers.size )
+  end
+
   def test_find_with_string_and_hash
     developers = Developer.find( :all, 
       :conditions=>[ "name = 'Zach Dennis'", { :id=>1 } ] )
