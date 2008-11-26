@@ -1,0 +1,1 @@
+module ActiveRecord::Extensions ; end
