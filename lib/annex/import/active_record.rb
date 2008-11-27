@@ -29,7 +29,8 @@ class ActiveRecord::Base
     sql_statement = generate_sql :insert_into do |sql|
       sql.table = quoted_table_name
       sql.columns = columns.map{ |name| connection.quote_column_name(name) }
-      sql.values = values.map{ |rows| rows.map{ |row| connection.quote(row, values.index(rows)) } }
+      sql.values = values.map{ |rows| rows.map{ |row| 
+        connection.quote(row, columns_hash[columns[values.index(rows)]]) } }
       sql.options = options
     end
 
