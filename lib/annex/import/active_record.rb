@@ -16,8 +16,7 @@ class ActiveRecord::Base
       values = instances.map{ |model| columns.map{ |column| model.attributes[column] } }
     elsif args.size == 2 && args.last.is_a?(Array)
       if args.last.first.kind_of?(ActiveRecord::Base)
-        columns = args.first
-        instances = args.last
+        columns, instances = args
         values = instances.map{ |model| columns.map{ |column| model.attributes[column] } }
       else
         columns, values = args
@@ -28,8 +27,14 @@ class ActiveRecord::Base
       instances = args.first
       values = instances.map{ |model| columns.map{ |column| model.attributes[column] } }
     elsif args.size == 3 && args.last.is_a?(Hash)
-      options.merge! args.pop
-      columns, values = args
+      if args[1].first.kind_of?(ActiveRecord::Base)
+        options.merge! args.pop
+        columns, instances = args
+        values = instances.map{ |model| columns.map{ |column| model.attributes[column] } }
+      else
+        options.merge! args.pop
+        columns, values = args
+      end
     end
     
     sql_statement = generate_sql :insert_into do |sql|

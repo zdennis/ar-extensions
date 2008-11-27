@@ -57,4 +57,15 @@ describe "ActiveRecord", "importing data" do
       result.num_inserts.should == 2
     }.should change(Topic, :count).by(2)
   end
+
+  it "should not import data with an array of column names and an invalid model object" do
+    topics = [
+      Topic.new(:title=>"Ruby", :author_name=>"", :content => "abc"), 
+      Topic.new(:title=>"Lisp", :author_name=>"McCarthy", :content => "123")]
+    lambda { 
+      result = Topic.import [:title, :author_name], topics, :validate => true
+      result.num_inserts.should == 0
+    }.should change(Topic, :count).by(0)
+  end
+
 end
