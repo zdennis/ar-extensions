@@ -1,6 +1,6 @@
 module ContinuousThinking::SQL
   class Generator
-    attr_accessor :columns, :table, :values
+    attr_accessor :columns, :options, :table, :values
     
     def self.templates
       ContinuousThinking::SQL.templates

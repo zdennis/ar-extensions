@@ -14,6 +14,15 @@ class ActiveRecord::Base
         sql.columns = columns.map{ |name| connection.quote_column_name(name) }
         sql.values = values.map{ |rows| rows.map{ |row| connection.quote(row, values.index(rows)) } }
       end
+    elsif args.size == 3 && args.last.is_a?(Hash)
+      options = args.pop
+      columns, values = args
+      sql_statement = generate_sql :insert_into do |sql|
+        sql.table = quoted_table_name
+        sql.columns = columns.map{ |name| connection.quote_column_name(name) }
+        sql.values = values.map{ |rows| rows.map{ |row| connection.quote(row, values.index(rows)) } }
+        sql.options = options
+      end
     end
     
     connection.execute sql_statement

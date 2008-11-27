@@ -9,4 +9,12 @@ describe "ActiveRecord", "importing data" do
     Topic.find_by_title_and_author_name!('Ruby', 'Matz').should_not be_nil
     Topic.find_by_title_and_author_name!('Lisp', 'McCarthy').should_not be_nil
   end
+  
+  it "should import data with validations" do
+    lambda { 
+      Topic.import(%w(title author_name), [%w(Ruby Matz), %w(Lisp McCarthy)], :validate => true)
+    }.should change(Topic, :count).by(2)
+    Topic.find_by_title_and_author_name!('Ruby', 'Matz').should_not be_nil
+    Topic.find_by_title_and_author_name!('Lisp', 'McCarthy').should_not be_nil    
+  end
 end
