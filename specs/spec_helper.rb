@@ -1,3 +1,4 @@
+require 'erb'
 require 'rubygems'
 require 'spec'
 require 'active_record'
@@ -18,3 +19,4 @@ Dir[$:.last + '/*.rb'].each { |m| require m }
 
 $:.unshift File.join(dir, "../lib/")
 
+require 'ar-extensions'
