@@ -19,4 +19,4 @@ Dir[$:.last + '/*.rb'].each { |m| require m }
 
 $:.unshift File.join(dir, "../lib/")
 
-require 'ar-extensions'
+require 'annex'

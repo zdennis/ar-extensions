@@ -1,5 +1,5 @@
 require File.expand_path(File.dirname(__FILE__)) + "/../spec_helper"
-require "ar-extensions/import/active_record"
+require "annex/import/active_record"
 
 describe "ActiveRecord", "importing data" do
   it "should import data with array of columns and values" do
