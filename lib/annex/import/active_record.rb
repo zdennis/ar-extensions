@@ -7,11 +7,14 @@ class ActiveRecord::Base
   end
   
   def self.import(*args)
-    if args.size == 2 && args.last.is_a?(Array)
-      options = {}
+    options = { :validate => true }
+    if args.size == 1
+      columns = column_names.dup
+      values = args.first.map{ |model| columns.map{ |column| model.attributes[column] } }
+    elsif args.size == 2 && args.last.is_a?(Array)
       columns, values = args
     elsif args.size == 3 && args.last.is_a?(Hash)
-      options = args.pop
+      options.merge! args.pop
       columns, values = args
     end
     
@@ -22,14 +25,16 @@ class ActiveRecord::Base
       sql.options = options
     end
 
-    invalid_instances = []
-    values.each do |rows|
-      attrs = {}
-      rows.each_with_index do |value, index|
-        attrs[columns[index]] = value
+    if options[:validate]
+      invalid_instances = []
+      values.each do |rows|
+        attrs = {}
+        rows.each_with_index do |value, index|
+          attrs[columns[index]] = value
+        end
+        instance = new attrs
+        invalid_instances << instance unless instance.valid?
       end
-      instance = new attrs
-      invalid_instances << instance unless instance.valid?
     end
 
     if invalid_instances.any?

@@ -38,5 +38,12 @@ describe "ActiveRecord", "importing data" do
     result = Topic.import(%w(title author_name), [%w(Ruby Matz), %w(Lisp)], :validate => true)
     result.num_inserts.should == 0
   end
+  
+  it "should import valid model objects" do
+    topics = [Topic.new( :title=>"Ruby", :author_name=>"Matz" ), Topic.new( :title=>"Lisp", :author_name=>"McCarthy")]
+    lambda {
+      Topic.import topics
+    }.should change(Topic, :count).by(2)
+  end
 end
 
