@@ -15,7 +15,13 @@ class ActiveRecord::Base
       instances = args.first
       values = instances.map{ |model| columns.map{ |column| model.attributes[column] } }
     elsif args.size == 2 && args.last.is_a?(Array)
-      columns, values = args
+      if args.last.first.kind_of?(ActiveRecord::Base)
+        columns = args.first
+        instances = args.last
+        values = instances.map{ |model| columns.map{ |column| model.attributes[column] } }
+      else
+        columns, values = args
+      end
     elsif args.size == 2 && args.last.is_a?(Hash)
       options.merge! args.pop
       columns = column_names.dup

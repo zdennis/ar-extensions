@@ -33,7 +33,7 @@ describe "ActiveRecord", "importing data" do
     result.failed_instances.should have(2).instances
   end
   
-  it "should import valid model objects" do
+  it "should import an array of model objects" do
     topics = [Topic.new(:title=>"Ruby", :author_name=>"Matz"), Topic.new(:title=>"Lisp", :author_name=>"McCarthy")]
     lambda {
       Topic.import topics, :validate => true
@@ -48,4 +48,13 @@ describe "ActiveRecord", "importing data" do
     }.should change(Topic, :count).by(0)
   end
 
+  it "should import data with an array of column names and an array of model objects" do
+    topics = [
+      Topic.new(:title=>"Ruby", :author_name=>"Matz", :content => "abc"), 
+      Topic.new(:title=>"Lisp", :author_name=>"McCarthy", :content => "123")]
+    lambda { 
+      result = Topic.import [:title, :author_name], topics
+      result.num_inserts.should == 2
+    }.should change(Topic, :count).by(2)
+  end
 end
