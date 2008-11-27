@@ -2,6 +2,7 @@ require 'erb'
 require 'rubygems'
 require 'spec'
 require 'active_record'
+require 'ruby-debug'
 
 dir = File.expand_path(File.dirname(__FILE__))
 adapter = "mysql"

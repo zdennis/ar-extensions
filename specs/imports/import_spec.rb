@@ -104,3 +104,5 @@ describe ActiveRecord, "reporting on imported data" do
     result.failed_instances.should have(2).instances
   end  
 end
+
+

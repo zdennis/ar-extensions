@@ -3,7 +3,7 @@ class ActiveRecord::Base
   def self.generate_sql(identifier, &blk)
     sql_generator = ContinuousThinking::SQL::Generator.for(identifier)
     yield sql_generator
-    sql_generator.to_sql_statement
+    sql_generator.to_sql_statements
   end
   
   def self.import(*args)
@@ -37,7 +37,7 @@ class ActiveRecord::Base
       end
     end
     
-    sql_statement = generate_sql :insert_into do |sql|
+    sql_statements = generate_sql :insert_into do |sql|
       sql.table = quoted_table_name
       sql.columns = columns.map{ |name| connection.quote_column_name(name) }
       sql.values = values.map{ |rows| rows.map{ |field| connection.quote(field, columns_hash[columns[rows.index(field)]]) } }
@@ -62,7 +62,7 @@ class ActiveRecord::Base
       return ContinuousThinking::SQL::Result.new(:num_inserts => 0, :failed_instances => invalid_instances)
     end      
 
-    connection.execute sql_statement
+    sql_statements.each { |statement| connection.execute statement }
     ContinuousThinking::SQL::Result.new(:num_inserts => values.size, :failed_instances => [])
   end
   

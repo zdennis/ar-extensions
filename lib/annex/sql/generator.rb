@@ -1,6 +1,8 @@
 module ContinuousThinking::SQL
   class Generator
-    attr_accessor :columns, :options, :table, :values
+    Infinity = 1.0/0
+
+    attr_accessor :columns, :max_bytes_per_statement, :options, :table, :values
     
     def self.templates
       ContinuousThinking::SQL.templates
@@ -15,8 +17,12 @@ module ContinuousThinking::SQL
       @template = template
     end
     
-    def to_sql_statement
-      @template.interpolate to_sql_options
+    def max_bytes_per_statement
+      @max_bytes_per_statement || Infinity
+    end
+    
+    def to_sql_statements
+      @template.interpolate to_sql_options.merge(:max_bytes_per_statement => max_bytes_per_statement)
     end
     
     private

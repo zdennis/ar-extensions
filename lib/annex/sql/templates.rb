@@ -18,6 +18,6 @@ module ContinuousThinking::SQL
     body "INSERT INTO :table :columns VALUES :values"
     mapping :table => lambda { |table| table }
     mapping :columns => lambda { |columns| "(#{columns.join(',')})" }
-    mapping :values => lambda { |values| values.map{ |row| "(#{row.join(',')})" }.join(',') }
+    mapping :values => lambda { |values| values.map{ |fields| "(#{fields.join(',')})" }}
   end
 end
