@@ -22,9 +22,15 @@ describe "ActiveRecord", "importing data" do
     result.num_inserts.should == 2
   end
   
-  it "should report the number of instances that failed to import with validation turned on" do
+  it "should report the number of instances that failed validation when given columns and values" do
     result = Topic.import(%w(title author_name), [%w(Ruby Matz), %w(Lisp)], :validate => true)
     result.failed_instances.should have(1).instances
+  end
+  
+  it "should report the number of instances that failed validation when given models" do
+    topics = [Topic.new(:title=>"Ruby"), Topic.new(:title=>"Lisp"), Topic.new(:title=>"Smalltalk", :author_name => "Kay")]
+    result = Topic.import topics
+    result.failed_instances.should have(2).instances
   end
   
   it "should import valid model objects" do
@@ -43,4 +49,3 @@ describe "ActiveRecord", "importing data" do
   end
 
 end
-
