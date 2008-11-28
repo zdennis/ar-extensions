@@ -21,3 +21,18 @@ Dir[$:.last + '/*.rb'].each { |m| require m }
 $:.unshift File.join(dir, "../lib/")
 
 require 'annex'
+
+module TransactionMethods
+  def self.extended(kl)
+    kl.before(:each) do
+      ActiveRecord::Base.connection.begin_db_transaction
+    end
+    kl.after(:each) do
+      ActiveRecord::Base.connection.rollback_db_transaction
+    end
+  end
+end
+
+Spec::Runner.configure do |config|
+  config.extend TransactionMethods, :type => :active_record
+end

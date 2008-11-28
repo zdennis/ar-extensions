@@ -1,15 +1,7 @@
 require File.expand_path(File.dirname(__FILE__)) + "/../spec_helper"
 require "annex/import/active_record"
 
-describe ActiveRecord, "importing data" do
-  before(:each) do
-    ActiveRecord::Base.connection.begin_db_transaction
-  end
-  
-  after(:each) do
-    ActiveRecord::Base.connection.rollback_db_transaction
-  end
-
+describe ActiveRecord, "importing data", :type => :active_record do
   it "should import data with columns and values" do
     lambda { 
       result = Topic.import(%w(title author_name), [["Ruby", nil], ["Lisp", nil]])
@@ -142,15 +134,7 @@ describe ActiveRecord, "importing data" do
   end
 end
 
-describe ActiveRecord, "importing data with time stamp columns" do
-  before(:each) do
-    ActiveRecord::Base.connection.begin_db_transaction
-  end
-  
-  after(:each) do
-    ActiveRecord::Base.connection.rollback_db_transaction
-  end
-
+describe ActiveRecord, "importing data with time stamp columns", :type => :active_record do
   %w(created_at created_on updated_at updated_on).each do |field|
     it "should set the #{field} column when importing new records" do
       Book.import [:title, :author_name, :publisher], [%w(Ruby Matz OReilly), %w(Rails DHH PragProg)]
@@ -175,15 +159,7 @@ describe ActiveRecord, "importing data with time stamp columns" do
 end
 
 
-describe ActiveRecord, "importing data that already exists" do
-  before(:each) do
-    ActiveRecord::Base.connection.begin_db_transaction
-  end
-  
-  after(:each) do
-    ActiveRecord::Base.connection.rollback_db_transaction
-  end
-
+describe ActiveRecord, "importing data that already exists", :type => :active_record do
   it "should not import a model whose primary key already exists in the database" do
     book = Book.create! :title=>"Ruby", :author_name=>"Matz", :publisher=>"PragProg"
     lambda {
@@ -195,15 +171,7 @@ describe ActiveRecord, "importing data that already exists" do
 end
 
 
-describe ActiveRecord, "importing data that uses reserved database words" do
-  before(:each) do
-    ActiveRecord::Base.connection.begin_db_transaction
-  end
-  
-  after(:each) do
-    ActiveRecord::Base.connection.rollback_db_transaction
-  end
-
+describe ActiveRecord, "importing data that uses reserved database words", :type => :active_record do
   it "should import data that uses reserved words given columns and values" do
     lambda {
       Group.import %w(order), %w(superfriends)
@@ -220,15 +188,7 @@ describe ActiveRecord, "importing data that uses reserved database words" do
 end
 
 
-describe ActiveRecord, "reporting on imported data" do
-  before(:each) do
-    ActiveRecord::Base.connection.begin_db_transaction
-  end
-  
-  after(:each) do
-    ActiveRecord::Base.connection.rollback_db_transaction
-  end
-    
+describe ActiveRecord, "reporting on imported data", :type => :active_record do
   it "should report the number of instances that failed validation when given columns and values" do
     result = Topic.import(%w(title author_name), [%w(Ruby Matz), ["Lisp", nil]], :validate => true)
     result.failed_instances.should have(1).instances
