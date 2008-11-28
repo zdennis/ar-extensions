@@ -14,7 +14,7 @@ ActiveRecord::Schema.define do
     t.column :description, :string
   end
   
-  create_table :books, :options=>'ENGINE=MyISAM', :force=>true do |t|
+  create_table :book_my_isam, :options=>'ENGINE=MyISAM', :force=>true do |t|
     t.column :title, :string, :null=>false
     t.column :publisher, :string, :null=>false
     t.column :author_name, :string, :null=>false
@@ -25,5 +25,5 @@ ActiveRecord::Schema.define do
     t.column :topic_id, :integer
     t.column :for_sale, :boolean, :default => true
   end
-  execute "ALTER TABLE books ADD FULLTEXT( `title`, `publisher`, `author_name` )"
+  execute "ALTER TABLE book_my_isam ADD FULLTEXT( `title`, `publisher`, `author_name` )"
 end

@@ -156,7 +156,23 @@ describe ActiveRecord, "importing data with time stamp columns" do
       Book.import [:title, :author_name, :publisher], [%w(Ruby Matz OReilly), %w(Rails DHH PragProg)]
       Book.find_by_title("Ruby").attributes[field].to_i.should be_close(Time.now.to_i, 10)
     end
+
+    context "when setting the time zone to utc" do
+      before(:each) do
+        @original_timezone = ActiveRecord::Base.default_timezone
+        ActiveRecord::Base.default_timezone = :utc
+      end
+      after(:each) do
+        ActiveRecord::Base.default_timezone = @original_timezone
+      end
+      
+      it "should set the #{field} column to ActiveRecord's time zone when importing new records" do
+        Book.import [:title, :author_name, :publisher], [%w(Ruby Matz OReilly), %w(Rails DHH PragProg)]
+        Book.find_by_title("Ruby").attributes[field].to_i.should be_close(Time.now.to_i, 10)
+      end
+    end
   end
+
 end
 
 

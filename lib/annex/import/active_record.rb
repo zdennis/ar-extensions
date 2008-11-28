@@ -1,6 +1,6 @@
 module ContinuousThinking::ActiveRecord
   class DataImporter
-    tproc = ActiveRecord::Base.default_timezone == :utc ? lambda { Time.now.utc } : lambda { Time.now }
+    tproc = lambda { ActiveRecord::Base.default_timezone == :utc ? Time.now.utc : Time.now }
     TIMESTAMP_COLUMNS = {
       :create => { "created_on" => tproc ,
                    "created_at" => tproc },
