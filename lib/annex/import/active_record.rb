@@ -1,95 +1,127 @@
-class ActiveRecord::Base
-  tproc = @@default_timezone == :utc ? lambda { Time.now.utc } : lambda { Time.now }
-  AREXT_RAILS_COLUMNS = {
-    :create => { "created_on" => tproc ,
-                 "created_at" => tproc },
-    :update => { "updated_on" => tproc ,
-                 "updated_at" => tproc }
-  }
+module ContinuousThinking::ActiveRecord
+  class DataImporter
+    tproc = ActiveRecord::Base.default_timezone == :utc ? lambda { Time.now.utc } : lambda { Time.now }
+    TIMESTAMP_COLUMNS = {
+      :create => { "created_on" => tproc ,
+                   "created_at" => tproc },
+      :update => { "updated_on" => tproc ,
+                   "updated_at" => tproc }
+    }
+
+    def generate_sql(identifier, &blk)
+      sql_generator = ContinuousThinking::SQL::Generator.for(identifier)
+      yield sql_generator
+      sql_generator.to_sql_statements
+    end
   
-  def self.generate_sql(identifier, &blk)
-    sql_generator = ContinuousThinking::SQL::Generator.for(identifier)
-    yield sql_generator
-    sql_generator.to_sql_statements
-  end
-  
-  def self.import(*args)
-    instances, invalid_instances = nil, []
-    options = { :validate => true, :timestamps => true }
+    def import(*args)
+      process_args(*args)
+      perform_validation if perform_validation?
     
-    if args.size == 1
-      columns = column_names.dup
-      instances = args.first
-    elsif args.size == 2 && args.last.is_a?(Array)
-      if args.last.first.kind_of?(ActiveRecord::Base)
-        columns, instances = args
-      else
-        columns, values = args
+      if using_model_instances?
+        if @instances.empty?
+          return ContinuousThinking::SQL::Result.new(:num_inserts => 0, :failed_instances => @invalid_instances)
+        else
+          build_values_from_model_instances
+        end
       end
-    elsif args.size == 2 && args.last.is_a?(Hash)
-      options.merge! args.pop
-      columns = column_names.dup
-      instances = args.first
-    elsif args.size == 3 && args.last.is_a?(Hash)
-      if args[1].first.kind_of?(ActiveRecord::Base)
-        options.merge! args.pop
-        columns, instances = args
-      else
-        options.merge! args.pop
-        columns, values = args
+    
+      add_timestamps if using_timestamps?
+        
+      connection = @model.connection
+      sql_statements = generate_sql :insert_into do |sql|
+        sql.table = @model.quoted_table_name
+        sql.columns = @columns.map{ |name| connection.quote_column_name(name) }
+        sql.values = @values.map{ |rows| rows.map{ |field| connection.quote(field, @model.columns_hash[@columns[rows.index(field)]]) } }
+        sql.options = @options
+      end
+      sql_statements.each { |statement| connection.execute statement }
+      ContinuousThinking::SQL::Result.new(:num_inserts => @values.size, :failed_instances => @invalid_instances)
+    end
+  
+    private
+  
+    def add_timestamps
+      TIMESTAMP_COLUMNS[:create].each_pair do |timestamp_column, timestamp_proc|
+        if @model.column_names.include?(timestamp_column) && !@columns.include?(timestamp_column.to_sym)
+          timestamp = timestamp_proc.call
+          @columns << timestamp_column
+          @values.each { |row| row << timestamp }
+        end
+      end
+
+      TIMESTAMP_COLUMNS[:update].each_pair do |timestamp_column, timestamp_proc|
+        if @model.column_names.include?(timestamp_column) && !@columns.include?(timestamp_column.to_sym)
+          timestamp = timestamp_proc.call
+          @columns << timestamp_column
+          @values.each { |row| row << timestamp }
+        end
       end
     end
-    columns = columns.map{ |c| c.to_sym }
-    
-    if options[:validate]
-      if instances.nil?
-        instances = []
-        values.each do |rows|
+  
+    def build_values_from_model_instances
+      @values = @instances.map{ |model_instance| @columns.map{ |column| model_instance.attributes[column.to_s] } }
+    end
+  
+    def perform_validation?
+      @options[:validate]
+    end
+  
+    def perform_validation
+      if @instances.nil?
+        @instances = []
+        @values.each do |rows|
           attrs = {}
           rows.each_with_index do |value, index|
-            attrs[columns[index]] = value
+            attrs[@columns[index]] = value
           end
-          instances << new(attrs)
+          @instances << @model.new(attrs)
         end
       end
-      invalid_instances = instances.select{ |instance| !instance.valid? }
-      instances -= invalid_instances
+      @invalid_instances = @instances.select{ |instance| !instance.valid? }
+      @instances -= @invalid_instances
     end
-
-    if instances
-      if instances.any?
-        values = instances.map{ |model| columns.map{ |column| model.attributes[column.to_s] } }
-      else
-        return ContinuousThinking::SQL::Result.new(:num_inserts => 0, :failed_instances => invalid_instances)
-      end
-    end
-
-    if options[:timestamps]
-      AREXT_RAILS_COLUMNS[:create].each_pair do |timestamp_column, timestamp_proc|
-        if self.column_names.include?(timestamp_column) && !columns.include?(timestamp_column.to_sym)
-          timestamp = timestamp_proc.call
-          columns << timestamp_column
-          values.each { |row| row << timestamp }
-        end
-      end
-
-      AREXT_RAILS_COLUMNS[:update].each_pair do |timestamp_column, timestamp_proc|
-        if self.column_names.include?(timestamp_column) && !columns.include?(timestamp_column.to_sym)
-          timestamp = timestamp_proc.call
-          columns << timestamp_column
-          values.each { |row| row << timestamp }
-        end
-      end
-    end
-    
-    sql_statements = generate_sql :insert_into do |sql|
-      sql.table = quoted_table_name
-      sql.columns = columns.map{ |name| connection.quote_column_name(name) }
-      sql.values = values.map{ |rows| rows.map{ |field| connection.quote(field, columns_hash[columns[rows.index(field)]]) } }
-      sql.options = options
-    end
-    sql_statements.each { |statement| connection.execute statement }
-    ContinuousThinking::SQL::Result.new(:num_inserts => values.size, :failed_instances => invalid_instances)
-  end
   
+    def process_args(*args)
+      instances = nil
+      options = args.pop
+      @model = options[:model]
+    
+      if args.size == 1
+        columns = @model.column_names.dup
+        instances = args.first
+      elsif args.size == 2 && args.last.is_a?(Array)
+        if args.last.first.kind_of?(ActiveRecord::Base)
+          columns, instances = args
+        else
+          columns, values = args
+        end
+      end
+    
+      @columns = columns.map{ |c| c.to_sym }
+      @values = values
+      @instances = instances
+      @invalid_instances = []
+      @options = options
+    end
+  
+    def using_model_instances?
+      @instances
+    end
+  
+    def using_timestamps?
+      @options[:timestamps]
+    end
+  end
+end
+
+
+class ActiveRecord::Base
+  def self.import(*args)
+    options = args.last.is_a?(Hash) ? args.pop : {}
+    options = {:validate => true, :timestamps => true, :model => self}.merge(options)
+    args << options
+    importer = ContinuousThinking::ActiveRecord::DataImporter.new
+    importer.import *args
+  end
 end
