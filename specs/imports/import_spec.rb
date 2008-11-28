@@ -172,7 +172,51 @@ describe ActiveRecord, "importing data with time stamp columns" do
       end
     end
   end
+end
 
+
+describe ActiveRecord, "importing data that already exists" do
+  before(:each) do
+    ActiveRecord::Base.connection.begin_db_transaction
+  end
+  
+  after(:each) do
+    ActiveRecord::Base.connection.rollback_db_transaction
+  end
+
+  it "should not import a model whose primary key already exists in the database" do
+    book = Book.create! :title=>"Ruby", :author_name=>"Matz", :publisher=>"PragProg"
+    lambda {
+      book.title = "Perl"
+      begin ; Book.import [book] ; rescue ; end
+    }.should_not change(Book, :count)
+    Book.last.title.should == "Ruby"
+  end
+end
+
+
+describe ActiveRecord, "importing data that uses reserved database words" do
+  before(:each) do
+    ActiveRecord::Base.connection.begin_db_transaction
+  end
+  
+  after(:each) do
+    ActiveRecord::Base.connection.rollback_db_transaction
+  end
+
+  it "should import data that uses reserved words given columns and values" do
+    lambda {
+      Group.import %w(order), %w(superfriends)
+    }.should change(Group, :count).by(1)
+    Group.find_by_order("superfriends").should_not be_nil
+  end
+
+  it "should import data that uses reserved words given models" do
+    lambda {
+      Group.import [Group.new(:order => "superfriends")]
+    }.should change(Group, :count).by(1)
+    Group.find_by_order("superfriends").should_not be_nil
+  end
 end
 
 
