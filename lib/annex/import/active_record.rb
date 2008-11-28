@@ -1,4 +1,11 @@
 class ActiveRecord::Base
+  tproc = @@default_timezone == :utc ? lambda { Time.now.utc } : lambda { Time.now }
+  AREXT_RAILS_COLUMNS = {
+    :create => { "created_on" => tproc ,
+                 "created_at" => tproc },
+    :update => { "updated_on" => tproc ,
+                 "updated_at" => tproc }
+  }
   
   def self.generate_sql(identifier, &blk)
     sql_generator = ContinuousThinking::SQL::Generator.for(identifier)
@@ -8,7 +15,7 @@ class ActiveRecord::Base
   
   def self.import(*args)
     instances, invalid_instances = nil, []
-    options = { :validate => true }
+    options = { :validate => true, :timestamps => true }
     
     if args.size == 1
       columns = column_names.dup
@@ -32,7 +39,8 @@ class ActiveRecord::Base
         columns, values = args
       end
     end
-
+    columns = columns.map{ |c| c.to_sym }
+    
     if options[:validate]
       if instances.nil?
         instances = []
@@ -47,12 +55,30 @@ class ActiveRecord::Base
       invalid_instances = instances.select{ |instance| !instance.valid? }
       instances -= invalid_instances
     end
-    
+
     if instances
       if instances.any?
         values = instances.map{ |model| columns.map{ |column| model.attributes[column.to_s] } }
       else
         return ContinuousThinking::SQL::Result.new(:num_inserts => 0, :failed_instances => invalid_instances)
+      end
+    end
+
+    if options[:timestamps]
+      AREXT_RAILS_COLUMNS[:create].each_pair do |timestamp_column, timestamp_proc|
+        if self.column_names.include?(timestamp_column) && !columns.include?(timestamp_column.to_sym)
+          timestamp = timestamp_proc.call
+          columns << timestamp_column
+          values.each { |row| row << timestamp }
+        end
+      end
+
+      AREXT_RAILS_COLUMNS[:update].each_pair do |timestamp_column, timestamp_proc|
+        if self.column_names.include?(timestamp_column) && !columns.include?(timestamp_column.to_sym)
+          timestamp = timestamp_proc.call
+          columns << timestamp_column
+          values.each { |row| row << timestamp }
+        end
       end
     end
     
@@ -62,7 +88,6 @@ class ActiveRecord::Base
       sql.values = values.map{ |rows| rows.map{ |field| connection.quote(field, columns_hash[columns[rows.index(field)]]) } }
       sql.options = options
     end
-
     sql_statements.each { |statement| connection.execute statement }
     ContinuousThinking::SQL::Result.new(:num_inserts => values.size, :failed_instances => invalid_instances)
   end

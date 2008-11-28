@@ -142,6 +142,23 @@ describe ActiveRecord, "importing data" do
   end
 end
 
+describe ActiveRecord, "importing data with time stamp columns" do
+  before(:each) do
+    ActiveRecord::Base.connection.begin_db_transaction
+  end
+  
+  after(:each) do
+    ActiveRecord::Base.connection.rollback_db_transaction
+  end
+
+  %w(created_at created_on updated_at updated_on).each do |field|
+    it "should set the #{field} column when importing new records" do
+      Book.import [:title, :author_name, :publisher], [%w(Ruby Matz OReilly), %w(Rails DHH PragProg)]
+      Book.find_by_title("Ruby").attributes[field].to_i.should be_close(Time.now.to_i, 10)
+    end
+  end
+end
+
 
 describe ActiveRecord, "reporting on imported data" do
   before(:each) do
