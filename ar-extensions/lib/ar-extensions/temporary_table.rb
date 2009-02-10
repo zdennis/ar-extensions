@@ -75,7 +75,7 @@ class ActiveRecord::Base
     options[:like] = self unless options[:like]	
     options[:temporary] = true if not options[:permanent] and not options.has_key?( :temporary )
     table_name = options[:table_name]
-    model_name = options[:model_name] || Inflector.classify( table_name )	
+    model_name = options[:model_name] || ActiveSupport::Inflector.classify( table_name )	
     raise Exception.new( "Model #{model_name} already exists! \n" ) if Object.const_defined? model_name 
     
     like_table_name = options[:like].table_name || self.table_name
