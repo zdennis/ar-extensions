@@ -1,3 +1,11 @@
+2009-02-09  zdennis  <zach.dennis@gmail.com>
+
+* fixed issue in http://zdennis.lighthouseapp.com/projects/14379/tickets/14-join-table-conditions-broken
+* Updated usage of Inflector to point to ActiveSupport::Inflector
+* Fixed bug where finder conditions which use arext-suffixed keys and normal field keys would fail when using a conditions hash. (Gabe da Silveira)
+* added timestamps options to not automatically add timestamps even if record timestamps is disabled in ActiveRecord::Base (Thibaud Guillaume-Gentil)
+*  Updated to use alias_method_chain so that multiple aliased finders remain intact (Marcus Crafter)
+
 2007-07-20  zdennis  <zdennis@dhcp-22.atomicobject.localnet>
 
 	* Added patch from Michael Flester to fix bug with created_at/updated_at fields to use proper timezone. 
