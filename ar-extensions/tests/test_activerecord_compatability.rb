@@ -55,6 +55,16 @@ class FindersTest < Test::Unit::TestCase
       assert_equal 2, Topic.find(:first).books.find(:all, :conditions => blank).size
     end
   end
+  
+  def test_find_with_hash_conditions_and_joins
+    Topic.destroy_all
+    Book.destroy_all
+    topic = Topic.create! :author_name => "Zach Dennis", :title => "Books by Brooks"
+    sword_of_shannara_book = Book.create!(:title => "Sword of Shannara", :author_name => "Terry Brooks", :publisher => "DelRey")
+    topic.books << sword_of_shannara_book
+    found_topic = Topic.find(:all, :conditions => {:books => {:title => "Sword of Shannara"}}, :joins => :books)
+    assert_equal [topic], found_topic
+  end
 
   
 end

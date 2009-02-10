@@ -10,7 +10,6 @@ module ActiveRecord::ConnectionAdapters::Quoting
   end
 end
 
-
 class ActiveRecord::Base
 
   class << self
@@ -55,6 +54,8 @@ class ActiveRecord::Base
         if val.respond_to?( :to_sql )  
           conditions << sanitize_sql_by_way_of_duck_typing( val ) 
           next
+        elsif val.is_a?(Hash) # don't mess with ActiveRecord hash nested hash functionality
+          conditions << sanitize_sql_hash_for_conditions(key => val)
         else
           sql = nil
           result = ActiveRecord::Extensions.process( key, val, self )
