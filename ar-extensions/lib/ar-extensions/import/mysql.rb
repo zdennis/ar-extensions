@@ -12,6 +12,8 @@ module ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter # :nodoc:
       sql << sql_for_on_duplicate_key_update_as_array( table_name, arg )
     elsif arg.is_a?( Hash )
       sql << sql_for_on_duplicate_key_update_as_hash( table_name, arg )
+    elsif arg.is_a?( String )
+      sql << arg
     else
       raise ArgumentError.new( "Expected Array or Hash" )
     end

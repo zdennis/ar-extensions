@@ -5,4 +5,6 @@ ActiveRecord::ConnectionAdapters::MysqlAdapter.class_eval do
     result = execute( "SHOW VARIABLES like 'max_allowed_packet';" )
     result.fetch_row[1].to_i
   end
+
+  def rollup_sql; " WITH ROLLUP "; end
 end

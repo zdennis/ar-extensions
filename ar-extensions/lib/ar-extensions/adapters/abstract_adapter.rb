@@ -49,7 +49,23 @@ module ActiveRecord # :nodoc:
 
         number_of_inserts
       end
-      
+
+      def pre_sql_statements(options)
+        sql = []
+        sql << options[:pre_sql] if options[:pre_sql]
+        sql << options[:command] if options[:command]
+        sql << "IGNORE" if options[:ignore]
+
+        #add keywords like IGNORE or DELAYED
+        if options[:keywords].is_a?(Array)
+          sql.concat(options[:keywords])
+        elsif options[:keywords]
+          sql << options[:keywords].to_s
+        end
+
+        sql
+      end
+
       # Synchronizes the passed in ActiveRecord instances with the records in
       # the database by calling +reload+ on each instance.
       def after_import_synchronize( instances )
@@ -62,6 +78,13 @@ module ActiveRecord # :nodoc:
         if options[:on_duplicate_key_update]
           post_sql_statements << sql_for_on_duplicate_key_update( table_name, options[:on_duplicate_key_update] )
         end
+
+        #custom user post_sql
+        post_sql_statements << options[:post_sql] if options[:post_sql]
+
+        #with rollup
+        post_sql_statements << rollup_sql if options[:rollup]
+
         post_sql_statements
       end
 
@@ -70,7 +93,7 @@ module ActiveRecord # :nodoc:
       def multiple_value_sets_insert_sql(table_name, column_names, options) # :nodoc:
         "INSERT #{options[:ignore] ? 'IGNORE ':''}INTO #{table_name} (#{column_names.join(',')}) VALUES "
       end  
-  
+
       # Returns SQL the VALUES for an INSERT statement given the passed in +columns+ 
       # and +array_of_attributes+.
       def values_sql_for_column_names_and_attributes( columns, array_of_attributes )   # :nodoc:
