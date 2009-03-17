@@ -3,7 +3,7 @@
 #
 # == Using finder_sql_to_string
 # Expose the finder sql to a string. The options are identical to those accepted by <tt>find(:all, options)</tt>
-# the find method takes. 
+# the find method takes.
 # === Example:
 #   sql = Contact.finder_sql_to_string(:include => :primary_email_address)
 #   Contact.find_by_sql(sql + 'USE_INDEX(blah)')
@@ -31,7 +31,7 @@
 # Several plugins exist to force <tt>:select</tt> to work with eager loading.
 #
 # <tt>script/plugin install http://arperftoolkit.rubyforge.org/svn/trunk/eload_select/ </tt>
-#    
+#
 # * <tt>:having</tt> only works when <tt>:group</tt> option is specified
 #  Book.find(:all, :select => 'count(*) as count_all, topic_id', :group => :topic_id, :having => 'count(*) > 1')
 #  SQL>SELECT count(*) as count_all, topic_id FROM `books`  GROUP BY topic_id HAVING count(*) > 1
@@ -46,41 +46,54 @@
 #
 
 module ActiveRecord::Extensions::FinderOptions
-  def self.included(base) 
-    
+  def self.included(base)
+
     #alias and include only if not yet defined
     unless base.respond_to?(:construct_finder_sql_ext)
       base.extend ClassMethods
+      base.extend ActiveRecord::Extensions::SqlGeneration
       base.class_eval do
         class << self
-          VALID_FIND_OPTIONS.concat([:pre_sql, :post_sql, :keywords, :ignore, :rollup, :override_select, :having])
+          VALID_FIND_OPTIONS.concat([:pre_sql, :post_sql, :keywords, :ignore, :rollup, :override_select, :having, :index_hint])
           alias_method              :construct_finder_sql, :construct_finder_sql_ext
           alias_method_chain        :construct_finder_sql_with_included_associations, :ext
         end
       end
    end
   end
-  
+
   module ClassMethods
     # Return a string containing the SQL used with the find(:all)
     # The options are the same as those with find(:all)
-    # 
+    #
+    # Additional parameter of
+    # <tt>:force_eager_load</tt> forces eager loading even if the
+    #  column is not referenced.
+    #
     #   sql = Contact.finder_sql_to_string(:include => :primary_email_address)
     #   Contact.find_by_sql(sql + 'USE_INDEX(blah)')
-    def finder_sql_to_string(options)      
-      include_associations = merge_includes(scope(:find, :include), options[:include])
-      select_sql = self.send( (include_associations.any? && references_eager_loaded_tables?(options)) ?
-        :finder_sql_with_included_associations :
-        :construct_finder_sql, options)
-        
-      select_sql.strip
+    def finder_sql_to_string(options)
+      
+      select_sql = self.send(
+        (use_eager_loading_sql?(options) ? :finder_sql_with_included_associations : :construct_finder_sql),
+        options.reject{|k,v| k == :force_eager_load}).strip
+
     end
-            
+
     protected
-    
+
+    # use eager loading sql (join associations) if inclu
+    def use_eager_loading_sql?(options)# :nodoc:
+      include_associations = merge_includes(scope(:find, :include), options[:include])
+      return ((include_associations.any?) &&
+              (options[:force_eager_load].is_a?(TrueClass) ||
+               references_eager_loaded_tables?(options)))
+
+    end
+
     # construct_finder_sql is called when not using eager loading (:include option is NOT specified)
     def construct_finder_sql_ext(options) # :nodoc:
-      
+
       #add piggy back option if plugin is installed
       add_piggy_back!(options) if self.respond_to? :add_piggy_back!
 
@@ -88,6 +101,7 @@ module ActiveRecord::Extensions::FinderOptions
       sql = pre_sql_statements(options)
       sql  << "#{options[:select] || options[:override_select] || (scope && scope[:select]) || default_select(options[:joins] || (scope && scope[:joins]))} "
       sql << "FROM #{(scope && scope[:from]) || options[:from] || quoted_table_name} "
+      sql << "#{options[:index_hint]} " if options[:index_hint]
 
       add_joins!(sql, options[:joins], scope)
       add_conditions!(sql, options[:conditions], scope)
@@ -97,24 +111,25 @@ module ActiveRecord::Extensions::FinderOptions
       add_order!(sql, options[:order], scope)
       add_limit!(sql, options, scope)
       add_lock!(sql, options, scope)
-      
+
       sql << post_sql_statements(options)
       sql
 
-    end 
+    end
 
     #override the constructor for use with associations (:include option)
     #directly use eager select if that plugin is loaded instead of this one
     def construct_finder_sql_with_included_associations_with_ext(options, join_dependency)#:nodoc
-      if respond_to?(:construct_finder_sql_with_included_associations_with_eager_select) 
+      if respond_to?(:construct_finder_sql_with_included_associations_with_eager_select)
         return construct_finder_sql_with_included_associations_with_eager_select(options, join_dependency)
       else
         scope = scope(:find)
         sql = pre_sql_statements(options)
         sql << "#{options[:override_select]||column_aliases(join_dependency)} FROM #{(scope && scope[:from]) || options[:from] || quoted_table_name} "
+        sql << "#{options[:index_hint]} " if options[:index_hint]
         sql << join_dependency.join_associations.collect{|join| join.association_join }.join
-        
-        
+
+
         add_joins!(sql, options[:joins], scope)
         add_conditions!(sql, options[:conditions], scope)
         add_limited_ids_condition!(sql, options, join_dependency) if !using_limitable_reflections?(join_dependency.reflections) && ((scope && scope[:limit]) || options[:limit])
@@ -136,18 +151,10 @@ module ActiveRecord::Extensions::FinderOptions
       join_dependency = ActiveRecord::Associations::ClassMethods::JoinDependency.new(self, merge_includes(scope(:find, :include), options[:include]), options[:joins])
       sql = construct_finder_sql_with_included_associations_with_ext(options, join_dependency)
     end
-      
-    def post_sql_statements(options)#:nodoc
-      connection.post_sql_statements(quoted_table_name, options).join(' ')
-    end
-    
-    def pre_sql_statements(options)#:nodoc
-      connection.pre_sql_statements({:command => 'SELECT'}.merge(options)).join(' ').strip + " "
-    end
-    
+
     def add_having!(sql, options, scope = :auto)#:nodoc
       sql << " HAVING #{options[:having]} " if options[:group] && options[:having]
     end
-    
+
   end
 end
