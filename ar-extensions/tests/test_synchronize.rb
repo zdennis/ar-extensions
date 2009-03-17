@@ -1,6 +1,6 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper' ) )
 
-class SynchronizeTest < Test::Unit::TestCase
+class SynchronizeTest< TestCaseSuperClass
   include ActiveRecord::ConnectionAdapters
   self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/synchronize' )
   self.fixtures 'books'

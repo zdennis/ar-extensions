@@ -1,6 +1,6 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper') )
 
-class ImportTest < Test::Unit::TestCase
+class ImportTest< TestCaseSuperClass
   if ActiveRecord::Base.connection.class.name =~ /sqlite/i
     self.use_transactional_fixtures = false
   end

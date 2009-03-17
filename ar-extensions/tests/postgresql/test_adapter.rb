@@ -1,6 +1,6 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), '..', 'test_helper' ) )
 
-class PostgreSQLAdapterTest < Test::Unit::TestCase
+class PostgreSQLAdapterTest< TestCaseSuperClass
   
   def setup
     @target = ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.allocate

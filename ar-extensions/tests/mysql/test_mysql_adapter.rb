@@ -1,4 +1,4 @@
-class MysqlAdapterTest < Test::Unit::TestCase
+class MysqlAdapterTest< TestCaseSuperClass
   include ActiveRecord::ConnectionAdapters
   
   def setup

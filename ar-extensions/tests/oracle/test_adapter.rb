@@ -1,6 +1,6 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), '..', 'test_helper' ) )
 
-class OracleAdapterTest < Test::Unit::TestCase
+class OracleAdapterTest< TestCaseSuperClass
   
   def setup
     @target = ActiveRecord::ConnectionAdapters::OracleAdapter.allocate

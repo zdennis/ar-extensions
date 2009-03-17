@@ -2,7 +2,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper') )
 require 'fileutils'
 require 'fastercsv'
 
-class TestToCSVWithDefaultOptions < Test::Unit::TestCase
+class TestToCSVWithDefaultOptions< TestCaseSuperClass
   self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/to_csv_with_default_options' )
   fixtures :developers
 

@@ -1,6 +1,6 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), '..', 'test_helper' ) )
 
-class MysqlFindersTest < Test::Unit::TestCase
+class MysqlFindersTest< TestCaseSuperClass
   include ActiveRecord::ConnectionAdapters
   self.fixture_path = File.join( File.dirname( __FILE__ ), '../fixtures/unit/active_record_base_finders' )
   self.fixtures :books

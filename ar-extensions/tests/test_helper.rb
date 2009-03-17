@@ -1,5 +1,14 @@
 dir = File.dirname( __FILE__ )
-begin ; require 'active_record' ; rescue LoadError; require 'rubygems'; require 'active_record'; end
+
+require 'rubygems'
+if version=ENV["AR_VERSION"]
+  gem 'activerecord', version
+else
+  gem 'activerecord'
+end
+require 'active_record'
+require 'active_record/version'
+
 require File.join( dir, 'connections', "native_#{ENV["ARE_DB"]}", 'connection.rb' )
 require File.expand_path( File.join( dir, 'boot' ) )
 
@@ -43,19 +52,21 @@ class Fixtures
   end
 end
 
-Test::Unit::TestCase.fixture_path = File.dirname(__FILE__) + "/fixtures/"
-#$LOAD_PATH.unshift(Test::Unit::TestCase.fixture_path)
-class Test::Unit::TestCase #:nodoc:
-
-#  def self.fixtures(*table_names)
-#    if block_given?
-#      Fixtures.create_fixtures(self.fixture_path, table_names) { yield }
-#    else
-#      Fixtures.create_fixtures(self.fixture_path, table_names)
-#    end
-#  end
-  self.use_transactional_fixtures = true
-  self.use_instantiated_fixtures = false
+if ActiveRecord::VERSION::STRING < '2.3.1'
+  TestCaseSuperClass = Test::Unit::TestCase
+  class Test::Unit::TestCase #:nodoc:
+    self.use_transactional_fixtures = true
+    self.use_instantiated_fixtures = false
+  end
+  Test::Unit::TestCase.fixture_path = File.dirname(__FILE__) + "/fixtures/"
+else
+  TestCaseSuperClass = ActiveRecord::TestCase
+  class ActiveRecord::TestCase #:nodoc:
+    include ActiveRecord::TestFixtures
+    self.use_transactional_fixtures = true
+    self.use_instantiated_fixtures = false
+  end
+  ActiveRecord::TestCase.fixture_path = File.dirname(__FILE__) + "/fixtures/"
 end
 
 module ActiveRecord # :nodoc:

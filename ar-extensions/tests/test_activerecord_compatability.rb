@@ -1,6 +1,6 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper' ) )
 
-class FindersTest < Test::Unit::TestCase
+class FindersTest< TestCaseSuperClass
   include ActiveRecord::ConnectionAdapters
 
   def setup

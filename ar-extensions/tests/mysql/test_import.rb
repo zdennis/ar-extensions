@@ -1,6 +1,6 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), '..', 'test_helper') )
 
-class MysqlImportTest < Test::Unit::TestCase
+class MysqlImportTest< TestCaseSuperClass
   fixtures :topics, :books
 
   def setup

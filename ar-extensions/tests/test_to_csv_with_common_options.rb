@@ -1,7 +1,7 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper') )
 require 'fileutils'
 
-class TestToCSVWithCommonOptions < Test::Unit::TestCase
+class TestToCSVWithCommonOptions< TestCaseSuperClass
   self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/to_csv_with_common_options' )
   self.fixtures 'developers', 'addresses', 'teams', 'languages'
 
