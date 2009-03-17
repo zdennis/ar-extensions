@@ -1,3 +1,7 @@
+2009-03-16  zdennis  <zach.dennis@gmail.com>
+
+* fixed Rails 2.3.1 and 2.3.2 compatibility issue (Stephen Heuer)
+
 2009-02-09  zdennis  <zach.dennis@gmail.com>
 
 * fixed issue in http://zdennis.lighthouseapp.com/projects/14379/tickets/14-join-table-conditions-broken

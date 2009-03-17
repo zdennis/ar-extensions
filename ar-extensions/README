@@ -9,6 +9,12 @@ Email: zach.dennis@gmail.com
  - For How-To information see http://www.continuousthinking.com/tags/arext
  - For project information and feedback please consult http://rubyforge.org/projects/arext/
  - For release information please see below
+ 
+ActiveRecord::Extensions 0.8.2
+------------------------------
+March 16th, 2009
+ - Rails 2.3.1 and 2.3.2 compatibility added 
+ - Rails 2.1.2 and 2.2.2 compatibility preserved
 
 AciveRecord::Extensions 0.7.0
 -----------------------------
