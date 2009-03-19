@@ -315,7 +315,12 @@ module ActiveRecord::Extensions
         fieldname = caller.connection.quote_column_name( key )
         min = caller.connection.quote( val.first, caller.columns_hash[ key ] )
         max = caller.connection.quote( val.last, caller.columns_hash[ key ] )
-        str = "#{caller.quoted_table_name}.#{fieldname} #{match_data ? 'NOT ' : '' } BETWEEN #{min} AND #{max}"
+        str = if val.exclude_end?
+          "#{match_data ? 'NOT ' : '' }(#{caller.quoted_table_name}.#{fieldname} >= #{min} AND #{caller.quoted_table_name}.#{fieldname} < #{max})"
+        else 
+          "#{caller.quoted_table_name}.#{fieldname} #{match_data ? 'NOT ' : '' } BETWEEN #{min} AND #{max}"
+        end
+        
         return Result.new( str, nil )
       end
       nil      

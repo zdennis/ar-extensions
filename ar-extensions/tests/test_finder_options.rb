@@ -5,7 +5,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper' ) )
 
 
 
-class FindersTest < Test::Unit::TestCase
+class FinderOptionsTest < TestCaseSuperClass
   include ActiveRecord::ConnectionAdapters
   self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/active_record_base_finders' )
   self.fixtures 'books'
