@@ -44,7 +44,7 @@
 # * Rubyforge Project: http://rubyforge.org/projects/arext
 # * Anonymous SVN: svn checkout svn://rubyforge.org/var/svn/arext
 #
-
+require 'active_record/version'
 module ActiveRecord::Extensions::FinderOptions
   def self.included(base)
 
@@ -100,14 +100,13 @@ module ActiveRecord::Extensions::FinderOptions
       scope = scope(:find)
       sql = pre_sql_statements(options)
       sql  << "#{options[:select] || options[:override_select] || (scope && scope[:select]) || default_select(options[:joins] || (scope && scope[:joins]))} "
-      sql << "FROM #{(scope && scope[:from]) || options[:from] || quoted_table_name} "
+      sql << "FROM #{options[:from]  || (scope && scope[:from]) || quoted_table_name} "
       sql << "#{options[:index_hint]} " if options[:index_hint]
 
       add_joins!(sql, options[:joins], scope)
       add_conditions!(sql, options[:conditions], scope)
-
-      add_group!(sql, options[:group], scope)
-      add_having!(sql, options, scope)
+      add_group_with_having!(sql, options[:group], options[:having], scope)
+      
       add_order!(sql, options[:order], scope)
       add_limit!(sql, options, scope)
       add_lock!(sql, options, scope)
@@ -132,10 +131,11 @@ module ActiveRecord::Extensions::FinderOptions
 
         add_joins!(sql, options[:joins], scope)
         add_conditions!(sql, options[:conditions], scope)
-        add_limited_ids_condition!(sql, options, join_dependency) if !using_limitable_reflections?(join_dependency.reflections) && ((scope && scope[:limit]) || options[:limit])
 
-        add_group!(sql, options[:group], scope)
-        add_having!(sql, options, scope)
+
+        add_limited_ids_condition!(sql, options_with_group(options), join_dependency) if !using_limitable_reflections?(join_dependency.reflections) && ((scope && scope[:limit]) || options[:limit])
+
+        add_group_with_having!(sql, options[:group], options[:having], scope)
         add_order!(sql, options[:order], scope)
         add_limit!(sql, options, scope) if using_limitable_reflections?(join_dependency.reflections)
         add_lock!(sql, options, scope)
@@ -151,9 +151,57 @@ module ActiveRecord::Extensions::FinderOptions
       join_dependency = ActiveRecord::Associations::ClassMethods::JoinDependency.new(self, merge_includes(scope(:find, :include), options[:include]), options[:joins])
       sql = construct_finder_sql_with_included_associations_with_ext(options, join_dependency)
     end
+    
 
-    def add_having!(sql, options, scope = :auto)#:nodoc
-      sql << " HAVING #{options[:having]} " if options[:group] && options[:having]
+    # Before Version 2.3.0 there was no :having option
+    # Add this option to previous versions by overriding add_group!
+    # to accept a hash with keys :group and :having instead of just group
+    # this avoids having to completely rewrite dependent functions like
+    # construct_finder_sql_for_association_limiting
+
+    if ActiveRecord::VERSION::STRING < '2.3.1'
+      #add_group! in version 2.3 adds having already
+      #copy that implementation
+
+      def add_group_with_having!(sql, group, having, scope =:auto)
+        if group
+          sql << " GROUP BY #{group}"
+          sql << " HAVING #{sanitize_sql(having)}" if having
+        else
+          scope = scope(:find) if :auto == scope
+          if scope && (scoped_group = scope[:group])
+            sql << " GROUP BY #{scoped_group}"
+            sql << " HAVING #{sanitize_sql(scope[:having])}" if scope[:having]
+          end
+        end
+      end
+
+      def add_group!(sql, group_options, scope = :auto)#:nodoc:
+        group, having = if group_options.is_a?(Hash) && group_options.has_key?(:group)
+          [group_options[:group] , group_options[:having]]
+        else
+          [group_options, nil]
+        end
+        add_group_with_having!(sql, group, having, scope)
+      end
+
+      def options_with_group(options)#:nodoc:
+        if options[:group]
+          options.merge(:group => {:group => options[:group], :having => options[:having]})
+        else
+          options
+        end
+      end
+
+    #for Version 2.3 and greater, define options_with_group to pass itself
+    else
+      def options_with_group(options)#:nodoc:
+        options
+      end
+      
+      def add_group_with_having!(sql, group, having, scope =:auto)#:nodoc:
+        add_group!(sql, group, having, scope)
+      end
     end
 
   end
