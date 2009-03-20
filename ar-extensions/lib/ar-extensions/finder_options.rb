@@ -52,6 +52,8 @@ module ActiveRecord::Extensions::FinderOptions
     unless base.respond_to?(:construct_finder_sql_ext)
       base.extend ClassMethods
       base.extend ActiveRecord::Extensions::SqlGeneration
+      base.extend HavingOptionBackCompatibility
+      base.extend ConstructSqlCompatibility
       base.class_eval do
         class << self
           VALID_FIND_OPTIONS.concat([:pre_sql, :post_sql, :keywords, :ignore, :rollup, :override_select, :having, :index_hint])
@@ -73,7 +75,7 @@ module ActiveRecord::Extensions::FinderOptions
     #   sql = Contact.finder_sql_to_string(:include => :primary_email_address)
     #   Contact.find_by_sql(sql + 'USE_INDEX(blah)')
     def finder_sql_to_string(options)
-      
+
       select_sql = self.send(
         (use_eager_loading_sql?(options) ? :finder_sql_with_included_associations : :construct_finder_sql),
         options.reject{|k,v| k == :force_eager_load}).strip
@@ -99,14 +101,15 @@ module ActiveRecord::Extensions::FinderOptions
 
       scope = scope(:find)
       sql = pre_sql_statements(options)
-      sql  << "#{options[:select] || options[:override_select] || (scope && scope[:select]) || default_select(options[:joins] || (scope && scope[:joins]))} "
-      sql << "FROM #{options[:from]  || (scope && scope[:from]) || quoted_table_name} "
+      add_select_column_sql!(sql, options, scope)
+      add_from!(sql, options, scope)
+
       sql << "#{options[:index_hint]} " if options[:index_hint]
 
       add_joins!(sql, options[:joins], scope)
       add_conditions!(sql, options[:conditions], scope)
       add_group_with_having!(sql, options[:group], options[:having], scope)
-      
+
       add_order!(sql, options[:order], scope)
       add_limit!(sql, options, scope)
       add_lock!(sql, options, scope)
@@ -119,31 +122,28 @@ module ActiveRecord::Extensions::FinderOptions
     #override the constructor for use with associations (:include option)
     #directly use eager select if that plugin is loaded instead of this one
     def construct_finder_sql_with_included_associations_with_ext(options, join_dependency)#:nodoc
-      if respond_to?(:construct_finder_sql_with_included_associations_with_eager_select)
-        return construct_finder_sql_with_included_associations_with_eager_select(options, join_dependency)
-      else
-        scope = scope(:find)
-        sql = pre_sql_statements(options)
-        sql << "#{options[:override_select]||column_aliases(join_dependency)} FROM #{(scope && scope[:from]) || options[:from] || quoted_table_name} "
-        sql << "#{options[:index_hint]} " if options[:index_hint]
-        sql << join_dependency.join_associations.collect{|join| join.association_join }.join
+      scope = scope(:find)
+      sql = pre_sql_statements(options)
 
+      add_eager_selected_column_sql!(sql, options, scope, join_dependency)
+      add_from!(sql, options, scope)
 
-        add_joins!(sql, options[:joins], scope)
-        add_conditions!(sql, options[:conditions], scope)
+      sql << "#{options[:index_hint]} " if options[:index_hint]
+      sql << join_dependency.join_associations.collect{|join| join.association_join }.join
 
+      add_joins!(sql, options[:joins], scope)
+      add_conditions!(sql, options[:conditions], scope)
 
-        add_limited_ids_condition!(sql, options_with_group(options), join_dependency) if !using_limitable_reflections?(join_dependency.reflections) && ((scope && scope[:limit]) || options[:limit])
+      add_limited_ids_condition!(sql, options_with_group(options), join_dependency) if !using_limitable_reflections?(join_dependency.reflections) && ((scope && scope[:limit]) || options[:limit])
 
-        add_group_with_having!(sql, options[:group], options[:having], scope)
-        add_order!(sql, options[:order], scope)
-        add_limit!(sql, options, scope) if using_limitable_reflections?(join_dependency.reflections)
-        add_lock!(sql, options, scope)
+      add_group_with_having!(sql, options[:group], options[:having], scope)
+      add_order!(sql, options[:order], scope)
+      add_limit!(sql, options, scope) if using_limitable_reflections?(join_dependency.reflections)
+      add_lock!(sql, options, scope)
 
-        sql << post_sql_statements(options)
+      sql << post_sql_statements(options)
 
-        return sanitize_sql(sql)
-      end
+      return sanitize_sql(sql)
     end
 
     #generate the finder sql for use with associations (:include => :something)
@@ -151,19 +151,100 @@ module ActiveRecord::Extensions::FinderOptions
       join_dependency = ActiveRecord::Associations::ClassMethods::JoinDependency.new(self, merge_includes(scope(:find, :include), options[:include]), options[:joins])
       sql = construct_finder_sql_with_included_associations_with_ext(options, join_dependency)
     end
+
+    #first use :override_select
+    #next use :construct_eload_select_sql if eload-select is loaded
+    #finally use normal column aliases
+    def add_eager_selected_column_sql!(sql, options, scope, join_dependency)#:nodoc:
+      if options[:override_select]
+        sql << options[:override_select]
+      elsif respond_to? :construct_eload_select_sql
+        sql << construct_eload_select_sql((scope && scope[:select]) || options[:select], join_dependency)
+      else
+        sql << column_aliases(join_dependency)
+      end
+    end
+
+    #simple select sql
+    def add_select_column_sql!(sql, options, scope = :auto)#:nodoc:
+      sql << "#{options[:select] || options[:override_select] || (scope && scope[:select]) || default_select(options[:joins] || (scope && scope[:joins]))}"
+    end
+
+    #from sql
+    def add_from!(sql, options, scope = :auto)#:nodoc:
+      sql << " FROM #{options[:from]  || (scope && scope[:from]) || quoted_table_name} "
+    end
     
+    def options_with_group(options)#:nodoc:
+      options
+    end
+  end
 
-    # Before Version 2.3.0 there was no :having option
-    # Add this option to previous versions by overriding add_group!
-    # to accept a hash with keys :group and :having instead of just group
-    # this avoids having to completely rewrite dependent functions like
-    # construct_finder_sql_for_association_limiting
+  #In Rails 2.0.0 add_joins! signature changed
+  #  Pre Rails 2.0.0: add_joins!(sql, options, scope)
+  #  After 2.0.0:     add_joins!(sql, options[:joins], scope)
+  module ConstructSqlCompatibility
+    def self.extended(base)
+      if ActiveRecord::VERSION::STRING < '2.0.0'
+        base.extend ClassMethods
+        base.class_eval do
+          class << self
+            alias_method_chain :add_joins!, :compatibility
+          end
+        end
+      end
+    end
 
-    if ActiveRecord::VERSION::STRING < '2.3.1'
+    module ClassMethods
+      def add_joins_with_compatibility!(sql, options, scope = :auto)#:nodoc:
+        join_param = options.is_a?(Hash) ? options : { :joins => options }
+        add_joins_without_compatibility!(sql, join_param, scope)
+      end
+
+      #aliasing threw errors
+      def quoted_table_name#:nodoc:
+        self.table_name
+      end
+
+      #pre Rails 2.0.0 the order of the scope and options was different
+      def add_from!(sql, options, scope = :auto)#:nodoc:
+        sql << " FROM #{(scope && scope[:from]) || options[:from] || table_name} "
+      end
+
+      def add_select_column_sql!(sql, options, scope = :auto)#:nodoc:
+        sql << "#{options[:override_select] || (scope && scope[:select]) || options[:select] || '*'}"
+      end
+
+    end
+  end
+
+  # Before Version 2.3.0 there was no :having option
+  # Add this option to previous versions by overriding add_group!
+  # to accept a hash with keys :group and :having instead of just group
+  # this avoids having to completely rewrite dependent functions like
+  # construct_finder_sql_for_association_limiting
+
+  module HavingOptionBackCompatibility#:nodoc:
+    def self.extended(base)
+
+      #for previous versions define having
+      if ActiveRecord::VERSION::STRING < '2.3.0'
+        base.extend ClassMethods
+
+      #for 2.3.0+ alias our method to :add_group!
+      else
+        base.class_eval do
+          class << self
+            alias_method            :add_group_with_having!, :add_group!
+          end
+        end
+      end
+    end
+    
+    module ClassMethods#:nodoc:
       #add_group! in version 2.3 adds having already
       #copy that implementation
-
-      def add_group_with_having!(sql, group, having, scope =:auto)
+      def add_group_with_having!(sql, group, having, scope =:auto)#:nodoc:
         if group
           sql << " GROUP BY #{group}"
           sql << " HAVING #{sanitize_sql(having)}" if having
@@ -191,16 +272,6 @@ module ActiveRecord::Extensions::FinderOptions
         else
           options
         end
-      end
-
-    #for Version 2.3 and greater, define options_with_group to pass itself
-    else
-      def options_with_group(options)#:nodoc:
-        options
-      end
-      
-      def add_group_with_having!(sql, group, having, scope =:auto)#:nodoc:
-        add_group!(sql, group, having, scope)
       end
     end
 
