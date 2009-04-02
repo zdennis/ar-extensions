@@ -1,5 +1,8 @@
 require 'active_record/version'
 
+
+
+
 module ActiveRecord::ConnectionAdapters::Quoting
 
   alias :quote_before_arext :quote
@@ -12,6 +15,7 @@ module ActiveRecord::ConnectionAdapters::Quoting
   end
 end
 
+unless  ActiveRecord::VERSION::STRING < '2.0.2'
 class ActiveRecord::Base
 
   class << self
@@ -92,4 +96,5 @@ class ActiveRecord::Base
        
   end
   
+end
 end

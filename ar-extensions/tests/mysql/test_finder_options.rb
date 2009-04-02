@@ -1,8 +1,4 @@
-dir = '/Users/blythie/radrails/ar_test/ar_test/vendor'
-$: << "#{dir}/rails/activerecord/lib"
-ENV["ARE_DB"] = 'mysql'
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper' ) )
-
+require File.expand_path( File.join( File.dirname( __FILE__ ), '..', 'test_helper' ))
 
 
 class FinderOptionsTest < TestCaseSuperClass
@@ -20,7 +16,6 @@ class FinderOptionsTest < TestCaseSuperClass
   end
   
   def test_find_with_having_should_add_having_option_to_sql
-
     create_books_and_topics
     
     #test having without associations
