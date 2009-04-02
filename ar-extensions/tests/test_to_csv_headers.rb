@@ -119,7 +119,6 @@ class TestToCSVHeaders< TestCaseSuperClass
     end
   end
   
-  
   def test_to_csv_headers_for_a_belongs_to_association_with_specified_columns_as_strings
     developer_columns = [ 'id', 'name' ]
     headers = Address.to_csv_headers( :include => { :developer=>{ :only=>developer_columns } } )
@@ -176,7 +175,6 @@ class TestToCSVHeaders< TestCaseSuperClass
     assert_equal primary_headers.size + developer_headers.size, headers.size
     [ "DeveloperName" ].each{ |e| assert headers.include?( e ), "Missing expected header '#{e}'!" }
   end
-
 
   def test_to_csv_fields_with_default_options
     assert_equal %W( created_at id name salary team_id updated_at ), Developer.to_csv_fields.fields

@@ -1,7 +1,6 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_helper' ) )
 
 class TemporaryTableCRUDTest< TestCaseSuperClass
-#  self.fixture_path = File.join( File.dirname( __FILE__ ), 'fixtures/unit/temporary_table' )
 
   def test_creating_a_temporary_table_creates_a_model
     unless Book.supports_temporary_tables?

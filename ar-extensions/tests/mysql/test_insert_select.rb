@@ -1,4 +1,3 @@
-
 require File.expand_path( File.join( File.dirname( __FILE__ ), '..', 'test_helper' ))
 
 class InsertSelectTest < TestCaseSuperClass
@@ -51,12 +50,9 @@ class InsertSelectTest < TestCaseSuperClass
       assert_equal topic.title, books[idx].title
       assert_equal topic.updated_at.to_s, timestamp.to_s
     }
-    
-
   end
 
   def test_insert_select_should_import_data_from_one_model_into_another_ignoring_existing_data
-
     time = Time.now - 4.seconds
     #insert book data into cart
     CartItem.insert_select(
@@ -79,7 +75,6 @@ class InsertSelectTest < TestCaseSuperClass
   end
   
   def test_insert_select_should_import_data_from_one_model_into_another_updating_existing_data(options_one={}, options_two={})
-    
     fun_topic = Topic.create!(:title => 'Fun Books', :author_name => 'Big Bird')
     ok_topic = Topic.create!(:title => 'OK Books', :author_name => 'sloth')
     boring_topic = Topic.create!(:title => 'Boring Books', :author_name => 'Giraffe')
@@ -155,7 +150,6 @@ class InsertSelectTest < TestCaseSuperClass
        :on_duplicate_key_update => [:updated_at, :copies])
 
     validate_cart_items :total => @cart_copies, :updated_at => new_time, :copies => 2
-
   end
   
   protected

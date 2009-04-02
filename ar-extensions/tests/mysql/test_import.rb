@@ -235,7 +235,6 @@ class MysqlImportTest< TestCaseSuperClass
     assert_equal "SomeOtherNewguy", topic2.author_name
   end  
   
-  
   def test_import_without_validations_but_with_on_duplicate_key_update_using_associated_objects
     return unless Topic.supports_on_duplicate_key_update?
 
