@@ -179,14 +179,37 @@ module ActiveRecord::Extensions::FindToCSV
 
     private
     
+    def add_to_csv_association_methods!(association_name)
+      association = self.send association_name
+      association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
+      association      
+    end
+    
+    def add_to_csv_association_data! data, to
+      if to.empty?
+        to.push( *data )
+      else
+        originals = to.dup
+        to.clear
+        data.each do |assoc_csv|
+          originals.each do |sibling|
+            to.push( sibling + assoc_csv )
+          end
+        end
+      end
+    end
+    
+    def to_csv_association_is_blank?(association)
+      association.nil? or (association.respond_to?( :empty? ) and association.empty?)      
+    end
+    
     def to_csv_data_for_included_associations( includes ) # :nodoc:
       get_class = proc { |str| Object.const_get( self.class.reflections[ str.to_sym ].class_name ) }
 
       case includes
       when Symbol
-        association = self.send( includes )
-        association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
-        if association.nil? or (association.respond_to?( :empty? ) and association.empty?)
+        association = add_to_csv_association_methods! includes
+        if to_csv_association_is_blank?(association)
           [ get_class.call( includes ).columns.map{ '' } ]
         else
           [ *association.to_csv_data ]
@@ -194,50 +217,27 @@ module ActiveRecord::Extensions::FindToCSV
       when Array
         siblings = []
         includes.each do |association_name|
-          association = self.send( association_name )
-          association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
-          if association.nil? or (association.respond_to?( :empty? ) and association.empty?)
+          association = add_to_csv_association_methods! association_name
+          if to_csv_association_is_blank?(association)
             association_data = [ get_class.call( association_name ).columns.map{ '' }  ]
           else
             association_data = association.to_csv_data
           end
 
-          if siblings.empty?
-            siblings.push( *association_data )
-          else
-            temp = []
-            association_data.each do |assoc_csv|
-              siblings.each do |sibling|
-                temp.push( sibling + assoc_csv )
-              end
-            end
-            siblings = temp            
-          end
+          add_to_csv_association_data! association_data, siblings
         end
         siblings
       when Hash
         sorted_includes = includes.sort_by{ |k| k.to_s }
         siblings = []
         sorted_includes.each do |(association_name,options)|
-          association = self.send( association_name )
-          association.send( :extend, ArrayInstanceMethods ) if association.is_a?( Array )
-          if association.nil? or (association.respond_to?( :empty ) and association.empty?)
+          association = add_to_csv_association_methods! association_name
+          if to_csv_association_is_blank?(association)
             association_data = [ get_class.call( association_name ).columns.map{ '' }  ]
           else
             association_data = association.to_csv_data( options )
           end
-
-          if siblings.empty?
-            siblings.push( *association_data )
-          else
-            temp = []
-            association_data.each do |assoc_csv|
-              siblings.each do |sibling|
-                temp.push( sibling + assoc_csv )
-              end
-            end
-            siblings = temp            
-          end
+          add_to_csv_association_data! association_data, siblings
         end
         siblings
       else
