@@ -61,6 +61,9 @@ module ActiveRecord::Extensions::InsertSelectSupport #:nodoc:
 end
 
 class ActiveRecord::Base
+  
+  include ActiveRecord::Extensions::SqlGeneration
+
   class << self
     # Insert records in bulk with a select statement
     #
@@ -116,17 +119,8 @@ class ActiveRecord::Base
 
     protected
 
-    #Base sql method for constructing inserts, updates
-    def construct_insert_sql(options={}, valid_options = [], &block)#:nodoc:
-      options.assert_valid_keys(valid_insert_select_options + valid_options)
-      sql = connection.pre_sql_statements(options).join(' ')
-      yield sql, options
-      sql << connection.post_sql_statements(quoted_table_name, options).join(' ')
-      sql
-    end
-
     def construct_insert_select_sql(select_obj, options)#:nodoc:
-      construct_insert_sql(gather_insert_options(options)) do |sql, into_op|
+      construct_ar_extension_sql(gather_insert_options(options), valid_insert_select_options) do |sql, into_op|
         sql << " INTO #{quoted_table_name} "
         sql << "( #{into_column_sql(options.delete(:into))} ) "
         

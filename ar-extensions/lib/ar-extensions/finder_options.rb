@@ -54,6 +54,7 @@ module ActiveRecord::Extensions::FinderOptions
       base.extend ActiveRecord::Extensions::SqlGeneration
       base.extend HavingOptionBackCompatibility
       base.extend ConstructSqlCompatibility
+
       base.class_eval do
         class << self
           VALID_FIND_OPTIONS.concat([:pre_sql, :post_sql, :keywords, :ignore, :rollup, :override_select, :having, :index_hint])

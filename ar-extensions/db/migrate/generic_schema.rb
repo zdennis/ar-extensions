@@ -84,4 +84,13 @@ ActiveRecord::Schema.define do
 
   add_index :cart_items, [:shopping_cart_id, :book_id], :unique => true, :name => 'uk_shopping_cart_books'
 
+  create_table :animals, :force => true do |t|
+    t.column :name, :string, :null => false
+    t.column :size, :string, :default => nil
+    t.column :created_at, :datetime
+    t.column :updated_at, :datetime
+  end
+  
+  add_index :animals, [:name], :unique => true, :name => 'uk_animals'
+
 end

@@ -36,7 +36,12 @@ module ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter # :nodoc:
       "#{table_name}.#{qc1}=VALUES( #{qc2} )"
     end
     results.join( ',')
-  end  
+  end
+
+  #return true if the statement is a duplicate key record error
+  def duplicate_key_update_error?(exception)# :nodoc:
+    exception.is_a?(ActiveRecord::StatementInvalid) && exception.to_s.include?('Duplicate entry')
+  end
 
 end
 
