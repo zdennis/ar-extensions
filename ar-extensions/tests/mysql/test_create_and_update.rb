@@ -50,14 +50,17 @@ class CreateAndUpdateTest < TestCaseSuperClass
                     :created_at => @animal.created_at)
   end
 
+  def test_create_ignore_with_reload_should_ignore_existing_data_then_reload
+    create_animal
 
-  def test_create_ignore_should_ignore_existing_data_and_reload_duplicate
-    test_create({:method => 'create'}, :ignore => true, :reload => true, :duplicate_columns => [:name])
-    validate_animal(:name => 'giraffe',
-                    :updated_at => @animal.updated_at,
-                    :created_at => @animal.created_at)
+    @new_animal = Animal.create!({:name => 'giraffe', :size => 'little'}, :ignore => true)
+    assert(@new_animal.stale_record?)
+    assert_equal('little', @new_animal.size)
+
+    @new_animal.reload_duplicate :duplicate_columns => [:name]
+    assert(!@new_animal.stale_record?)
+    assert_nil(@new_animal.size)
   end
-
 
   def test_create_bang_ignore_should_ignore_existing_data
     test_create({:method => 'create!'}, :ignore => true)
@@ -145,6 +148,58 @@ class CreateAndUpdateTest < TestCaseSuperClass
     assert_equal(@bear.size, 'huge')
   end
 
+  #RELOAD tests
+
+
+    def test_create_ignore_with_reload_should_ignore_existing_data_then_reload
+    create_animal
+
+    @new_animal = Animal.create!({:name => 'giraffe', :size => 'little'}, :ignore => true)
+    assert(@new_animal.stale_record?)
+    assert_equal('little', @new_animal.size)
+
+    @new_animal.reload_duplicate :duplicate_columns => [:name]
+    assert(!@new_animal.stale_record?)
+    assert_nil(@new_animal.size)
+  end
+
+  def test_save_should_update_existing_data_then_reload_later
+    create_animal
+
+    @new_animal = Animal.new :name => 'giraffe', :size => 'little'
+    @new_animal.save!(:on_duplicate_key_update => [:updated_at])
+
+
+    assert(@new_animal.stale_record?)
+    assert_equal(0, @new_animal.id)
+    assert_equal('little', @new_animal.size)
+    assert(@animal.updated_at < @new_animal.updated_at)
+    new_updated = @new_animal.updated_at
+
+    @new_animal.reload_duplicate :duplicate_columns => [:name]
+
+    assert(!@new_animal.stale_record?)
+    assert_nil(@new_animal.size)
+    assert_equal(new_updated.to_s, @new_animal.updated_at.to_s)
+    assert_equal(@animal.id, @new_animal.id)
+  end
+
+  def test_update_should_delete_duplicate_record_on_reload
+    create_animal
+
+    @new_animal = Animal.create! :name => 'bear', :size => 'little'
+    @new_animal.name = 'giraffe'
+    assert(@new_animal.id > @animal.id)
+
+    @new_animal.reload_duplicate :force => true, :duplicate_columns => [:name]
+    assert(!@new_animal.stale_record?)
+    assert_nil(@new_animal.size)
+    assert_equal(@animal.updated_at.to_s, @new_animal.updated_at.to_s)
+    assert_equal(@animal.id, @new_animal.id)
+    assert_nil(Animal.find_by_name('bear'))
+
+  end
+  
   protected
 
   def test_create(options, ex_options)

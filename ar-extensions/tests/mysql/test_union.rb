@@ -14,8 +14,36 @@ class UnionTest < TestCaseSuperClass
     }
   end
 
+  def test_union_with_unused_include_should_query_five_records
+    books = Book.find_union({:conditions => ['author_name = ?', 'Terry Brooks']},
+                    {:conditions => 'books.id > 3 and books.id < 6', :include => :topic})
 
-  def test_union_should_query_four_records
+
+    assert_equal(5, books.length)
+    books.each {|book|
+      assert(book.author_name == 'Terry Brooks' || (book.id > 3 && book.id < 6))
+    }
+  end
+
+
+  def test_union_with_include_should_load_5_books
+    @topic = Topic.create!(:title => 'funtimes', :author_name => 'giraffe')
+    Book.update_all(['topic_id = ? ', @topic.id], ['books.id > 3 and books.id < 6'])
+
+
+    books = Book.find_union({:conditions => ['author_name = ?', 'Terry Brooks']},
+                    {:conditions => ['topics.title = :name',{:name => @topic.title}],
+                     :include => ['topic']})
+
+
+    assert_equal(5, books.length)
+
+    books.each {|book|
+      assert(book.author_name == 'Terry Brooks' || (book.id > 3 && book.id < 6))
+    }
+  end
+
+  def test_union_with_limit_should_query_four_records
     books = Book.find_union({:conditions => ['author_name = ?', 'Terry Brooks']},
                             {:conditions => 'id > 3 and id < 6', :limit => 1})
 
