@@ -30,14 +30,3 @@ module ActiveRecord
 end
 
 ActiveRecord::Base.send :extend, ActiveRecord::Extensions::SupportMethods
-
-module ActiveRecord
-  module Extensions
-    module SupportTrue#:nodoc:
-      def self.define(base, name)
-        puts name
-        base.class_eval "def supports_#{name}?; true; end"
-      end
-    end
-  end
-end

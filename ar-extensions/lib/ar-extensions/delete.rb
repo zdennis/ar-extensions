@@ -1,4 +1,3 @@
-
 module ActiveRecord::Extensions::Delete#:nodoc:
   mattr_accessor :delete_batch_size
   self.delete_batch_size = 15000
@@ -11,7 +10,6 @@ module ActiveRecord::Extensions::Delete#:nodoc:
 end
 
 class ActiveRecord::Base
-
   supports_extension :delete
   
   class << self
@@ -131,8 +129,6 @@ class ActiveRecord::Base
         }
       end
 
-
-
       #generate the delete SQL with limit
       def delete_all_extension_sql(conditions, options={})#:nodoc:
         sql = "DELETE FROM #{quoted_table_name} "
@@ -144,5 +140,4 @@ class ActiveRecord::Base
   end
 
 end
-
 
