@@ -76,11 +76,9 @@ module ActiveRecord::Extensions::FinderOptions
     #   sql = Contact.finder_sql_to_string(:include => :primary_email_address)
     #   Contact.find_by_sql(sql + 'USE_INDEX(blah)')
     def finder_sql_to_string(options)
-
       select_sql = self.send(
         (use_eager_loading_sql?(options) ? :finder_sql_with_included_associations : :construct_finder_sql),
         options.reject{|k,v| k == :force_eager_load}).strip
-
     end
 
     protected
@@ -117,7 +115,6 @@ module ActiveRecord::Extensions::FinderOptions
 
       sql << post_sql_statements(options)
       sql
-
     end
 
     #override the constructor for use with associations (:include option)

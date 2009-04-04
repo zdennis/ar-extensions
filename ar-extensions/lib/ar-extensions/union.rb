@@ -187,7 +187,15 @@ class ActiveRecord::Base
         return finder_sql_to_string(args.first.update(options))
       end
 
-      sql = args.inject([]){|l, a| l << "(#{finder_sql_to_string(a)})" }.join(" UNION ")
+      sql = args.inject([]) do |sql_list, union_args|
+        part = union_args.merge(:force_eager_load => true,
+                                :override_select => union_args[:select]||"#{quoted_table_name}.*",
+                                :select => nil)
+        sql_list << "(#{finder_sql_to_string(part)})"
+        sql_list
+      end.join(" UNION ")
+
+
       add_union_options!(sql, options)
       sql
     end

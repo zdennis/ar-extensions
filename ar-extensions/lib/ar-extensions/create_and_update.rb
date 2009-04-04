@@ -1,7 +1,7 @@
 # ActiveRecord::Extensions::CreateAndUpdate extends ActiveRecord adding additionaly functionality for
 # insert and updates. Methods +create+, +update+, and +save+ accept
 # additional hash map of parameters to allow customization of database access.
-# 
+#
 # Include the appropriate adapter file in <tt>environment.rb</tt> to access this functionality
 #   require 'ar-extenstion/create_and_update/mysql'
 #
@@ -27,7 +27,7 @@
 #
 # === Create Examples
 # Assume that there is a unique key on the +name+ field
-#  
+#
 # Create a new giraffe, and ignore the error if a giraffe already exists
 # If a giraffe exists, then the instance of animal is stale, as it may not
 # reflect the data in the database.
@@ -58,9 +58,9 @@
 #  big_giraffe.name = 'giraffe'
 #  big_giraffe.save(:on_duplicate_key_update => [:size, :updated_at],
 #                   :duplicate_columns => [:name], :reload => true)
-# 
+#
 # === Misc
-#  
+#
 # <tt>stale_record?</tt> - returns true if the record is stale
 # Example: <tt>animal.stale_record?</tt>
 #
@@ -141,6 +141,9 @@ module ActiveRecord
 #                   :duplicate_columns => [:name], :reload => true)
 #
     module CreateAndUpdate
+
+      class NoDuplicateFound < Exception; end
+
       def self.included(base) #:nodoc:
         base.extend(ClassMethods)
         base.extend(ActiveRecord::Extensions::SqlGeneration)
@@ -220,7 +223,7 @@ module ActiveRecord
       #call the callbacks here
       def create_or_update_with_extension(options={})#:nodoc:
         return create_or_update_without_extension unless options.any?
-        
+
         return false if callback(:before_save) == false
         raise ReadOnlyRecord if readonly?
         result = new_record? ? create(options) : update(@attributes.keys, options)
@@ -268,7 +271,7 @@ module ActiveRecord
           raise ActiveRecord::StaleObjectError, "#{affected_rows} Attempted to update a stale object" if locking_sql && affected_rows != 1
           @stale_record = (affected_rows == 0)
           callback(:after_update)
-          
+
         #catch the duplicate error and update the existing record
         rescue Exception => e
           if (duplicate_columns(options) && options[:on_duplicate_key_update] &&
@@ -282,7 +285,7 @@ module ActiveRecord
 
         end
 
-        reload_duplicate(options) if options[:reload] && !reloaded
+        load_duplicate_record(options) if options[:reload] && !reloaded
 
         return true
       end
@@ -298,7 +301,7 @@ module ActiveRecord
 
         if self.id.nil? && connection.prefetch_primary_key?(self.class.table_name)
           self.id = connection.next_sequence_value(self.class.sequence_name)
-          
+
         end
 
         quoted_attributes = attributes_with_quotes
@@ -316,18 +319,18 @@ module ActiveRecord
         self.id = connection.insert(statement, "#{self.class.name} Create X",
           self.class.primary_key, self.id, self.class.sequence_name)
 
-        
+
         @new_record = false
 
         #most adapters update the insert id number even if nothing was
         #inserted. Reset to 0 for all :on_duplicate_key_update
         self.id = 0 if options[:on_duplicate_key_update]
 
-        
+
         #the record was not created. Set the value to stale
         if self.id == 0
           @stale_record = true
-          reload_duplicate(options) if options[:reload]
+          load_duplicate_record(options) if options[:reload]
         end
 
         callback(:after_create)
@@ -362,6 +365,24 @@ module ActiveRecord
       # in the database
       def stale_record?; @stale_record.is_a?(TrueClass); end
 
+      # Reload Duplicate records like +reload_duplicate+ but
+      # throw an exception if no duplicate record is found
+      def reload_duplicate!(options={})
+        options.assert_valid_keys(:duplicate_columns, :force, :delete)
+        raise NoDuplicateFound.new("Record is not stale") if !stale_record? and !options[:force].is_a?(TrueClass)
+        load_duplicate_record(options.merge(:reload => true))
+      end
+
+      # Reload the record's duplicate based on the
+      # the duplicate_columns. Returns true if the reload was successful.
+      # <tt>:duplicate_columns</tt> - the columns to search on
+      # <tt>:force</tt> - force a reload even if the record is not stale
+      # <tt>:delete</tt> - delete the existing record if there is one. Defaults to true
+      def reload_duplicate(options={})
+        reload_duplicate!(options)
+      rescue NoDuplicateFound => e
+        return false
+      end
     protected
 
       # Returns the list of fields for which there is a unique key.
@@ -429,7 +450,7 @@ module ActiveRecord
       #Update the existing record with the new data from the duplicate column fields
       #automatically delete and reload the object
       def update_existing_record(options)#:nodoc:
-        reload_duplicate(options.merge(:reload => true)) do |record|
+        load_duplicate_record(options.merge(:reload => true)) do |record|
           updated_attributes = options[:on_duplicate_key_update].inject({}) {|map, attribute| map[attribute] = self.send(attribute); map}
           record.update_attributes(updated_attributes)
         end
@@ -437,7 +458,7 @@ module ActiveRecord
 
       #reload the record's duplicate based on the
       #the duplicate_columns parameter or overwritten function
-      def reload_duplicate(options, &block)#:nodoc:
+      def load_duplicate_record(options, &block)#:nodoc:
 
         search_columns = duplicate_columns(options)
 
@@ -452,16 +473,21 @@ module ActiveRecord
 
         record = self.class.find :first, :conditions => conditions
 
-        raise("Cannot find duplicate record.") if record.nil?
+        raise NoDuplicateFound.new("Cannot find duplicate record.") if record.nil?
 
         yield record if block
 
         @stale_record = true
 
         if options[:reload]
-          self.class.delete_all(['id = ?', self.id])
+          #do not delete new records, the same record or
+          #if user specified not to delete
+          if self.id.to_i > 0 && self.id != record.id && !options[:delete].is_a?(FalseClass)
+            self.class.delete_all(['id = ?', self.id])
+          end
           reset_to_record(record)
         end
+        true
       end
       #reload this object to the specified record
       def reset_to_record(record)#:nodoc:
