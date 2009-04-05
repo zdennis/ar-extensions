@@ -75,7 +75,7 @@ class ActiveRecord::Base
 
         options[:query_field]||= primary_key
 
-        query = "DELETE FROM #{quoted_table_name}"
+        query = "DELETE FROM"
         query << " c1 USING #{quoted_table_name} c1, #{quoted_table_name} c2"
         query << " WHERE ("
         query << options[:fields].collect{|field| "c1.#{field} = c2.#{field}" }.join(" and ")
