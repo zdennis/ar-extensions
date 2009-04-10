@@ -55,22 +55,18 @@ class Fixtures
   end
 end
 
-if ActiveRecord::VERSION::STRING < "2.3.1"
-  TestCaseSuperClass = Test::Unit::TestCase
-  class Test::Unit::TestCase #:nodoc:
-    self.use_transactional_fixtures = true
-    self.use_instantiated_fixtures = false
-  end
-  Test::Unit::TestCase.fixture_path = File.dirname(__FILE__) + "/fixtures/"
+TestCaseSuperClass = if ActiveRecord::VERSION::STRING < "2.3.1"
+  Test::Unit::TestCase
 else
-  TestCaseSuperClass = ActiveRecord::TestCase
-  class ActiveRecord::TestCase #:nodoc:
-    include ActiveRecord::TestFixtures
-    self.use_transactional_fixtures = true
-    self.use_instantiated_fixtures = false
-  end
-  ActiveRecord::TestCase.fixture_path = File.dirname(__FILE__) + "/fixtures/"
+  ActiveRecord::TestCase
 end
+
+class TestCaseSuperClass #:nodoc:
+  self.use_transactional_fixtures = true
+  self.use_instantiated_fixtures = false
+end
+
+TestCaseSuperClass.fixture_path = dir.join("fixtures")
 
 module ActiveRecord # :nodoc:
   module ConnectionAdapters # :nodoc:
