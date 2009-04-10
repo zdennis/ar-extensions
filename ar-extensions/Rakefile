@@ -1,79 +1,66 @@
-require 'rubygems'
-require 'rake'
-require 'rake/testtask'
+require "pathname"
+require "rubygems"
+require "rake"
+require "rake/testtask"
 
-DIR = File.dirname( __FILE__ )
+DIR      = Pathname.new(File.dirname(__FILE__))
+ADAPTERS = %w(mysql postgresql sqlite sqlite3 oracle)
 
-task :default => [ "test:mysql" ]
+task :default => ["test:mysql"]
 
 task :boot do 
-  require File.expand_path( File.join( DIR, 'lib', 'ar-extensions' ) )
-  require File.expand_path( File.join( DIR, 'tests', 'connections', "native_#{ENV['ARE_DB']}", 'connection' ) )
-  require File.expand_path( File.join( DIR, 'db/migrate/version' ) )
+  require DIR.join("lib", "ar-extensions").expand_path
+  require DIR.join("tests", "connections", "native_#{ENV['ARE_DB']}", "connection").expand_path
+  require DIR.join("db", "migrate", "version").expand_path
 end
 
-ADAPTERS = %w( mysql postgresql sqlite sqlite3 oracle )
-
-namespace :db do
-
-  namespace :test do
-    ADAPTERS.each do |adapter|
-      desc "builds test database for #{adapter}"
-      task "prepare_#{adapter}" do |t|
-        file2run = File.join( DIR, 'tests/prepare.rb' )
-        system( "ruby #{file2run} #{adapter}" )
+ADAPTERS.each do |adapter|
+  namespace :db do
+    namespace :test do
+      desc "Builds test database for #{adapter}"
+      task "prepare_#{adapter}" do
+        ruby "#{DIR.join('tests', 'prepare.rb')} #{adapter}"
       end
     end
   end
 
-end
-
-namespace :test do
-  
-  ADAPTERS.each do |adapter|
-    desc "test base extensions for #{adapter}"
-    task adapter do |t|
-      ENV['ARE_DB'] = adapter
+  namespace :test do
+    desc "Test base extensions for #{adapter}"
+    task(adapter) do
+      ENV["ARE_DB"] = adapter
             
-      task = Rake::Task[ "db:test:prepare_#{adapter}" ]
-      begin
-        task = false  if SchemaInfo::VERSION == SchemaInfo.find( :first ).version
-      rescue Exception => ex        
+      unless SchemaInfo::VERSION == SchemaInfo.find(:first).version
+        Rake::Task["db:test:prepare_#{adapter}"].invoke
       end
-      task.invoke if task
         
-      system "ruby #{File.join( DIR, 'tests/run.rb ' )} #{adapter}" 
+      ruby "#{DIR.join('tests', 'run.rb')} #{adapter}" 
     end
   end
   
   namespace :activerecord do
-
-    ADAPTERS.each do |adapter|
-      desc "runs ActiveRecord unit tests for #{adapter} with ActiveRecord::Extensions"
-      task adapter.to_sym do |t|
-        activerecord_dir = ARGV[1]
-        if activerecord_dir.nil? or ! File.directory?( activerecord_dir )
-          STDERR.puts "ERROR: Pass in the path to ActiveRecord. Eg: /home/zdennis/rails_trunk/activerecord"
-          exit
-        end
-        
-        old_dir, old_env = Dir.pwd, ENV['RUBYOPT']
-        Dir.chdir( activerecord_dir )
-        ENV['RUBYOPT'] = "-r#{File.join(old_dir,'init.rb')}"
-
-        load "Rakefile"
-        Rake::Task[ "test_#{adapter}" ].invoke
-        Dir.chdir( old_dir )
-        ENV['RUBYOPT'] = old_env
-      end      
-
-      desc "runs ActiveRecord unit tests for #{adapter} with ActiveRecord::Extensions with ALL available #{adapter} functionality"
-      task "#{adapter}_all" do |t|
-        ENV['LOAD_ADAPTER_EXTENSIONS'] = adapter.to_s
-        Rake::Task["test:activerecord:#{adapter}"].invoke
+    desc "Runs ActiveRecord unit tests for #{adapter} with ActiveRecord::Extensions"
+    task(adapter) do
+      activerecord_dir = ARGV[1]
+      if activerecord_dir.nil? || !File.directory?(activerecord_dir)
+        puts "ERROR: Pass in the path to ActiveRecord. Eg: /home/zdennis/rails_trunk/activerecord"
+        exit
       end
-    end  
-          
-  end    
+      
+      old_dir, old_env = Dir.pwd, ENV["RUBYOPT"]
+      Dir.chdir(activerecord_dir)
+      ENV["RUBYOPT"] = "-r#{File.join(old_dir,'init.rb')}"
 
- end
+      load "Rakefile"
+
+      Rake::Task["test_#{adapter}"].invoke
+      Dir.chdir(old_dir)
+      ENV["RUBYOPT"] = old_env
+    end      
+
+    desc "Runs ActiveRecord unit tests for #{adapter} with ActiveRecord::Extensions with ALL available #{adapter} functionality"
+    task "#{adapter}_all" do
+      ENV["LOAD_ADAPTER_EXTENSIONS"] = adapter
+      Rake::Task["test:activerecord:#{adapter}"].invoke
+    end
+  end    
+end
