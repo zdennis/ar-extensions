@@ -28,11 +28,11 @@ ADAPTERS.each do |adapter|
     desc "Test base extensions for #{adapter}"
     task(adapter) do
       ENV["ARE_DB"] = adapter
-            
-      unless SchemaInfo::VERSION == SchemaInfo.find(:first).version
+ 
+      if Object.const_defined?(:SchemaInfo) && SchemaInfo::VERSION != SchemaInfo.find(:first).version
         Rake::Task["db:test:prepare_#{adapter}"].invoke
       end
-        
+ 
       ruby "#{DIR.join('tests', 'run.rb')} #{adapter}" 
     end
   end
