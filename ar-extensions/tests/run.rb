@@ -4,7 +4,7 @@ ADAPTER = ARGV.shift
 ENV["ARE_DB"] = ADAPTER
 
 dir = File.dirname(__FILE__)
-require File.expand_path(File.join(dir, 'test_helper'))
+require File.expand_path(File.join(dir, "test_helper"))
 
 Dir[File.join(dir, ADAPTER, "test_*.rb") ].each{ |f| require(f) }
 

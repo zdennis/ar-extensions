@@ -1,10 +1,23 @@
-dir = File.dirname( __FILE__ )
+require "yaml"
+require "pathname"
 
-libdir = File.expand_path(File.join(dir, '..', 'lib', 'ar-extensions')) 
+dir = Pathname.new(File.dirname(__FILE__))
+
+libdir = dir.join("..", "lib", "ar-extensions").expand_path
 require libdir
-require 'ar-extensions/csv'
+require "ar-extensions/csv"
 
-# Load all database adapter specific stuff
-Dir[File.join(libdir, "**/#{ENV['ARE_DB']}.rb")].each do |file|
-  require file
+## Connection
+
+puts "Using native #{ENV['ARE_DB']}"
+
+ActiveRecord::Base.logger = Logger.new("debug.log")
+ActiveRecord::Base.configurations["test"] = YAML.load(dir.join("database.yml").open)[ENV["ARE_DB"]]
+ActiveRecord::Base.establish_connection("test")
+
+## Load all database adapter specific stuff. This has to happen after the 
+## connection has been established.
+
+Dir[libdir.join("**", "#{ENV['ARE_DB']}.rb")].each do |f|
+  require(f)
 end

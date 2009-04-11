@@ -10,11 +10,11 @@ Currently the ten available tasks are:
  - test:sqlite
  - test:sqlite3
  - test:oracle
- - test:activerecord:mysql
- - test:activerecord:postgresql
- - test:activerecord:sqlite
- - test:activerecord:sqlite3
- - test:activerecord:oracle
+ - test:ActiveRecord:mysql
+ - test:ActiveRecord:postgresql
+ - test:ActiveRecord:sqlite
+ - test:ActiveRecord:sqlite3
+ - test:ActiveRecord:oracle
 
 Task - test:<db_adapter>
 -----------------
@@ -22,38 +22,47 @@ The test:<db_adapter> tasks runs the ActiveRecord::Extensions tests for
 name of the <db_adapter>. Before you can run these you must create a database and load
 it's schema using the ../config/<db_adapter>.schema file. 
 
-Task - test:activerecord:<db_adapter> 
+Task - test:ActiveRecord:<db_adapter> 
 ------------------------------
 The test:activerecord:<db_adapter> takes one argument, the path to
-activerecord.  For activerecord testing purposes this must be the
-activerecord directory inside of a full rails download.
+ActiveRecord. For ActiveRecord testing purposes this must be the
+ActiveRecord directory inside of a full rails download.
 
-Example:   "rake test:activerecord:mysql /home/zdennis/rails-1.1.6/activerecord"
+Example:
+
+  rake test:activerecord:mysql /home/zdennis/rails-1.1.6/activerecord
 
 This runs the ActiveRecord tasks with the ActiveRecord::Extensions loaded.
 
 Task - test:activerecord:<db_adapter>_all
-------------------------------
+-----------------------------------------
+
 Since each adapter functionality must be included seperately for 0.8.0 onward,
 this runs the ActiveRecord tasks with ALL ActiveRecord::Extensions
-functionality availabe for that adapter
+functionality available for that adapter
 
-Example:    "rake test:activerecord:mysql_all /home/zdennis/rails-1.1.6/activerecord "
+Example:
+
+  rake test:activerecord:mysql_all /home/zdennis/rails-1.1.6/ActiveRecord
 
 Preparing Your Test Database
-------------------------------
-As of 0.2.0 ActiveRecord::Extensions allows you to use database migrations to prepare
-your test database. The format of the task is:
-  rake db:test:prepare_<db_adapter>
+----------------------------
+
+At the very least you will need to create a database.yml file in the 
+'tests' directory. A sample of such a file is in 
+tests/database.ymls.sample.
+
+As of 0.2.0 ActiveRecord::Extensions allows you to use database 
+migrations to prepare your test database. The format of the task is:
+rake db:test:prepare_<db_adapter>
 
 IE: rake db:test:prepare_mysql
 
-This will force creation of all of the tables. This tasks relies on your connection to
-be specified correctly in the tests/connections/native_<db_adapter>connection.rb 
+This will force creation of all of the tables. This tasks relies on 
+your connection to be specified correctly in the tests/database.yml 
 file. 
 
 As of 0.4.0 the test database contains schema information about
 itself. If your test database is out of sync with the current version
-of ActiveRecord::Extensions it will automatically prepare your
-database for you. You should never have to explicitly use
-"rake db:test:prepare_<db_adapter>".
+of ActiveRecord::Extensions it will automatically prepare your database 
+for you. You should never have to explicitly use these tasks.

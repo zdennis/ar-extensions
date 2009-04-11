@@ -1,6 +1,6 @@
 require "pathname"
 
-dir = Pathname.new(File.dirname(__FILE__))
+DIR = Pathname.new(File.dirname(__FILE__))
 
 require "rubygems"
 
@@ -17,12 +17,12 @@ require "test/unit"
 require "fileutils"
 require "active_record/fixtures"
 
-require dir.join("connections", "native_#{ENV['ARE_DB']}", "connection.rb")
-require dir.join("boot").expand_path
-require dir.join("..", "db", "migrate", "version").expand_path
+require DIR.join("connections", "native_#{ENV['ARE_DB']}", "connection.rb")
+require DIR.join("boot").expand_path
+require DIR.join("..", "db", "migrate", "version").expand_path
 
 ## Load Generic Models
-models_dir = dir.join("models")
+models_dir = DIR.join("models")
 $:.unshift(models_dir)
 
 Dir[models_dir.join("*.rb")].each { |m| require(m) }
@@ -67,7 +67,7 @@ class TestCaseSuperClass #:nodoc:
 
   self.use_transactional_fixtures = true
   self.use_instantiated_fixtures = false
-  self.fixture_path = dir.join("fixtures")
+  self.fixture_path = DIR.join("fixtures")
 end
 
 #TestCaseSuperClass.fixture_path = dir.join("fixtures")
