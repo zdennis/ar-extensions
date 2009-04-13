@@ -29,8 +29,7 @@
 # The <tt>:override_select</tt> options allows us to directly specify a <tt>SELECT</tt> clause without affecting the operations of legacy code  (ignore <tt>:select</tt>)
 # of the current code. Several plugins are available that enable select with eager loading
 # Several plugins exist to force <tt>:select</tt> to work with eager loading.
-#
-# <tt>script/plugin install http://arperftoolkit.rubyforge.org/svn/trunk/eload_select/ </tt>
+# <tt>script/plugin install git://github.com/blythedunham/eload-select.git </tt>
 #
 # * <tt>:having</tt> only works when <tt>:group</tt> option is specified
 #  Book.find(:all, :select => 'count(*) as count_all, topic_id', :group => :topic_id, :having => 'count(*) > 1')
@@ -62,7 +61,7 @@ module ActiveRecord::Extensions::FinderOptions
           alias_method_chain        :construct_finder_sql_with_included_associations, :ext
         end
       end
-   end
+    end
   end
 
   module ClassMethods
@@ -87,9 +86,8 @@ module ActiveRecord::Extensions::FinderOptions
     def use_eager_loading_sql?(options)# :nodoc:
       include_associations = merge_includes(scope(:find, :include), options[:include])
       return ((include_associations.any?) &&
-              (options[:force_eager_load].is_a?(TrueClass) ||
-               references_eager_loaded_tables?(options)))
-
+          (options[:force_eager_load].is_a?(TrueClass) ||
+            references_eager_loaded_tables?(options)))
     end
 
     # construct_finder_sql is called when not using eager loading (:include option is NOT specified)

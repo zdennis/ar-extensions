@@ -80,66 +80,66 @@ module ActiveRecord
 
 
     # ActiveRecord::Extensions::CreateAndUpdate extends ActiveRecord adding additionaly functionality for
-# insert and updates. Methods +create+, +update+, and +save+ accept
-# additional hash map of parameters to allow customization of database access.
-#
-# Include the appropriate adapter file in <tt>environment.rb</tt> to access this functionality
-#   require 'ar-extenstion/create_and_update/mysql'
-#
-# === Options
-# * <tt>:pre_sql</tt> inserts +SQL+ before the +INSERT+ or +UPDATE+ command
-# * <tt>:post_sql</tt> appends additional +SQL+ to the end of the statement
-# * <tt>:keywords</tt> additional keywords to follow the command. Examples
-#   include +LOW_PRIORITY+, +HIGH_PRIORITY+, +DELAYED+
-# * <tt>:on_duplicate_key_update</tt> - an array of fields (or a custom string) specifying which parameters to
-#   update if there is a duplicate row (unique key violoation)
-# * <tt>:ignore => true </tt> - skips insert or update for duplicate existing rows on a unique key value
-# * <tt>:command</tt> an additional command to replace +INSERT+ or +UPDATE+
-# * <tt>:reload</tt> - If a duplicate is ignored (+ignore+) or updated with
-#   +on_duplicate_key_update+, the instance is reloaded to reflect the data
-#   in the database. If the record is not reloaded, it may contain stale data and
-#   <tt>stale_record?</tt> will evaluate to true. If the object is discared after
-#   create or update, it is preferrable to avoid reloading the record to avoid
-#   superflous queries
-# * <tt>:duplicate_columns</tt> - an Array required with +reload+ to specify the columns used
-#   to locate the duplicate record. These are the unique key columns.
-#   Refer to the documentation under the +duplicate_columns+ method.
-#
-#
-# === Create Examples
-# Assume that there is a unique key on the +name+ field
-#
-# Create a new giraffe, and ignore the error if a giraffe already exists
-# If a giraffe exists, then the instance of animal is stale, as it may not
-# reflect the data in the database.
-#  animal = Animal.create!({:name => 'giraffe', :size => 'big'}, :ignore => true)
-#
-#
-# Create a new giraffe; update the existing +size+ and +updated_at+ fields if the
-# giraffe already exists. The instance of animal is not stale and reloaded
-# to reflect the content in the database.
-#  animal = Animal.create({:name => 'giraffe', :size => 'big'},
-#                 :on_duplicate_key_update => [:size, :updated_at],
-#                 :duplicate_columns => [:name], :reload => true)
-#
-# Save a new giraffe, ignoring existing duplicates and inserting a comment
-# in the SQL before the insert.
-#  giraffe = Animal.new(:name => 'giraffe', :size => 'small')
-#  giraffe.save!(:ignore => true, :pre_sql => '/* My Comment */')
-#
-#
-# === Update Examples
-# Update the giraffe with the low priority keyword
-#  big_giraffe.update(:keywords => 'LOW_PRIORITY')
-#
-# Update an existing record. If a duplicate exists, it is updated with the
-# fields specified by +:on_duplicate_key_update+. The original instance(big_giraffe) is
-# deleted, and the instance is reloaded to reflect the database (giraffe).
-#  big_giraffe = Animal.create!(:name => 'big_giraffe', :size => 'biggest')
-#  big_giraffe.name = 'giraffe'
-#  big_giraffe.save(:on_duplicate_key_update => [:size, :updated_at],
-#                   :duplicate_columns => [:name], :reload => true)
-#
+    # insert and updates. Methods +create+, +update+, and +save+ accept
+    # additional hash map of parameters to allow customization of database access.
+    #
+    # Include the appropriate adapter file in <tt>environment.rb</tt> to access this functionality
+    #   require 'ar-extenstion/create_and_update/mysql'
+    #
+    # === Options
+    # * <tt>:pre_sql</tt> inserts +SQL+ before the +INSERT+ or +UPDATE+ command
+    # * <tt>:post_sql</tt> appends additional +SQL+ to the end of the statement
+    # * <tt>:keywords</tt> additional keywords to follow the command. Examples
+    #   include +LOW_PRIORITY+, +HIGH_PRIORITY+, +DELAYED+
+    # * <tt>:on_duplicate_key_update</tt> - an array of fields (or a custom string) specifying which parameters to
+    #   update if there is a duplicate row (unique key violoation)
+    # * <tt>:ignore => true </tt> - skips insert or update for duplicate existing rows on a unique key value
+    # * <tt>:command</tt> an additional command to replace +INSERT+ or +UPDATE+
+    # * <tt>:reload</tt> - If a duplicate is ignored (+ignore+) or updated with
+    #   +on_duplicate_key_update+, the instance is reloaded to reflect the data
+    #   in the database. If the record is not reloaded, it may contain stale data and
+    #   <tt>stale_record?</tt> will evaluate to true. If the object is discared after
+    #   create or update, it is preferrable to avoid reloading the record to avoid
+    #   superflous queries
+    # * <tt>:duplicate_columns</tt> - an Array required with +reload+ to specify the columns used
+    #   to locate the duplicate record. These are the unique key columns.
+    #   Refer to the documentation under the +duplicate_columns+ method.
+    #
+    #
+    # === Create Examples
+    # Assume that there is a unique key on the +name+ field
+    #
+    # Create a new giraffe, and ignore the error if a giraffe already exists
+    # If a giraffe exists, then the instance of animal is stale, as it may not
+    # reflect the data in the database.
+    #  animal = Animal.create!({:name => 'giraffe', :size => 'big'}, :ignore => true)
+    #
+    #
+    # Create a new giraffe; update the existing +size+ and +updated_at+ fields if the
+    # giraffe already exists. The instance of animal is not stale and reloaded
+    # to reflect the content in the database.
+    #  animal = Animal.create({:name => 'giraffe', :size => 'big'},
+    #                 :on_duplicate_key_update => [:size, :updated_at],
+    #                 :duplicate_columns => [:name], :reload => true)
+    #
+    # Save a new giraffe, ignoring existing duplicates and inserting a comment
+    # in the SQL before the insert.
+    #  giraffe = Animal.new(:name => 'giraffe', :size => 'small')
+    #  giraffe.save!(:ignore => true, :pre_sql => '/* My Comment */')
+    #
+    #
+    # === Update Examples
+    # Update the giraffe with the low priority keyword
+    #  big_giraffe.update(:keywords => 'LOW_PRIORITY')
+    #
+    # Update an existing record. If a duplicate exists, it is updated with the
+    # fields specified by +:on_duplicate_key_update+. The original instance(big_giraffe) is
+    # deleted, and the instance is reloaded to reflect the database (giraffe).
+    #  big_giraffe = Animal.create!(:name => 'big_giraffe', :size => 'biggest')
+    #  big_giraffe.name = 'giraffe'
+    #  big_giraffe.save(:on_duplicate_key_update => [:size, :updated_at],
+    #                   :duplicate_columns => [:name], :reload => true)
+    #
     module CreateAndUpdate
 
       class NoDuplicateFound < Exception; end
@@ -257,7 +257,7 @@ module ActiveRecord
         sql = self.class.construct_ar_extension_sql(sql_options) do |sql, o|
           sql << "#{self.class.quoted_table_name} "
           sql << "SET #{quoted_comma_pair_list(connection, quoted_attributes)} " +
-                 "WHERE #{connection.quote_column_name(self.class.primary_key)} = #{quote_value(id)}"
+            "WHERE #{connection.quote_column_name(self.class.primary_key)} = #{quote_value(id)}"
           sql << locking_sql if locking_sql
         end
 
@@ -272,13 +272,13 @@ module ActiveRecord
           @stale_record = (affected_rows == 0)
           callback(:after_update)
 
-        #catch the duplicate error and update the existing record
+          #catch the duplicate error and update the existing record
         rescue Exception => e
           if (duplicate_columns(options) && options[:on_duplicate_key_update] &&
-              connection.respond_to?('duplicate_key_update_error?') &&
-              connection.duplicate_key_update_error?(e))
-             update_existing_record(options)
-             reloaded = true
+                connection.respond_to?('duplicate_key_update_error?') &&
+                connection.duplicate_key_update_error?(e))
+            update_existing_record(options)
+            reloaded = true
           else
             raise e
           end
@@ -383,7 +383,7 @@ module ActiveRecord
       rescue NoDuplicateFound => e
         return false
       end
-    protected
+      protected
 
       # Returns the list of fields for which there is a unique key.
       # When reloading duplicates during updates, with the <tt> :reload => true </tt>
@@ -443,8 +443,8 @@ module ActiveRecord
 
       def duplicate_option_check?(options)#:nodoc:
         options.has_key?(:on_duplicate_key_update) ||
-        options[:keywords].to_s.downcase == 'ignore' ||
-        options[:ignore]
+          options[:keywords].to_s.downcase == 'ignore' ||
+          options[:ignore]
       end
 
       #Update the existing record with the new data from the duplicate column fields

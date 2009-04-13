@@ -14,7 +14,7 @@ class CreateAndUpdateTest < TestCaseSuperClass
   def test_replace_should_replace_existing_record_with_new_data
     create_animal
     assert_nil(@animal.size)
-    
+
     new_animal = Animal.new(:name => 'giraffe', :size => 'big')
     assert_raise(ActiveRecord::StatementInvalid,
       "Should not be able to save duplicate.") { new_animal.save }
@@ -94,14 +94,14 @@ class CreateAndUpdateTest < TestCaseSuperClass
   end
 
   def test_save_bang_ignore_should_ignore_existing_data_and_reload
-    test_save({:method => 'save!'}, 
+    test_save({:method => 'save!'},
                :ignore => true, :reload => true, :duplicate_columns => [:name])
     validate_animal(:name => 'giraffe',
                     :updated_at => @animal.updated_at,
                     :created_at => @animal.created_at)
   end
 
-  
+
   def test_save_duplicate_should_update_duplicate_data_and_reload
     test_save({:method =>'save', :size => 'big'},
                 :on_duplicate_key_update => [:updated_at, :size],
@@ -199,7 +199,7 @@ class CreateAndUpdateTest < TestCaseSuperClass
     assert_nil(Animal.find_by_name('bear'))
 
   end
-  
+
   protected
 
   def test_create(options, ex_options)
@@ -250,7 +250,7 @@ class CreateAndUpdateTest < TestCaseSuperClass
 
     @bear.save(save_options)
     assert(Animal.find_by_name('giraffe'))
-    
+
     if save_options[:reload] || (save_options[:on_duplicate_key_update] && save_options[:duplicate_columns])
       assert_equal(@original_giraffe_id, @bear.id)
       assert(!@bear.stale_record?)
