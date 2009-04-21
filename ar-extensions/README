@@ -9,6 +9,17 @@ Email: zach.dennis@gmail.com
  - For How-To information see http://www.continuousthinking.com/tags/arext
  - For project information and feedback please consult http://rubyforge.org/projects/arext/
  - For release information please see below
+
+ActiveRecord::Extensions 0.9.0, 0.9.1
+------------------------------
+April 17, 2009
+ - Added MySQL support for save, create, replace options - :ignore, :on_duplicate_key_update, :keywords, :reload, :keywords, :pre_sql, :post_sql
+ - Added MySQL support for find options: :keywords, :pre_sql, :post_sql, :index_hint
+ - Added MySQL support for find_union and count_union
+ - Added MySQL support for insert_select
+ - Added MySQL support for delete_duplicates and delete_all :batch_size => X
+ - Updated :on_duplicate_update_key to accept a string in addition to array
+ - Fixed Find Extension Range bug to exclude end when ... used instead of ..
  
 ActiveRecord::Extensions 0.8.2
 ------------------------------
