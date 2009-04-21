@@ -17,7 +17,6 @@ require "test/unit"
 require "fileutils"
 require "active_record/fixtures"
 
-require DIR.join("connections", "native_#{ENV['ARE_DB']}", "connection.rb")
 require DIR.join("boot").expand_path
 require DIR.join("..", "db", "migrate", "version").expand_path
 

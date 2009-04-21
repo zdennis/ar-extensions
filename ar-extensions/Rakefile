@@ -10,7 +10,6 @@ task :default => ["test:mysql"]
 
 task :boot do 
   require DIR.join("lib", "ar-extensions").expand_path
-  require DIR.join("tests", "connections", "native_#{ENV['ARE_DB']}", "connection").expand_path
   require DIR.join("db", "migrate", "version").expand_path
 end
 
