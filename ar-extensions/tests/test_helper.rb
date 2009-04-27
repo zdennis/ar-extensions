@@ -68,5 +68,3 @@ class TestCaseSuperClass #:nodoc:
   self.use_instantiated_fixtures = false
   self.fixture_path = DIR.join("fixtures")
 end
-
-#TestCaseSuperClass.fixture_path = dir.join("fixtures")
