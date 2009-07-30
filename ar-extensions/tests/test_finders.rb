@@ -232,6 +232,24 @@ class FindersTest< TestCaseSuperClass
     developers = Developer.find( :all, :conditions=>{ :id_not=>9999 } )
     assert_equal( Developer.count, developers.size )
   end
+
+  def test_find_greater_than_date
+    Book.destroy_all
+    books = [
+      Book.create!(:publish_date => Date.parse("2009-01-01"), :title=>"a", :publisher=>"x", :author_name=>"j"),
+      Book.create!(:publish_date => Date.parse("2009-01-15"), :title=>"b", :publisher=>"y", :author_name=>"k"),
+      Book.create!(:publish_date => Date.parse("2009-01-30"), :title=>"c", :publisher=>"z", :author_name=>"l")]
+    assert_equal books[1..2], Book.find( :all, :conditions=>{ :publish_date_gt => Date.parse("2009-01-01") } )
+  end
+
+  def test_find_less_than_date
+    Book.destroy_all
+    books = [
+      Book.create!(:publish_date => Date.parse("2009-01-01"), :title=>"a", :publisher=>"x", :author_name=>"j"),
+      Book.create!(:publish_date => Date.parse("2009-01-15"), :title=>"b", :publisher=>"y", :author_name=>"k"),
+      Book.create!(:publish_date => Date.parse("2009-01-30"), :title=>"c", :publisher=>"z", :author_name=>"l")]
+    assert_equal books[0..1], Book.find( :all, :conditions=>{ :publish_date_lt => Date.parse("2009-01-30") } )
+  end
   
   def test_find_greater_than_time
     setup_time
@@ -281,6 +299,13 @@ class FindersTest< TestCaseSuperClass
     assert_equal [g2, g3], groups
   end
   
+  def test_find_less_than_or_equal_to_time
+    setup_time
+    
+    books = Book.find( :all, :conditions=>{ :created_at_lte => Time.local(2007, 01, 01, 21, 38, 0) } )
+    assert_equal 2, books.size
+  end
+
   def test_find_less_than_or_equal_to_time
     setup_time
     

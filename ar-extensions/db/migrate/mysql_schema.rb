@@ -23,6 +23,7 @@ ActiveRecord::Schema.define do
     t.column :created_on, :datetime
     t.column :updated_at, :datetime
     t.column :updated_on, :datetime
+    t.column :publish_date, :date
     t.column :topic_id, :integer
     t.column :for_sale, :boolean, :default => true
   end
