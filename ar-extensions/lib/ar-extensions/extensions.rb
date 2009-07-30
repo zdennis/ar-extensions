@@ -206,7 +206,7 @@ module ActiveRecord::Extensions
   class Comparison
 
     SUFFIX_MAP = { 'eq'=>'=', 'lt'=>'<', 'lte'=>'<=', 'gt'=>'>', 'gte'=>'>=', 'ne'=>'!=', 'not'=>'!=' }
-    ACCEPTABLE_COMPARISONS = [ String, Numeric, Time, DateTime ]
+    ACCEPTABLE_COMPARISONS = [ String, Numeric, Time, DateTime, Date ]
     
     def self.process( key, val, caller )
       process_without_suffix( key, val, caller ) || process_with_suffix( key, val, caller )
