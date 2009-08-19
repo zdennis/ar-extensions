@@ -10,11 +10,11 @@ Currently the ten available tasks are:
  - test:sqlite
  - test:sqlite3
  - test:oracle
- - test:ActiveRecord:mysql
- - test:ActiveRecord:postgresql
- - test:ActiveRecord:sqlite
- - test:ActiveRecord:sqlite3
- - test:ActiveRecord:oracle
+ - test:activerecord:mysql
+ - test:activerecord:postgresql
+ - test:activerecord:sqlite
+ - test:activerecord:sqlite3
+ - test:activerecord:oracle
 
 Task - test:<db_adapter>
 -----------------
@@ -22,7 +22,7 @@ The test:<db_adapter> tasks runs the ActiveRecord::Extensions tests for
 name of the <db_adapter>. Before you can run these you must create a database and load
 it's schema using the ../config/<db_adapter>.schema file. 
 
-Task - test:ActiveRecord:<db_adapter> 
+Task - test:activerecord:<db_adapter> 
 ------------------------------
 The test:activerecord:<db_adapter> takes one argument, the path to
 ActiveRecord. For ActiveRecord testing purposes this must be the
