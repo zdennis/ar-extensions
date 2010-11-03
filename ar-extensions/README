@@ -1,3 +1,5 @@
+*ar-extensions is not compatible and is not being developed for Rails 3. Please use the activerecord-import gem which supports the same interface.*
+
 LICENSE
 ----------
 This is licensed under the ruby license. 
