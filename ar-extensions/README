@@ -12,6 +12,11 @@ Email: zach.dennis@gmail.com
  - For project information and feedback please consult http://rubyforge.org/projects/arext/
  - For release information please see below
 
+ActiveRecord::Extensions 0.9.4
+------------------------------
+April 6, 2011
+ - Added :synchronize_keys option for import which allows people to synchronize on specified fields besides the primary key. Note these fields should be unique
+
 ActiveRecord::Extensions 0.9.0, 0.9.1
 ------------------------------
 April 17, 2009
