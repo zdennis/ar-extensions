@@ -327,7 +327,28 @@ class ImportTest< TestCaseSuperClass
     group = Group.find(:first)
     assert_equal "superx", group.order
   end
+  
+  def test_import_with_synchronize_options_shouldnt_reload_new_records
+    new_topics = [
+      Topic.new( :title=>"Title 1", :author_name=>"Jeff" ),
+      Topic.new( :title=>"Title 2", :author_name=>"Bob" ),
+      Topic.new( :title=>"Title 3", :author_name=>"Kevin" )
+    ]
 
+    Topic.import new_topics, :synchronize => new_topics
+    assert new_topics.all?(&:new_record?), "No record should have been reloaded"
+  end
+  
+  def test_import_with_synchronize_options_should_reload_new_records_with_explicit_conditions  
+    new_topics = [
+      Topic.new( :title=>"Title 1", :author_name=>"Jeff" ),
+      Topic.new( :title=>"Title 2", :author_name=>"Bob" ),
+      Topic.new( :title=>"Title 3", :author_name=>"Kevin" )
+    ]
+
+    Topic.import(new_topics, :synchronize => new_topics, :synchronize_key => [:title] )
+    assert new_topics.all?(&:new_record?), "Records should have been reloaded"
+  end
 
   private
   

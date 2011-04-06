@@ -206,8 +206,10 @@ class ActiveRecord::Base
         num_inserts = import_without_validations_or_callbacks( column_names, array_of_attributes, options )
         OpenStruct.new :failed_instances=>[], :num_inserts=>num_inserts
       end
+
       if options[:synchronize]
-        synchronize( options[:synchronize] )
+        sync_keys = options[:synchronize_keys] || [self.primary_key]
+        synchronize( options[:synchronize], sync_keys)
       end
 
       return_obj.num_inserts = 0 if return_obj.num_inserts.nil?

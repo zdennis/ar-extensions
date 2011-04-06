@@ -7,7 +7,7 @@ require "rubygems"
 if version = ENV["AR_VERSION"]
   gem "activerecord", version
 else
-  gem "activerecord"
+  gem "activerecord", "~> 2"
 end
 
 require "active_record"
