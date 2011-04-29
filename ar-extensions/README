@@ -12,6 +12,11 @@ Email: zach.dennis@gmail.com
  - For project information and feedback please consult http://rubyforge.org/projects/arext/
  - For release information please see below
 
+ActiveRecord::Extensions 0.9.5
+------------------------------
+April 29th, 2011
+ - Removed erroneous "Can't mass assign protected attribute :id" when importing models
+
 ActiveRecord::Extensions 0.9.4
 ------------------------------
 April 6, 2011
