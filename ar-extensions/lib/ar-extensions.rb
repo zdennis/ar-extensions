@@ -4,6 +4,7 @@ require 'active_record/version'
 
 require File.expand_path(File.join( File.dirname( __FILE__ ), '..', 'init.rb' ))
 
+# Set MYSQL_ADAPTER_CLASS to the used and defined MysqlAdapter class dynamically and use this later on to do the mixins 
 MYSQL_ADAPTER_CLASS = if defined? ActiveRecord::ConnectionAdapters::MysqlAdapter
   ActiveRecord::ConnectionAdapters::MysqlAdapter
 elsif defined? ActiveRecord::ConnectionAdapters::Mysql2Adapter
