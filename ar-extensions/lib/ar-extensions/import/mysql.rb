@@ -45,6 +45,6 @@ module ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter # :nodoc:
 
 end
 
-ActiveRecord::ConnectionAdapters::MysqlAdapter.class_eval do
+MYSQL_ADAPTER_CLASS.class_eval do
   include ActiveRecord::Extensions::ConnectionAdapters::MysqlAdapter
 end
