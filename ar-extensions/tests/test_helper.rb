@@ -38,7 +38,7 @@ if Test::Unit::TestCase.class_variables.include?("@@fixture_path")
       remove_method :fixture_path 
       remove_method :fixture_path=
     end
-    class_inheritable_accessor :fixture_path
+    class_attribute :fixture_path
   end
 end
 

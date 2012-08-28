@@ -32,7 +32,7 @@ class ActiveRecord::Base
     end
     
     def sanitize_sql_by_way_of_duck_typing(arg) #: nodoc:
-      arg.to_sql( caller )
+      arg.to_sql
     end
 
     def sanitize_sql_from_string_and_hash(arr, table_name = quoted_table_name) # :nodoc:

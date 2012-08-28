@@ -15,5 +15,5 @@ Gem::Specification.new do |s|
   s.files = FileList[ 'init.rb', 'db/**/*', 'Rakefile', 'ChangeLog', 'README', 'config/**/*', 'lib/**/*.rb', 'test/**/*' ]
   s.rdoc_options = ["--main", "README"]
   s.extra_rdoc_files = ["README"]
-  s.add_dependency(%q<activerecord>, ["~> 2.1"])
+  s.add_dependency(%q<activerecord>, ["~> 3.2"])
 end
