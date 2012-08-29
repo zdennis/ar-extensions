@@ -1,4 +1,4 @@
-require 'rake'
+require "rake"
 
 Gem::Specification.new do |s|
   s.name = %q{ar-extensions}
@@ -12,8 +12,9 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.has_rdoc = true
   s.authors = ["Zach Dennis", "Mark Van Holstyn", "Blythe Dunham"]
-  s.files = FileList[ 'init.rb', 'db/**/*', 'Rakefile', 'ChangeLog', 'README', 'config/**/*', 'lib/**/*.rb', 'test/**/*' ]
+  s.files = `git ls-files`.split($\)
   s.rdoc_options = ["--main", "README"]
   s.extra_rdoc_files = ["README"]
   s.add_dependency(%q<activerecord>, ["~> 2.1"])
+  s.add_dependency(%q<rake>, [">= 0.9.2"])
 end
